@@ -31,6 +31,7 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
   const [expandedPlan, setExpandedPlan] = useState(null);
   const [activeWeek, setActiveWeek] = useState('w1');
   const [modalMeal, setModalMeal] = useState(null);
+  const [doubleProteinAll, setDoubleProteinAll] = useState(false);
 
   const visibleCounts = showMoreCounts ? MEAL_COUNTS : MEAL_COUNTS.slice(0, 4);
   const meals = activeWeek === 'w1' ? MEALS_WEEK1 : MEALS_WEEK2;
@@ -42,22 +43,24 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
 
   const isAtLimit = mealCount !== null && entreeCount >= mealCount;
 
-  // Gate onAdd for entrées — hard cap at mealCount
+  // Gate onAdd; auto-apply double protein when the "all" mode is on
   function handleEntreeAdd(id) {
     if (mealCount !== null && entreeCount >= mealCount) return;
     onAdd(id);
+    if (doubleProteinAll) {
+      const meal = ALL_ENTREES_DATA.find(m => m.id === id);
+      if (meal?.doubleProtein && !doubleProteins[id]) onDoubleProteinToggle(id);
+    }
   }
 
-  // Double protein all — only entrées that are selected and support double protein
-  const selectedEntreesWithDP = ALL_ENTREES_DATA.filter(
-    m => (cart[m.id] || 0) > 0 && m.doubleProtein
-  );
-  const allDoubleProtein = selectedEntreesWithDP.length > 0 &&
-    selectedEntreesWithDP.every(m => doubleProteins[m.id]);
-
+  // Toggle the double-protein-all mode and immediately apply/remove on current cart
   function toggleAllDoubleProtein() {
-    const ids = selectedEntreesWithDP.map(m => m.id);
-    if (ids.length > 0) onBulkDoubleProtein(ids, !allDoubleProtein);
+    const newValue = !doubleProteinAll;
+    setDoubleProteinAll(newValue);
+    const ids = ALL_ENTREES_DATA
+      .filter(m => (cart[m.id] || 0) > 0 && m.doubleProtein)
+      .map(m => m.id);
+    if (ids.length > 0) onBulkDoubleProtein(ids, newValue);
   }
 
   const hasPicked = mealCount !== null;
@@ -204,18 +207,15 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
               {/* Double protein all toggle */}
               <button
                 onClick={toggleAllDoubleProtein}
-                disabled={selectedEntreesWithDP.length === 0}
                 className={`flex items-center gap-2 rounded-xl px-3 py-2 border transition-colors text-sm flex-shrink-0 ${
-                  allDoubleProtein
+                  doubleProteinAll
                     ? 'border-brand-green bg-green-50 text-green-800'
-                    : selectedEntreesWithDP.length === 0
-                    ? 'border-gray-200 bg-gray-50 text-gray-300 cursor-not-allowed'
                     : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
                 }`}
               >
                 {/* Toggle switch */}
-                <div className={`w-8 h-[18px] rounded-full relative flex-shrink-0 transition-colors ${allDoubleProtein ? 'bg-brand-green' : 'bg-gray-300'}`}>
-                  <div className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-transform ${allDoubleProtein ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                <div className={`w-8 h-[18px] rounded-full relative flex-shrink-0 transition-colors ${doubleProteinAll ? 'bg-brand-green' : 'bg-gray-300'}`}>
+                  <div className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-transform ${doubleProteinAll ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
                 </div>
                 <span className="font-medium whitespace-nowrap">Double protein all</span>
               </button>
