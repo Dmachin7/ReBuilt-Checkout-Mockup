@@ -33,6 +33,11 @@ export default function StepBreakfast({ cart, doubleProteins, onAdd, onRemove, o
 
         <p className="text-center text-xs text-gray-400">— or browse breakfast options below —</p>
 
+        {/* Next-step hint */}
+        <p className="text-xs text-gray-400 flex items-center gap-1.5">
+          <span>🍎</span> Snack options available after this step
+        </p>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-7">
           {BREAKFAST_ITEMS.map(meal => (
             <MealCard

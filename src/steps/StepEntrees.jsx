@@ -196,17 +196,10 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
               </div>
             )}
 
-            {/* Next-step teaser */}
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              <div className="bg-white rounded-xl px-3 py-2 border border-gray-100 flex items-center gap-2 text-xs text-gray-500">
-                <span className="text-base">🍳</span>
-                <span>Breakfast options up next</span>
-              </div>
-              <div className="bg-white rounded-xl px-3 py-2 border border-gray-100 flex items-center gap-2 text-xs text-gray-500">
-                <span className="text-base">🍎</span>
-                <span>Snacks available after</span>
-              </div>
-            </div>
+            {/* Next-step hint — plain text, not a button */}
+            <p className="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
+              <span>🍳</span> Breakfast add-ons available in the next step
+            </p>
 
             {/* Week selector */}
             <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit mb-4">
