@@ -4,7 +4,7 @@ import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/
 const ALL_MEALS = [...MEALS_WEEK1, ...MEALS_WEEK2, ...BREAKFAST_ITEMS, ...SNACK_ITEMS];
 
 // Floating pill bar — visible on ALL screen sizes
-export default function MobileCartBar({ cart, doubleProteins, mealCount, onContinue, continueLabel, visible = true }) {
+export default function MobileCartBar({ cart, doubleProteins, mealCount, onContinue, continueLabel, visible = true, onClear }) {
   const [expanded, setExpanded] = useState(false);
 
   if (!visible) return null;
@@ -55,9 +55,14 @@ export default function MobileCartBar({ cart, doubleProteins, mealCount, onConti
                   </div>
                 );
               })}
-              <div className="px-4 py-3 flex justify-between font-bold text-gray-900 bg-gray-50 text-sm">
-                <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+              <div className="px-4 py-3 flex items-center justify-between bg-gray-50 text-sm">
+                <button
+                  onClick={() => { onClear?.(); setExpanded(false); }}
+                  className="text-red-400 hover:text-red-600 font-medium transition-colors"
+                >
+                  Clear cart
+                </button>
+                <span className="font-bold text-gray-900">Subtotal ${subtotal.toFixed(2)}</span>
               </div>
             </div>
           )}

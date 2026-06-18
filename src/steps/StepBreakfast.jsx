@@ -5,7 +5,7 @@ import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
 import { BREAKFAST_ITEMS } from '../data/meals';
 
-export default function StepBreakfast({ cart, doubleProteins, onAdd, onRemove, onDoubleProteinToggle, onNext, onBack, mealCount }) {
+export default function StepBreakfast({ cart, doubleProteins, onAdd, onRemove, onDoubleProteinToggle, onNext, onBack, mealCount, onClear }) {
   const [modalMeal, setModalMeal] = useState(null);
 
   return (
@@ -60,7 +60,7 @@ export default function StepBreakfast({ cart, doubleProteins, onAdd, onRemove, o
         </div>
       </div>
 
-      <CartSidebar cart={cart} doubleProteins={doubleProteins} mealCount={mealCount} />
+      <CartSidebar cart={cart} doubleProteins={doubleProteins} mealCount={mealCount} onClear={onClear} />
 
       <MobileCartBar
         cart={cart}
@@ -68,6 +68,7 @@ export default function StepBreakfast({ cart, doubleProteins, onAdd, onRemove, o
         mealCount={mealCount}
         onContinue={onNext}
         continueLabel="Continue to Snacks →"
+        onClear={onClear}
       />
 
       {modalMeal && (

@@ -24,7 +24,9 @@ const WEEKS = [
 
 const ALL_ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2].map(m => m.id));
 
-export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onDoubleProteinToggle, onNext, mealCount, setMealCount, selectedPlan, setSelectedPlan }) {
+const ALL_ENTREES_DATA = [...MEALS_WEEK1, ...MEALS_WEEK2];
+
+export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onDoubleProteinToggle, onNext, mealCount, setMealCount, selectedPlan, setSelectedPlan, onClear, onBulkDoubleProtein }) {
   const [showMoreCounts, setShowMoreCounts] = useState(false);
   const [expandedPlan, setExpandedPlan] = useState(null);
   const [activeWeek, setActiveWeek] = useState('w1');
@@ -44,6 +46,18 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
   function handleEntreeAdd(id) {
     if (mealCount !== null && entreeCount >= mealCount) return;
     onAdd(id);
+  }
+
+  // Double protein all — only entrées that are selected and support double protein
+  const selectedEntreesWithDP = ALL_ENTREES_DATA.filter(
+    m => (cart[m.id] || 0) > 0 && m.doubleProtein
+  );
+  const allDoubleProtein = selectedEntreesWithDP.length > 0 &&
+    selectedEntreesWithDP.every(m => doubleProteins[m.id]);
+
+  function toggleAllDoubleProtein() {
+    const ids = selectedEntreesWithDP.map(m => m.id);
+    if (ids.length > 0) onBulkDoubleProtein(ids, !allDoubleProtein);
   }
 
   const hasPicked = mealCount !== null;
@@ -175,7 +189,7 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
         {hasPicked && (
           <section className="animate-reveal-delayed">
             {/* Header */}
-            <div className="flex items-end justify-between mb-2 flex-wrap gap-2">
+            <div className="flex items-start justify-between mb-2 flex-wrap gap-3">
               <div>
                 <h2 className="font-display text-2xl sm:text-3xl text-gray-900 leading-tight">
                   Choose your {mealCount} entrées
@@ -186,6 +200,25 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
                     : `${entreeCount} of ${mealCount} selected`}
                 </p>
               </div>
+
+              {/* Double protein all toggle */}
+              <button
+                onClick={toggleAllDoubleProtein}
+                disabled={selectedEntreesWithDP.length === 0}
+                className={`flex items-center gap-2 rounded-xl px-3 py-2 border transition-colors text-sm flex-shrink-0 ${
+                  allDoubleProtein
+                    ? 'border-brand-green bg-green-50 text-green-800'
+                    : selectedEntreesWithDP.length === 0
+                    ? 'border-gray-200 bg-gray-50 text-gray-300 cursor-not-allowed'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                }`}
+              >
+                {/* Toggle switch */}
+                <div className={`w-8 h-[18px] rounded-full relative flex-shrink-0 transition-colors ${allDoubleProtein ? 'bg-brand-green' : 'bg-gray-300'}`}>
+                  <div className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-transform ${allDoubleProtein ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                </div>
+                <span className="font-medium whitespace-nowrap">Double protein all</span>
+              </button>
             </div>
 
             {/* At-limit banner */}
@@ -240,7 +273,7 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
 
       {/* Desktop sidebar — only once count is picked */}
       {hasPicked && (
-        <CartSidebar cart={cart} doubleProteins={doubleProteins} mealCount={mealCount} />
+        <CartSidebar cart={cart} doubleProteins={doubleProteins} mealCount={mealCount} onClear={onClear} />
       )}
 
       {/* Floating bottom bar — all screens */}
@@ -251,6 +284,7 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
         onContinue={onNext}
         continueLabel="Continue to Breakfast →"
         visible={hasPicked}
+        onClear={onClear}
       />
 
       {/* Meal detail modal */}

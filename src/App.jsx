@@ -24,6 +24,11 @@ function cartReducer(state, action) {
       const prev = state.doubleProteins[action.id];
       return { ...state, doubleProteins: { ...state.doubleProteins, [action.id]: !prev } };
     }
+    case 'SET_DOUBLE_PROTEIN_BULK': {
+      const updates = {};
+      action.ids.forEach(id => { updates[id] = action.value; });
+      return { ...state, doubleProteins: { ...state.doubleProteins, ...updates } };
+    }
     case 'RESET':
       return { quantities: {}, doubleProteins: {} };
     default:
@@ -48,9 +53,11 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function handleAdd(id)           { dispatch({ type: 'ADD', id }); }
-  function handleRemove(id)        { dispatch({ type: 'REMOVE', id }); }
-  function handleDoubleProtein(id) { dispatch({ type: 'TOGGLE_DOUBLE_PROTEIN', id }); }
+  function handleAdd(id)                          { dispatch({ type: 'ADD', id }); }
+  function handleRemove(id)                       { dispatch({ type: 'REMOVE', id }); }
+  function handleDoubleProtein(id)                { dispatch({ type: 'TOGGLE_DOUBLE_PROTEIN', id }); }
+  function handleClearCart()                      { dispatch({ type: 'RESET' }); }
+  function handleBulkDoubleProtein(ids, value)    { dispatch({ type: 'SET_DOUBLE_PROTEIN_BULK', ids, value }); }
 
   function handleConfirm(details) {
     setOrderDetails(details);
@@ -88,6 +95,8 @@ export default function App() {
           setMealCount={setMealCount}
           selectedPlan={selectedPlan}
           setSelectedPlan={setSelectedPlan}
+          onClear={handleClearCart}
+          onBulkDoubleProtein={handleBulkDoubleProtein}
         />
       )}
 
@@ -101,6 +110,7 @@ export default function App() {
           onNext={() => go('snacks')}
           onBack={() => go('entrees')}
           mealCount={mealCount}
+          onClear={handleClearCart}
         />
       )}
 
@@ -114,6 +124,7 @@ export default function App() {
           onNext={() => go('allergies')}
           onBack={() => go('breakfast')}
           mealCount={mealCount}
+          onClear={handleClearCart}
         />
       )}
 

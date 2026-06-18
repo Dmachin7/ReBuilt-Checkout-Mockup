@@ -5,7 +5,7 @@ import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
 import { SNACK_ITEMS } from '../data/meals';
 
-export default function StepSnacks({ cart, doubleProteins, onAdd, onRemove, onDoubleProteinToggle, onNext, onBack, mealCount }) {
+export default function StepSnacks({ cart, doubleProteins, onAdd, onRemove, onDoubleProteinToggle, onNext, onBack, mealCount, onClear }) {
   const [modalMeal, setModalMeal] = useState(null);
 
   return (
@@ -55,7 +55,7 @@ export default function StepSnacks({ cart, doubleProteins, onAdd, onRemove, onDo
         </div>
       </div>
 
-      <CartSidebar cart={cart} doubleProteins={doubleProteins} mealCount={mealCount} />
+      <CartSidebar cart={cart} doubleProteins={doubleProteins} mealCount={mealCount} onClear={onClear} />
 
       <MobileCartBar
         cart={cart}
@@ -63,6 +63,7 @@ export default function StepSnacks({ cart, doubleProteins, onAdd, onRemove, onDo
         mealCount={mealCount}
         onContinue={onNext}
         continueLabel="Continue to Allergies →"
+        onClear={onClear}
       />
 
       {modalMeal && (

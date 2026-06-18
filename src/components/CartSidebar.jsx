@@ -6,7 +6,7 @@ function findMeal(id) {
   return ALL_MEALS.find(m => m.id === id);
 }
 
-export default function CartSidebar({ cart, doubleProteins, mealCount }) {
+export default function CartSidebar({ cart, doubleProteins, mealCount, onClear }) {
   const cartEntries = Object.entries(cart).filter(([, qty]) => qty > 0);
   const entreeCount = cartEntries
     .filter(([id]) => {
@@ -33,9 +33,19 @@ export default function CartSidebar({ cart, doubleProteins, mealCount }) {
         <div className="bg-brand-charcoal px-5 py-4">
           <div className="flex items-center justify-between">
             <h3 className="font-display text-white text-lg">Your Order</h3>
-            <span className="text-sm text-gray-300">
-              {entreeCount} / {mealCount} entrées
-            </span>
+            <div className="flex items-center gap-3">
+              {cartEntries.length > 0 && (
+                <button
+                  onClick={onClear}
+                  className="text-xs text-red-300 hover:text-red-200 transition-colors font-medium"
+                >
+                  Clear
+                </button>
+              )}
+              <span className="text-sm text-gray-300">
+                {entreeCount} / {mealCount} entrées
+              </span>
+            </div>
           </div>
           {/* Progress bar */}
           <div className="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
