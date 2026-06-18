@@ -49,6 +49,19 @@ const DETAILS = {
     ingredients: 'Bone-in pork shoulder (slow-cooked), apple cider vinegar BBQ sauce, cauliflower mash (cauliflower, butter, cream cheese, garlic), green beans, smoked paprika, sea salt, black pepper.',
     fat: 24, fiber: 6, sodium: 860, sugar: 5,
   },
+  // ── Week 1 additions ──
+  9: {
+    ingredients: 'Lean ground beef, taco seasoning (chili powder, cumin, paprika, garlic), shredded cheddar, fresh pico de gallo, sour cream, avocado, cilantro lime cauliflower rice, lime juice, sea salt.',
+    fat: 22, fiber: 5, sodium: 820, sugar: 3,
+  },
+  10: {
+    ingredients: 'Sweet potato, canned chickpeas, coconut milk, crushed tomatoes, garam masala, cumin, turmeric, ginger, garlic, onion, jasmine rice, fresh cilantro, lime, sea salt.',
+    fat: 8, fiber: 9, sodium: 620, sugar: 9,
+  },
+  11: {
+    ingredients: 'Boneless chicken thighs, raw honey, garlic, soy sauce, sesame oil, sweet potato wedges, broccolini, olive oil, garlic powder, sea salt, cracked pepper, red pepper flakes.',
+    fat: 14, fiber: 5, sodium: 760, sugar: 12,
+  },
   // ── Week 2 Entrées ──
   101: {
     ingredients: 'Boneless chicken thighs, crushed tomatoes, heavy cream, garam masala, cumin, coriander, turmeric, ginger, garlic, butter, basmati rice, fresh cilantro, sea salt.',
@@ -73,6 +86,19 @@ const DETAILS = {
   106: {
     ingredients: 'Jumbo Gulf shrimp, stone-ground cheddar grits, roasted tri-color peppers, Cajun spice blend (paprika, cayenne, garlic powder, onion powder, thyme), butter, garlic, scallions, lemon.',
     fat: 18, fiber: 3, sodium: 920, sugar: 3,
+  },
+  // ── Week 2 additions ──
+  107: {
+    ingredients: 'Jasmine rice, boneless chicken breast, scrambled eggs, frozen peas, carrots, garlic, ginger, sesame oil, teriyaki sauce (soy sauce, mirin, sake, sugar), green onion, sesame seeds.',
+    fat: 10, fiber: 3, sodium: 890, sugar: 8,
+  },
+  108: {
+    ingredients: 'USDA Prime ribeye steak (dry-aged 14 days), asparagus, brussels sprouts, garlic herb compound butter (butter, parsley, thyme, garlic, lemon zest), sea salt, cracked black pepper, avocado oil.',
+    fat: 34, fiber: 4, sodium: 680, sugar: 2,
+  },
+  109: {
+    ingredients: 'Tri-color quinoa, black beans, roasted corn, avocado, cherry tomatoes, red onion, cilantro, chipotle cashew cream (raw cashews, chipotle, lime, garlic), lime juice, cumin, sea salt.',
+    fat: 11, fiber: 12, sodium: 590, sugar: 4,
   },
   // ── Breakfast ──
   201: {

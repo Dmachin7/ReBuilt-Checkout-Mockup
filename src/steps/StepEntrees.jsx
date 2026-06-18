@@ -22,6 +22,14 @@ const WEEKS = [
   { id: 'w2', label: 'Week of Jun 22' },
 ];
 
+const CATEGORIES = [
+  { id: 'ALL',         label: 'All',         dot: null },
+  { id: 'LIFESTYLE',   label: 'Lifestyle',   dot: 'bg-green-500' },
+  { id: 'PERFORMANCE', label: 'Performance', dot: 'bg-blue-500' },
+  { id: 'KETO',        label: 'Keto',        dot: 'bg-pink-500' },
+  { id: 'PLANT-BASED', label: 'Plant-Based', dot: 'bg-orange-400' },
+];
+
 const ALL_ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2].map(m => m.id));
 
 const ALL_ENTREES_DATA = [...MEALS_WEEK1, ...MEALS_WEEK2];
@@ -30,11 +38,15 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
   const [showMoreCounts, setShowMoreCounts] = useState(false);
   const [expandedPlan, setExpandedPlan] = useState(null);
   const [activeWeek, setActiveWeek] = useState('w1');
+  const [activeCategory, setActiveCategory] = useState('ALL');
   const [modalMeal, setModalMeal] = useState(null);
   const [doubleProteinAll, setDoubleProteinAll] = useState(false);
 
   const visibleCounts = showMoreCounts ? MEAL_COUNTS : MEAL_COUNTS.slice(0, 4);
-  const meals = activeWeek === 'w1' ? MEALS_WEEK1 : MEALS_WEEK2;
+  const weekMeals = activeWeek === 'w1' ? MEALS_WEEK1 : MEALS_WEEK2;
+  const meals = activeCategory === 'ALL'
+    ? weekMeals
+    : weekMeals.filter(m => m.category === activeCategory);
 
   // Track total entrée count and enforce limit
   const entreeCount = Object.entries(cart)
@@ -234,6 +246,35 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
               <span>🍳</span> Breakfast add-ons available in the next step
             </p>
 
+            {/* Category filter */}
+            <div className="flex gap-2 overflow-x-auto pb-1 mb-3" style={{ scrollbarWidth: 'none' }}>
+              {CATEGORIES.map(cat => {
+                const count = cat.id === 'ALL'
+                  ? weekMeals.length
+                  : weekMeals.filter(m => m.category === cat.id).length;
+                const isActive = activeCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+                      isActive
+                        ? 'bg-brand-charcoal text-white shadow-sm'
+                        : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    {cat.dot && (
+                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cat.dot}`} />
+                    )}
+                    {cat.label}
+                    <span className={`text-[10px] ${isActive ? 'text-gray-400' : 'text-gray-400'}`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Week selector */}
             <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit mb-4">
               {WEEKS.map(w => (
@@ -253,6 +294,15 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
 
             {/* Meal cards — extra vertical gap for ribbon badges */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-7">
+              {meals.length === 0 && (
+                <div className="col-span-2 py-10 text-center text-gray-400">
+                  <p className="text-3xl mb-2">🍽️</p>
+                  <p className="text-sm">No {activeCategory.charAt(0) + activeCategory.slice(1).toLowerCase()} meals this week</p>
+                  <button onClick={() => setActiveCategory('ALL')} className="text-xs text-brand-green mt-1.5 hover:underline">
+                    View all meals
+                  </button>
+                </div>
+              )}
               {meals.map(meal => (
                 <MealCard
                   key={meal.id}
