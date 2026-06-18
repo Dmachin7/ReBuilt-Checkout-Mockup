@@ -40,7 +40,8 @@ export default function App() {
   const [step, setStep] = useState('entrees');
   const [cart, dispatch] = useReducer(cartReducer, { quantities: {}, doubleProteins: {} });
   const [orderDetails, setOrderDetails] = useState(null);
-  const [mealCount] = useState(5);
+  const [mealCount, setMealCount] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   function go(target) {
     setStep(target);
@@ -84,6 +85,9 @@ export default function App() {
           onDoubleProteinToggle={handleDoubleProtein}
           onNext={() => go('breakfast')}
           mealCount={mealCount}
+          setMealCount={setMealCount}
+          selectedPlan={selectedPlan}
+          setSelectedPlan={setSelectedPlan}
         />
       )}
 

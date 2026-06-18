@@ -24,10 +24,8 @@ const WEEKS = [
 
 const ALL_ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2].map(m => m.id));
 
-export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onDoubleProteinToggle, onNext }) {
-  const [mealCount, setMealCount] = useState(null); // null = not chosen yet
+export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onDoubleProteinToggle, onNext, mealCount, setMealCount, selectedPlan, setSelectedPlan }) {
   const [showMoreCounts, setShowMoreCounts] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(null);
   const [expandedPlan, setExpandedPlan] = useState(null);
   const [activeWeek, setActiveWeek] = useState('w1');
   const [modalMeal, setModalMeal] = useState(null);

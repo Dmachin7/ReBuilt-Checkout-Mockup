@@ -152,17 +152,17 @@ export default function MealModal({ meal, onClose, qty, onAdd, onRemove, doubleP
   return (
     // Overlay — clicking background closes modal
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-md"
       onClick={onClose}
     >
-      {/* Modal sheet */}
+      {/* Modal card */}
       <div
-        className="bg-white w-full sm:max-w-xl sm:rounded-2xl rounded-t-2xl overflow-hidden flex flex-col shadow-2xl"
-        style={{ maxHeight: '92vh' }}
+        className="bg-white w-full max-w-sm sm:max-w-md rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+        style={{ maxHeight: '85vh' }}
         onClick={e => e.stopPropagation()}
       >
         {/* ── Hero image ── */}
-        <div className="relative h-44 sm:h-52 bg-brand-mint flex-shrink-0 overflow-hidden">
+        <div className="relative h-36 sm:h-44 bg-brand-mint flex-shrink-0 overflow-hidden">
           {meal.image ? (
             <img src={meal.image} alt={meal.name} className="w-full h-full object-cover" />
           ) : (
