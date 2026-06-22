@@ -1,0 +1,84 @@
+import { useState } from 'react';
+import { MEAL_COUNTS } from '../data/meals';
+
+const PRICING = {
+  5:  { perMeal: 13.99 },
+  7:  { perMeal: 13.49 },
+  9:  { perMeal: 12.99 },
+  10: { perMeal: 12.99 },
+  12: { perMeal: 12.49 },
+  14: { perMeal: 11.99 },
+  16: { perMeal: 11.49 },
+  18: { perMeal: 10.99 },
+};
+
+export default function StepMealCount({ mealCount, setMealCount, onNext }) {
+  const [showMore, setShowMore] = useState(false);
+  const visibleCounts = showMore ? MEAL_COUNTS : MEAL_COUNTS.slice(0, 4);
+  const pricing = mealCount ? PRICING[mealCount] : null;
+
+  return (
+    <div className="flex-1 px-4 sm:px-6 py-10 max-w-2xl mx-auto w-full">
+      <div className="mb-8">
+        <h1 className="font-display text-3xl sm:text-4xl text-gray-900 mb-2">
+          How many meals per week?
+        </h1>
+        <p className="text-gray-500">More meals = lower price per meal. Change anytime.</p>
+      </div>
+
+      <div className="flex flex-wrap gap-3 mb-6">
+        {visibleCounts.map(n => {
+          const p = PRICING[n];
+          const weekly = (p.perMeal * n).toFixed(2);
+          const isSelected = mealCount === n;
+          return (
+            <button
+              key={n}
+              onClick={() => setMealCount(n)}
+              className={`px-5 py-4 rounded-2xl text-left border-2 transition-all min-w-[120px] ${
+                isSelected
+                  ? 'bg-brand-charcoal text-white border-brand-charcoal shadow-md'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:shadow-sm'
+              }`}
+            >
+              <p className="font-bold text-base leading-tight">{n} meals</p>
+              <p className={`text-xs mt-1 leading-tight ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
+                ${p.perMeal}/meal
+              </p>
+              <p className={`text-[11px] leading-tight font-semibold mt-0.5 ${isSelected ? 'text-green-400' : 'text-gray-300'}`}>
+                ${weekly}/week
+              </p>
+            </button>
+          );
+        })}
+        {!showMore && (
+          <button
+            onClick={() => setShowMore(true)}
+            className="px-5 py-4 rounded-2xl text-sm font-semibold text-gray-400 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:text-gray-500 transition-colors min-w-[120px]"
+          >
+            More ↓
+          </button>
+        )}
+      </div>
+
+      {mealCount && (
+        <div className="mb-8 inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-800 text-sm font-medium px-4 py-2 rounded-xl animate-reveal">
+          <span className="text-green-500">✓</span>
+          {mealCount} meals · ${pricing.perMeal}/meal · ${(pricing.perMeal * mealCount).toFixed(2)}/week
+        </div>
+      )}
+
+      <button
+        onClick={onNext}
+        disabled={!mealCount}
+        className={`w-full py-4 rounded-2xl font-bold text-base transition-all shadow-sm ${
+          mealCount
+            ? 'bg-brand-green hover:bg-brand-green-dark text-white'
+            : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+        }`}
+      >
+        Continue →
+      </button>
+    </div>
+  );
+}

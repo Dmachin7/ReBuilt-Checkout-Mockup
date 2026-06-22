@@ -5,7 +5,11 @@ import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
 import { SNACK_ITEMS } from '../data/meals';
 
-export default function StepSnacks({ cart, doubleProteins, onAdd, onRemove, onDoubleProteinToggle, onNext, onBack, mealCount, onClear }) {
+export default function StepSnacks({
+  singles, doubles,
+  onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
+  onNext, onBack, mealCount, onClear,
+}) {
   const [modalMeal, setModalMeal] = useState(null);
 
   return (
@@ -17,7 +21,6 @@ export default function StepSnacks({ cart, doubleProteins, onAdd, onRemove, onDo
           <p className="text-gray-500 text-sm">Keep momentum between meals. Completely optional.</p>
         </div>
 
-        {/* SKIP — large dark banner */}
         <button
           onClick={onNext}
           className="w-full flex items-center justify-between gap-4 bg-brand-charcoal hover:bg-gray-800 text-white rounded-2xl px-6 py-5 transition-colors shadow-md group"
@@ -38,11 +41,13 @@ export default function StepSnacks({ cart, doubleProteins, onAdd, onRemove, onDo
             <MealCard
               key={meal.id}
               meal={meal}
-              qty={cart[meal.id] || 0}
-              onAdd={onAdd}
-              onRemove={onRemove}
-              onDoubleProteinToggle={onDoubleProteinToggle}
-              doubleProtein={!!doubleProteins[meal.id]}
+              singleQty={singles[meal.id] || 0}
+              doubleQty={doubles[meal.id] || 0}
+              onAddSingle={onAddSingle}
+              onRemoveSingle={onRemoveSingle}
+              onAddDouble={onAddDouble}
+              onRemoveDouble={onRemoveDouble}
+              atLimit={false}
               onCardClick={() => setModalMeal(meal)}
             />
           ))}
@@ -55,14 +60,15 @@ export default function StepSnacks({ cart, doubleProteins, onAdd, onRemove, onDo
         </div>
       </div>
 
-      <CartSidebar cart={cart} doubleProteins={doubleProteins} mealCount={mealCount} onClear={onClear} />
+      <CartSidebar singles={singles} doubles={doubles} mealCount={mealCount} onClear={onClear} />
 
       <MobileCartBar
-        cart={cart}
-        doubleProteins={doubleProteins}
+        singles={singles}
+        doubles={doubles}
         mealCount={mealCount}
         onContinue={onNext}
         continueLabel="Continue to Allergies →"
+        visible
         onClear={onClear}
       />
 
@@ -70,11 +76,12 @@ export default function StepSnacks({ cart, doubleProteins, onAdd, onRemove, onDo
         <MealModal
           meal={modalMeal}
           onClose={() => setModalMeal(null)}
-          qty={cart[modalMeal.id] || 0}
-          onAdd={onAdd}
-          onRemove={onRemove}
-          doubleProtein={!!doubleProteins[modalMeal.id]}
-          onDoubleProteinToggle={onDoubleProteinToggle}
+          singleQty={singles[modalMeal.id] || 0}
+          doubleQty={doubles[modalMeal.id] || 0}
+          onAddSingle={onAddSingle}
+          onRemoveSingle={onRemoveSingle}
+          onAddDouble={onAddDouble}
+          onRemoveDouble={onRemoveDouble}
           atLimit={false}
         />
       )}

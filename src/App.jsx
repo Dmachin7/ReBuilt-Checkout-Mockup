@@ -1,63 +1,140 @@
 import { useReducer, useState } from 'react';
 import ProgressBar from './components/ProgressBar';
+import StepMealCount from './steps/StepMealCount';
+import StepPlan from './steps/StepPlan';
+import StepMealMode from './steps/StepMealMode';
 import StepEntrees from './steps/StepEntrees';
 import StepBreakfast from './steps/StepBreakfast';
 import StepSnacks from './steps/StepSnacks';
 import StepAllergies from './steps/StepAllergies';
 import StepCheckout from './steps/StepCheckout';
 import ConfirmationScreen from './steps/ConfirmationScreen';
+import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS } from './data/meals';
+
+const ALL_ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2].map(m => m.id));
 
 function cartReducer(state, action) {
   switch (action.type) {
-    case 'ADD': {
-      const prev = state.quantities[action.id] || 0;
-      return { ...state, quantities: { ...state.quantities, [action.id]: prev + 1 } };
+    case 'ADD_SINGLE': {
+      const prev = state.singles[action.id] || 0;
+      return { ...state, singles: { ...state.singles, [action.id]: prev + 1 } };
     }
-    case 'REMOVE': {
-      const prev = state.quantities[action.id] || 0;
+    case 'REMOVE_SINGLE': {
+      const prev = state.singles[action.id] || 0;
       const next = Math.max(0, prev - 1);
-      const q = { ...state.quantities, [action.id]: next };
-      if (next === 0) delete q[action.id];
-      return { ...state, quantities: q };
+      const s = { ...state.singles, [action.id]: next };
+      if (next === 0) delete s[action.id];
+      return { ...state, singles: s };
     }
-    case 'TOGGLE_DOUBLE_PROTEIN': {
-      const prev = state.doubleProteins[action.id];
-      return { ...state, doubleProteins: { ...state.doubleProteins, [action.id]: !prev } };
+    case 'ADD_DOUBLE': {
+      const prev = state.doubles[action.id] || 0;
+      return { ...state, doubles: { ...state.doubles, [action.id]: prev + 1 } };
     }
-    case 'SET_DOUBLE_PROTEIN_BULK': {
-      const updates = {};
-      action.ids.forEach(id => { updates[id] = action.value; });
-      return { ...state, doubleProteins: { ...state.doubleProteins, ...updates } };
+    case 'REMOVE_DOUBLE': {
+      const prev = state.doubles[action.id] || 0;
+      const next = Math.max(0, prev - 1);
+      const d = { ...state.doubles, [action.id]: next };
+      if (next === 0) delete d[action.id];
+      return { ...state, doubles: d };
+    }
+    case 'SET_BULK_SINGLES': {
+      const singles = {};
+      action.ids.forEach(id => { singles[id] = (singles[id] || 0) + 1; });
+      return { singles, doubles: {} };
+    }
+    case 'SET_BULK_BREAKFAST': {
+      const newSingles = { ...state.singles };
+      BREAKFAST_ITEMS.forEach(m => delete newSingles[m.id]);
+      action.ids.forEach(id => { newSingles[id] = (newSingles[id] || 0) + 1; });
+      return { ...state, singles: newSingles };
     }
     case 'RESET':
-      return { quantities: {}, doubleProteins: {} };
+      return { singles: {}, doubles: {} };
     default:
       return state;
   }
 }
 
+function computeEntreeCount(singles, doubles) {
+  let count = 0;
+  Object.entries(singles).forEach(([id, qty]) => { if (ALL_ENTREE_IDS.has(Number(id))) count += qty; });
+  Object.entries(doubles).forEach(([id, qty]) => { if (ALL_ENTREE_IDS.has(Number(id))) count += qty; });
+  return count;
+}
+
+function computeUnlockedUpTo(mealCount, mealMode, entreeCount, breakfastCount, breakfastSkipped) {
+  if (!mealCount) return 1;
+  if (!mealMode) return 3;
+  if (entreeCount < mealCount) return 4;
+  if (!breakfastCount && !breakfastSkipped) return 5;
+  return 8;
+}
+
 function stepToNumber(step) {
-  const map = { entrees: 1, breakfast: 2, snacks: 3, allergies: 4, checkout: 5 };
+  const map = { mealCount: 1, plan: 2, mealMode: 3, entrees: 4, breakfast: 5, snacks: 6, allergies: 7, checkout: 8 };
   return map[step] || 1;
 }
 
 export default function App() {
-  const [step, setStep] = useState('entrees');
-  const [cart, dispatch] = useReducer(cartReducer, { quantities: {}, doubleProteins: {} });
+  const [step, setStep] = useState('mealCount');
+  const [cart, dispatch] = useReducer(cartReducer, { singles: {}, doubles: {} });
   const [orderDetails, setOrderDetails] = useState(null);
   const [mealCount, setMealCount] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [mealMode, setMealMode] = useState(null);
+  const [breakfastCount, setBreakfastCount] = useState(null);
+  const [breakfastSkipped, setBreakfastSkipped] = useState(false);
 
   function go(target) {
     setStep(target);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function handleAdd(id)                          { dispatch({ type: 'ADD', id }); }
-  function handleRemove(id)                       { dispatch({ type: 'REMOVE', id }); }
-  function handleDoubleProtein(id)                { dispatch({ type: 'TOGGLE_DOUBLE_PROTEIN', id }); }
-  function handleClearCart()                      { dispatch({ type: 'RESET' }); }
-  function handleBulkDoubleProtein(ids, value)    { dispatch({ type: 'SET_DOUBLE_PROTEIN_BULK', ids, value }); }
+  const entreeCount = computeEntreeCount(cart.singles, cart.doubles);
+  const unlockedUpTo = computeUnlockedUpTo(mealCount, mealMode, entreeCount, breakfastCount, breakfastSkipped);
+
+  function handleAddSingle(id)    { dispatch({ type: 'ADD_SINGLE', id }); }
+  function handleRemoveSingle(id) { dispatch({ type: 'REMOVE_SINGLE', id }); }
+  function handleAddDouble(id)    { dispatch({ type: 'ADD_DOUBLE', id }); }
+  function handleRemoveDouble(id) { dispatch({ type: 'REMOVE_DOUBLE', id }); }
+  function handleClearCart()      { dispatch({ type: 'RESET' }); }
+
+  function handleChefChosen() {
+    const planCategoryMap = { lifestyle: 'LIFESTYLE', performance: 'PERFORMANCE', plant_based: 'PLANT-BASED' };
+    const category = planCategoryMap[selectedPlan] || null;
+    const allEntrees = [...MEALS_WEEK1, ...MEALS_WEEK2];
+    const pool = category ? allEntrees.filter(m => m.category === category) : allEntrees;
+    const supplement = category ? allEntrees.filter(m => m.category !== category) : [];
+    const ordered = [...pool, ...supplement];
+    const ids = [];
+    for (let i = 0; i < mealCount; i++) ids.push(ordered[i % ordered.length].id);
+    dispatch({ type: 'SET_BULK_SINGLES', ids });
+    setMealMode('chef');
+    go('entrees');
+  }
+
+  function handleOwnMeals() {
+    dispatch({ type: 'RESET' });
+    setMealMode('own');
+    go('entrees');
+  }
+
+  function handleSetBreakfastCount(count) {
+    setBreakfastCount(count);
+    setBreakfastSkipped(false);
+    if (mealMode === 'chef') {
+      const shuffled = [...BREAKFAST_ITEMS].sort(() => Math.random() - 0.5);
+      const ids = [];
+      for (let i = 0; i < count; i++) ids.push(shuffled[i % shuffled.length].id);
+      dispatch({ type: 'SET_BULK_BREAKFAST', ids });
+    }
+  }
+
+  function handleSkipBreakfast() {
+    setBreakfastSkipped(true);
+    setBreakfastCount(null);
+    go('snacks');
+  }
 
   function handleConfirm(details) {
     setOrderDetails(details);
@@ -67,13 +144,29 @@ export default function App() {
   function handleReset() {
     dispatch({ type: 'RESET' });
     setOrderDetails(null);
-    go('entrees');
+    setMealCount(null);
+    setSelectedPlan(null);
+    setMealMode(null);
+    setBreakfastCount(null);
+    setBreakfastSkipped(false);
+    go('mealCount');
   }
+
+  const sharedCartProps = {
+    singles: cart.singles,
+    doubles: cart.doubles,
+    onAddSingle: handleAddSingle,
+    onRemoveSingle: handleRemoveSingle,
+    onAddDouble: handleAddDouble,
+    onRemoveDouble: handleRemoveDouble,
+    mealCount,
+    onClear: handleClearCart,
+  };
 
   if (step === 'confirmation') {
     return (
       <div className="min-h-svh bg-brand-mint flex flex-col">
-        <ProgressBar currentStep={5} onNavigate={go} />
+        <ProgressBar currentStep={8} unlockedUpTo={8} onNavigate={go} />
         <ConfirmationScreen orderDetails={orderDetails} onReset={handleReset} />
       </div>
     );
@@ -81,50 +174,61 @@ export default function App() {
 
   return (
     <div className="min-h-svh bg-brand-mint flex flex-col">
-      <ProgressBar currentStep={stepToNumber(step)} onNavigate={go} />
+      <ProgressBar currentStep={stepToNumber(step)} unlockedUpTo={unlockedUpTo} onNavigate={go} />
+
+      {step === 'mealCount' && (
+        <StepMealCount
+          mealCount={mealCount}
+          setMealCount={setMealCount}
+          onNext={() => go('plan')}
+        />
+      )}
+
+      {step === 'plan' && (
+        <StepPlan
+          selectedPlan={selectedPlan}
+          setSelectedPlan={setSelectedPlan}
+          onNext={() => go('mealMode')}
+          onBack={() => go('mealCount')}
+        />
+      )}
+
+      {step === 'mealMode' && (
+        <StepMealMode
+          selectedPlan={selectedPlan}
+          mealCount={mealCount}
+          onChefChosen={handleChefChosen}
+          onOwnMeals={handleOwnMeals}
+          onBack={() => go('plan')}
+        />
+      )}
 
       {step === 'entrees' && (
         <StepEntrees
-          cart={cart.quantities}
-          doubleProteins={cart.doubleProteins}
-          onAdd={handleAdd}
-          onRemove={handleRemove}
-          onDoubleProteinToggle={handleDoubleProtein}
+          {...sharedCartProps}
+          entreeCount={entreeCount}
+          mealMode={mealMode}
           onNext={() => go('breakfast')}
-          mealCount={mealCount}
-          setMealCount={setMealCount}
-          selectedPlan={selectedPlan}
-          setSelectedPlan={setSelectedPlan}
-          onClear={handleClearCart}
-          onBulkDoubleProtein={handleBulkDoubleProtein}
         />
       )}
 
       {step === 'breakfast' && (
         <StepBreakfast
-          cart={cart.quantities}
-          doubleProteins={cart.doubleProteins}
-          onAdd={handleAdd}
-          onRemove={handleRemove}
-          onDoubleProteinToggle={handleDoubleProtein}
+          {...sharedCartProps}
+          mealMode={mealMode}
+          breakfastCount={breakfastCount}
+          onSetBreakfastCount={handleSetBreakfastCount}
+          onSkipBreakfast={handleSkipBreakfast}
           onNext={() => go('snacks')}
           onBack={() => go('entrees')}
-          mealCount={mealCount}
-          onClear={handleClearCart}
         />
       )}
 
       {step === 'snacks' && (
         <StepSnacks
-          cart={cart.quantities}
-          doubleProteins={cart.doubleProteins}
-          onAdd={handleAdd}
-          onRemove={handleRemove}
-          onDoubleProteinToggle={handleDoubleProtein}
+          {...sharedCartProps}
           onNext={() => go('allergies')}
           onBack={() => go('breakfast')}
-          mealCount={mealCount}
-          onClear={handleClearCart}
         />
       )}
 
@@ -137,8 +241,7 @@ export default function App() {
 
       {step === 'checkout' && (
         <StepCheckout
-          cart={cart.quantities}
-          doubleProteins={cart.doubleProteins}
+          {...sharedCartProps}
           onBack={() => go('allergies')}
           onConfirm={handleConfirm}
         />
