@@ -111,8 +111,8 @@ export default function MealCard({
   const cat = CATEGORY_STYLES[meal.category] || CATEGORY_STYLES.LIFESTYLE;
   const badge = meal.badge ? BADGE_STYLES[meal.badge] : null;
 
-  const singleAtLimit = atLimit && singleQty === 0;
-  const doubleAtLimit = atLimit && doubleQty === 0;
+  const singleAtLimit = atLimit;
+  const doubleAtLimit = atLimit;
 
   return (
     <div className="relative">
