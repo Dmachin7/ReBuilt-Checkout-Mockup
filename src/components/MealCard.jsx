@@ -126,7 +126,7 @@ export default function MealCard({
 
       <div
         onClick={onCardClick}
-        className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col cursor-pointer"
+        className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
       >
         <div className="flex items-start gap-3 px-3 pt-3 pb-2">
           <CircularImage
