@@ -55,22 +55,17 @@ export default function StepEntrees({ cart, doubleProteins, onAdd, onRemove, onD
 
   const isAtLimit = mealCount !== null && entreeCount >= mealCount;
 
-  // Gate onAdd; auto-apply double protein when the "all" mode is on
   function handleEntreeAdd(id) {
     if (mealCount !== null && entreeCount >= mealCount) return;
     onAdd(id);
-    if (doubleProteinAll) {
-      const meal = ALL_ENTREES_DATA.find(m => m.id === id);
-      if (meal?.doubleProtein && !doubleProteins[id]) onDoubleProteinToggle(id);
-    }
   }
 
-  // Toggle the double-protein-all mode and immediately apply/remove on current cart
+  // Toggle the double-protein-all mode and immediately apply/remove on all eligible meals
   function toggleAllDoubleProtein() {
     const newValue = !doubleProteinAll;
     setDoubleProteinAll(newValue);
     const ids = ALL_ENTREES_DATA
-      .filter(m => (cart[m.id] || 0) > 0 && m.doubleProtein)
+      .filter(m => m.doubleProtein)
       .map(m => m.id);
     if (ids.length > 0) onBulkDoubleProtein(ids, newValue);
   }
