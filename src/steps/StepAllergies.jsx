@@ -24,7 +24,7 @@ export default function StepAllergies({ onNext, onBack }) {
   const noAllergies = selected.has('none');
 
   return (
-    <div className="px-4 sm:px-6 py-6 max-w-2xl mx-auto w-full pb-16">
+    <div className="px-4 sm:px-6 py-6 max-w-2xl mx-auto w-full pb-28 sm:pb-10">
 
       <div className="mb-5">
         <h2 className="font-display text-2xl sm:text-3xl text-gray-900 mb-1">Any dietary restrictions?</h2>
@@ -106,17 +106,17 @@ export default function StepAllergies({ onNext, onBack }) {
         />
       </div>
 
-      {/* Nav */}
-      <div className="flex flex-col gap-3">
+      {/* Floating on mobile, inline on sm+ */}
+      <div className="fixed sm:static bottom-4 inset-x-4 sm:inset-auto z-20 flex flex-col gap-2">
         <button
           onClick={onNext}
-          className="w-full bg-brand-green hover:bg-brand-green-dark text-white font-bold py-4 rounded-xl text-base transition-colors shadow-sm"
+          className="w-full bg-brand-green hover:bg-brand-green-dark text-white font-bold py-4 rounded-2xl text-base transition-colors shadow-md"
         >
           Continue to Checkout →
         </button>
         <button
           onClick={onBack}
-          className="w-full text-gray-500 hover:text-gray-700 font-medium text-sm py-2 transition-colors"
+          className="w-full text-gray-500 hover:text-gray-700 font-medium text-sm py-2 transition-colors text-center"
         >
           ← Back to Snacks
         </button>

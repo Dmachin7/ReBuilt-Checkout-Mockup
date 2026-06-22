@@ -3,12 +3,12 @@ const FULL_STEPS = ['mealCount', 'plan', 'mealMode', 'entrees', 'breakfast', 'sn
 
 // Major circles shown in the bar (6 steps instead of 8)
 const MAJOR_STEPS = [
-  { id: 1, label: 'Meal Count', route: 'mealCount'  },
-  { id: 2, label: 'Entrées',    route: 'entrees'    },
-  { id: 3, label: 'Breakfast',  route: 'breakfast'  },
-  { id: 4, label: 'Snacks',     route: 'snacks'     },
-  { id: 5, label: 'Allergies',  route: 'allergies'  },
-  { id: 6, label: 'Checkout',   route: 'checkout'   },
+  { id: 1, label: 'Meal Count', short: 'Count',    route: 'mealCount'  },
+  { id: 2, label: 'Entrées',    short: 'Entrées',  route: 'entrees'    },
+  { id: 3, label: 'Breakfast',  short: 'Bfast',    route: 'breakfast'  },
+  { id: 4, label: 'Snacks',     short: 'Snacks',   route: 'snacks'     },
+  { id: 5, label: 'Allergies',  short: 'Diet',     route: 'allergies'  },
+  { id: 6, label: 'Checkout',   short: 'Checkout', route: 'checkout'   },
 ];
 
 // Sub-steps that live in the connector between two major steps
@@ -118,12 +118,13 @@ export default function ProgressBar({ currentRoute, unlockedUntil = 'mealCount',
                   }`}>
                     {complete ? '✓' : step.id}
                   </div>
-                  <span className={`hidden sm:block text-center leading-tight whitespace-nowrap font-medium text-[10px] transition-colors ${
+                  <span className={`text-center leading-tight whitespace-nowrap font-medium transition-colors ${
                     active   ? 'font-semibold text-gray-900' :
                     complete ? 'text-brand-green' :
                                'text-gray-400'
                   }`}>
-                    {step.label}
+                    <span className="block sm:hidden text-[8px]">{step.short}</span>
+                    <span className="hidden sm:block text-[10px]">{step.label}</span>
                   </span>
                 </button>
               </div>

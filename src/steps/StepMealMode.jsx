@@ -10,7 +10,7 @@ export default function StepMealMode({ selectedPlan, mealCount, onChefChosen, on
   const planLabel = selectedPlan ? PLAN_LABELS[selectedPlan] : null;
 
   return (
-    <div className="flex-1 px-4 sm:px-6 py-10 max-w-2xl mx-auto w-full">
+    <div className="flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full pb-24 sm:pb-10">
       <div className="mb-8">
         <h1 className="font-display text-3xl sm:text-4xl text-gray-900 mb-2">
           How do you want to pick meals?
@@ -54,12 +54,14 @@ export default function StepMealMode({ selectedPlan, mealCount, onChefChosen, on
         </button>
       </div>
 
-      <button
-        onClick={onBack}
-        className="w-full text-gray-500 hover:text-gray-700 font-medium text-sm py-2 transition-colors"
-      >
-        ← Back
-      </button>
+      <div className="fixed sm:static bottom-4 inset-x-4 sm:inset-auto z-20">
+        <button
+          onClick={onBack}
+          className="w-full text-gray-500 hover:text-gray-700 font-medium text-sm py-2 transition-colors text-center"
+        >
+          ← Back
+        </button>
+      </div>
     </div>
   );
 }

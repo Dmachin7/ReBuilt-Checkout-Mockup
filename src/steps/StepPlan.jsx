@@ -14,7 +14,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
   const [expandedPlan, setExpandedPlan] = useState(null);
 
   return (
-    <div className="flex-1 px-4 sm:px-6 py-10 max-w-2xl mx-auto w-full">
+    <div className="flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full pb-28 sm:pb-10">
       <div className="mb-6">
         <h1 className="font-display text-3xl sm:text-4xl text-gray-900 mb-2">
           Choose your meal preference
@@ -93,21 +93,22 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
         })}
       </div>
 
-      <div className="space-y-3">
+      {/* Floating on mobile, inline on sm+ */}
+      <div className="fixed sm:static bottom-4 inset-x-4 sm:inset-auto z-20 space-y-2">
         <button
           onClick={onNext}
           disabled={!selectedPlan}
-          className={`w-full py-4 rounded-2xl font-bold text-base transition-all shadow-sm ${
+          className={`w-full py-4 rounded-2xl font-bold text-base transition-all shadow-md ${
             selectedPlan
               ? 'bg-brand-green hover:bg-brand-green-dark text-white'
-              : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+              : 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none'
           }`}
         >
           {selectedPlan ? 'Continue →' : 'Pick a preference to continue'}
         </button>
         <button
           onClick={onBack}
-          className="w-full text-gray-500 hover:text-gray-700 font-medium text-sm py-2 transition-colors"
+          className="w-full text-gray-500 hover:text-gray-700 font-medium text-sm py-2 transition-colors text-center"
         >
           ← Back
         </button>
