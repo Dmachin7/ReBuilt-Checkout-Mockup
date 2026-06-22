@@ -54,14 +54,14 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
       onClick={stop}
     >
       <span className="text-[10px] text-gray-400 font-medium leading-none">✓ {label}</span>
-      <div className="flex items-center gap-0.5 flex-shrink-0">
+      <div className="flex items-center gap-1 flex-shrink-0">
         <button
           onClick={e => { stop(e); onRemove(); }}
-          className="w-5 h-5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 text-xs font-bold flex items-center justify-center transition-colors"
+          className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${dotCls} hover:opacity-80`}
         >
           −
         </button>
-        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${dotCls}`}>
+        <span className="text-[11px] font-bold text-gray-700 min-w-[12px] text-center">
           {qty}
         </span>
         <button
