@@ -23,6 +23,8 @@ const DIETARY = {
 function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble }) {
   const stop = e => e.stopPropagation();
 
+  const dotCls = isDouble ? 'bg-brand-green text-white' : 'bg-brand-charcoal text-white';
+
   if (qty === 0) {
     return (
       <button
@@ -41,29 +43,33 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
     );
   }
 
-  // Active: [−] circle + qty circle (tap to add more). Compact — never expands card width.
+  // Active: same pill shape, "✓ added" on left, compact [−][qty][+] locked to right
   return (
-    <div className="flex items-center gap-1 flex-1 min-w-0" onClick={stop}>
-      <button
-        onClick={e => { stop(e); onRemove(); }}
-        className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-bold flex items-center justify-center flex-shrink-0 transition-colors"
-      >
-        −
-      </button>
-      <button
-        onClick={e => { stop(e); if (!atLimit) onAdd(); }}
-        disabled={atLimit}
-        title={`Add another ${label}`}
-        className={`flex-1 h-6 rounded-full flex items-center justify-center text-sm font-bold transition-colors min-w-0 ${
-          atLimit
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : isDouble
-            ? 'bg-brand-green text-white hover:bg-brand-green-dark'
-            : 'bg-brand-charcoal text-white hover:bg-gray-700'
-        }`}
-      >
-        {qty}
-      </button>
+    <div
+      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-gray-200 bg-white flex-1 min-w-0"
+      onClick={stop}
+    >
+      <span className="text-[10px] text-gray-400 font-medium truncate flex-1 leading-none">✓ added</span>
+      <div className="flex items-center gap-0.5 flex-shrink-0">
+        <button
+          onClick={e => { stop(e); onRemove(); }}
+          className="w-5 h-5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 text-xs font-bold flex items-center justify-center transition-colors"
+        >
+          −
+        </button>
+        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${dotCls}`}>
+          {qty}
+        </span>
+        <button
+          onClick={e => { stop(e); if (!atLimit) onAdd(); }}
+          disabled={atLimit}
+          className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+            atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${dotCls} hover:opacity-80`
+          }`}
+        >
+          +
+        </button>
+      </div>
     </div>
   );
 }
