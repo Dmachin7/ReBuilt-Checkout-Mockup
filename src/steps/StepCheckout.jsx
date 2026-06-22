@@ -72,7 +72,7 @@ export default function StepCheckout({ singles, doubles, onBack, onConfirm }) {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">{item.meal.name}</p>
-                  <p className="text-xs text-gray-500">{item.isDouble ? '2× Protein' : 'Single'} · qty {item.qty}</p>
+                  <p className="text-xs text-gray-500">{item.isDouble ? 'Double Protein' : 'Single'} · qty {item.qty}</p>
                 </div>
                 <span className="text-sm font-bold text-gray-800">${item.price.toFixed(2)}</span>
               </div>

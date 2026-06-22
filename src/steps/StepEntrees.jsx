@@ -118,7 +118,7 @@ export default function StepEntrees({
               onClick={() => setActiveWeek(w.id)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 activeWeek === w.id
-                  ? 'bg-white text-gray-900 shadow-sm'
+                  ? 'bg-brand-green text-white font-semibold shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -128,7 +128,7 @@ export default function StepEntrees({
         </div>
 
         {/* Meal grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-7">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-6">
           {meals.length === 0 && (
             <div className="col-span-2 py-10 text-center text-gray-400">
               <p className="text-3xl mb-2">🍽️</p>
@@ -162,7 +162,8 @@ export default function StepEntrees({
         doubles={doubles}
         mealCount={mealCount}
         onContinue={onNext}
-        continueLabel="Continue to Breakfast →"
+        continueLabel="Continue →"
+        continueDisabled={!isAtLimit}
         visible
         onClear={onClear}
       />

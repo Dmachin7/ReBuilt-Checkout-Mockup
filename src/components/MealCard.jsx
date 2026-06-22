@@ -47,27 +47,26 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
     );
   }
 
-  // Active: label on the left, [−][qty][+] locked to the right — full width, never overflows
   return (
     <div
       className="w-full flex items-center justify-between px-3 py-1.5 rounded-full border border-gray-200 bg-white"
       onClick={stop}
     >
       <span className="text-[10px] text-gray-400 font-medium leading-none">✓ {label}</span>
-      <div className="flex items-center gap-1 flex-shrink-0">
+      <div className="flex items-center gap-1.5 flex-shrink-0">
         <button
           onClick={e => { stop(e); onRemove(); }}
-          className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${dotCls} hover:opacity-80`}
+          className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${dotCls} hover:opacity-80`}
         >
           −
         </button>
-        <span className="text-[11px] font-bold text-gray-700 min-w-[12px] text-center">
+        <span className="text-sm font-bold text-gray-700 min-w-[16px] text-center">
           {qty}
         </span>
         <button
           onClick={e => { stop(e); if (!atLimit) onAdd(); }}
           disabled={atLimit}
-          className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+          className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
             atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${dotCls} hover:opacity-80`
           }`}
         >
@@ -116,18 +115,19 @@ export default function MealCard({
   const doubleAtLimit = atLimit && doubleQty === 0;
 
   return (
-    <div className="relative mt-4">
-      {badge && (
-        <div className={`absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 px-3.5 py-1 rounded-b-xl text-[10px] font-bold tracking-wide shadow-md whitespace-nowrap ${badge.cls}`}>
-          <span>{badge.icon}</span>
-          {meal.badge}
-        </div>
-      )}
-
+    <div className="relative">
       <div
         onClick={onCardClick}
-        className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
+        className="relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
       >
+        {/* Badge — top-right corner of the card */}
+        {badge && (
+          <div className={`absolute top-2 right-2 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide shadow-md whitespace-nowrap ${badge.cls}`}>
+            <span>{badge.icon}</span>
+            {meal.badge}
+          </div>
+        )}
+
         <div className="flex items-start gap-3 px-3 pt-3 pb-2">
           <CircularImage
             src={meal.image}
@@ -176,7 +176,7 @@ export default function MealCard({
               />
               {meal.doubleProtein && (
                 <PortionBtn
-                  label="2× Protein"
+                  label="Double Protein"
                   extraPrice={meal.doubleProteinPrice}
                   qty={doubleQty}
                   onAdd={() => onAddDouble(meal.id)}
@@ -205,7 +205,7 @@ export default function MealCard({
 function MacroStat({ value, unit, label }) {
   return (
     <div className="flex items-baseline gap-0.5">
-      <span className="text-white text-xs font-bold">{value}{unit}</span>
+      <span className="text-white text-xs sm:text-sm font-bold">{value}{unit}</span>
       <span className="text-gray-500 text-[10px]">{label}</span>
     </div>
   );

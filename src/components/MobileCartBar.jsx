@@ -4,7 +4,7 @@ import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/
 const ALL_MEALS = [...MEALS_WEEK1, ...MEALS_WEEK2, ...BREAKFAST_ITEMS, ...SNACK_ITEMS];
 const ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2].map(m => m.id));
 
-export default function MobileCartBar({ singles, doubles, mealCount, onContinue, continueLabel, visible = true, onClear }) {
+export default function MobileCartBar({ singles, doubles, mealCount, onContinue, continueLabel, visible = true, onClear, continueDisabled = false }) {
   const [expanded, setExpanded] = useState(false);
 
   if (!visible) return null;
@@ -77,7 +77,7 @@ export default function MobileCartBar({ singles, doubles, mealCount, onContinue,
 
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">{item.meal.name}</p>
-                      <p className="text-xs text-gray-500">{item.isDouble ? '2× Protein' : 'Single'} · qty {item.qty}</p>
+                      <p className="text-xs text-gray-500">{item.isDouble ? 'Double Protein' : 'Single'} · qty {item.qty}</p>
                     </div>
                     <span className="text-sm font-bold text-gray-800 flex-shrink-0">${item.price.toFixed(2)}</span>
                   </div>
@@ -135,8 +135,13 @@ export default function MobileCartBar({ singles, doubles, mealCount, onContinue,
           </button>
 
           <button
-            onClick={onContinue}
-            className="flex-shrink-0 bg-brand-green hover:bg-brand-green-dark text-white font-bold text-sm px-4 py-2.5 rounded-xl whitespace-nowrap transition-colors shadow-sm"
+            onClick={continueDisabled ? undefined : onContinue}
+            disabled={continueDisabled}
+            className={`flex-shrink-0 font-bold text-sm px-4 py-2.5 rounded-xl whitespace-nowrap transition-colors shadow-sm ${
+              continueDisabled
+                ? 'bg-gray-500 text-gray-300 cursor-not-allowed opacity-60'
+                : 'bg-brand-green hover:bg-brand-green-dark text-white'
+            }`}
           >
             {continueLabel || 'Continue →'}
           </button>

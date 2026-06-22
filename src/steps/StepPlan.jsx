@@ -1,93 +1,101 @@
 import { useState } from 'react';
 import { PLANS } from '../data/meals';
 
-// Representative meal image for each plan type
 const PLAN_IMAGES = {
-  lifestyle:    'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=200&q=80',
-  performance:  'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=200&q=80',
-  keto:         'https://images.unsplash.com/photo-1544025162-d76694265947?w=200&q=80',
-  chefs_choice: 'https://images.unsplash.com/photo-1543339494-b4cd4f7ba686?w=200&q=80',
-  plant_based:  'https://images.unsplash.com/photo-1574484284002-952d92456975?w=200&q=80',
+  lifestyle:    'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&q=80',
+  performance:  'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400&q=80',
+  keto:         'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80',
+  chefs_choice: 'https://images.unsplash.com/photo-1543339494-b4cd4f7ba686?w=400&q=80',
+  plant_based:  'https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&q=80',
 };
 
 export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack }) {
   const [expandedPlan, setExpandedPlan] = useState(null);
 
   return (
-    <div className="flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full pb-28 sm:pb-10">
+    <div className="flex-1 px-4 sm:px-6 py-8 max-w-3xl lg:max-w-5xl mx-auto w-full pb-28 sm:pb-10">
       <div className="mb-6">
         <h1 className="font-display text-3xl sm:text-4xl text-gray-900 mb-2">
           Choose your meal preference
         </h1>
         <p className="text-gray-500 text-sm">
-          This sets your backup plan if you ever miss the Thursday selection deadline, and helps us suggest meals you'll love.
+          Sets your backup plan if you miss the Thursday deadline, and helps us suggest meals you'll love.
         </p>
       </div>
 
-      {/* 2-col grid on mobile, 3-col on sm+ for 5 plans */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {PLANS.map(plan => {
           const img = PLAN_IMAGES[plan.id];
           const isSelected = selectedPlan === plan.id;
+          const isExpanded = expandedPlan === plan.id;
+
           return (
-            <div key={plan.id} className="flex flex-col">
-              <button
+            <div
+              key={plan.id}
+              className={`rounded-2xl border-2 overflow-hidden transition-all ${
+                isSelected
+                  ? 'border-brand-green shadow-md'
+                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+              }`}
+            >
+              {/* Full-bleed hero image */}
+              <div
+                className="relative w-full aspect-[4/3] overflow-hidden cursor-pointer"
                 onClick={() => setSelectedPlan(isSelected ? null : plan.id)}
-                className={`w-full text-left p-3.5 rounded-2xl border-2 transition-all flex flex-col items-center gap-2.5 ${
-                  isSelected
-                    ? 'border-brand-green bg-green-50 shadow-sm'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
               >
-                {/* Circular meal image */}
-                <div className="relative mt-1">
-                  {img ? (
-                    <img
-                      src={img}
-                      alt={plan.name}
-                      className="w-14 h-14 rounded-full object-cover shadow-md ring-2 ring-white"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center shadow-md ring-2 ring-white">
-                      <span className="text-xl">🍽️</span>
-                    </div>
-                  )}
-                  {/* Color dot badge */}
-                  <div
-                    className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white"
-                    style={{ background: plan.color }}
-                  />
-                </div>
-
-                {/* Text */}
-                <div className="text-center">
-                  <p className="text-sm font-bold text-gray-900 leading-tight">{plan.name}</p>
-                  <p className="text-[10px] text-gray-500 leading-tight mt-0.5 line-clamp-2">{plan.tagline}</p>
-                </div>
-
-                {isSelected && (
-                  <span className="text-[10px] font-bold text-brand-green uppercase tracking-wide">✓ Selected</span>
+                {img ? (
+                  <img src={img} alt={plan.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                    <span className="text-4xl">🍽️</span>
+                  </div>
                 )}
-              </button>
+                {/* Color accent strip at bottom of image */}
+                <div className="absolute inset-x-0 bottom-0 h-1.5" style={{ background: plan.color }} />
+                {isSelected && (
+                  <div className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-brand-green flex items-center justify-center text-white font-bold text-sm shadow-md">
+                    ✓
+                  </div>
+                )}
+              </div>
 
-              <button
-                onClick={() => setExpandedPlan(expandedPlan === plan.id ? null : plan.id)}
-                className="text-[10px] text-brand-green font-medium text-center mt-1 py-0.5 hover:underline"
+              {/* Title row */}
+              <div
+                className={`px-4 pt-3 pb-2 cursor-pointer ${isSelected ? 'bg-green-50' : 'bg-white'}`}
+                onClick={() => setSelectedPlan(isSelected ? null : plan.id)}
               >
-                {expandedPlan === plan.id ? 'Hide ▲' : 'Details ▼'}
-              </button>
-              {expandedPlan === plan.id && (
-                <div className="mt-1 p-3 bg-gray-50 rounded-xl border border-gray-100 text-[11px] text-gray-600 animate-reveal">
-                  <p className="mb-1.5">{plan.description}</p>
-                  <ul className="space-y-0.5">
-                    {plan.highlights.map(h => (
-                      <li key={h} className="flex items-start gap-1">
-                        <span className="text-brand-green flex-shrink-0">✓</span> {h}
-                      </li>
-                    ))}
-                  </ul>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 text-base leading-tight">{plan.name}</p>
+                    <p className="text-gray-500 text-xs mt-0.5 line-clamp-2">{plan.tagline}</p>
+                  </div>
+                  <div className="w-3 h-3 rounded-full flex-shrink-0 mt-0.5" style={{ background: plan.color }} />
                 </div>
-              )}
+              </div>
+
+              {/* Details toggle — expands card in-place */}
+              <div className={`px-4 pb-3 ${isSelected ? 'bg-green-50' : 'bg-white'}`}>
+                <button
+                  onClick={() => setExpandedPlan(isExpanded ? null : plan.id)}
+                  className="text-xs text-brand-green font-semibold hover:underline"
+                >
+                  {isExpanded ? '▲ Hide details' : '▼ More details'}
+                </button>
+
+                {isExpanded && (
+                  <div className="mt-2 pt-2 border-t border-gray-100 animate-reveal">
+                    <p className="text-xs text-gray-600 leading-relaxed mb-2">{plan.description}</p>
+                    <ul className="space-y-1">
+                      {plan.highlights.map(h => (
+                        <li key={h} className="flex items-start gap-1.5 text-xs text-gray-600">
+                          <span className="text-brand-green flex-shrink-0 mt-0.5">✓</span>
+                          {h}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}

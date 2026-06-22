@@ -230,7 +230,8 @@ export default function App() {
 
       {step === 'allergies' && (
         <StepAllergies
-          onNext={() => go('checkout')}
+          onViewSummary={() => go('checkout')}
+          onCheckout={() => go('checkout')}
           onBack={() => go('snacks')}
         />
       )}
