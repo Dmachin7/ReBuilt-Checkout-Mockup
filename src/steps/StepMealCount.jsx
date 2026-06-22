@@ -26,7 +26,7 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
         <p className="text-gray-500">More meals = lower price per meal. Change anytime.</p>
       </div>
 
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="flex flex-wrap gap-3 mb-6 justify-center">
         {visibleCounts.map(n => {
           const p = PRICING[n];
           const weekly = (p.perMeal * n).toFixed(2);

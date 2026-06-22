@@ -28,7 +28,7 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
       <button
         onClick={e => { stop(e); if (!atLimit) onAdd(); }}
         disabled={atLimit}
-        className={`flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-full border text-[11px] font-semibold transition-colors flex-1 whitespace-nowrap ${
+        className={`flex items-center justify-center gap-1 px-2 py-1.5 rounded-full border text-[11px] font-semibold transition-colors flex-1 whitespace-nowrap overflow-hidden ${
           atLimit
             ? 'border-gray-200 text-gray-300 bg-white cursor-not-allowed'
             : isDouble
@@ -36,33 +36,33 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
             : 'border-gray-300 text-gray-600 bg-white hover:border-gray-400 hover:bg-gray-50'
         }`}
       >
-        + {label}{extraPrice != null ? ` +$${extraPrice.toFixed(2)}` : ''}
+        <span className="truncate">+ {label}{extraPrice != null ? ` +$${extraPrice.toFixed(2)}` : ''}</span>
       </button>
     );
   }
 
+  // Active: [−] circle + qty circle (tap to add more). Compact — never expands card width.
   return (
-    <div
-      className="flex items-center bg-brand-charcoal rounded-full px-1.5 py-0.5 gap-1 flex-1 justify-between"
-      onClick={stop}
-    >
+    <div className="flex items-center gap-1 flex-1 min-w-0" onClick={stop}>
       <button
         onClick={e => { stop(e); onRemove(); }}
-        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold hover:bg-gray-600 transition-colors flex-shrink-0"
+        className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-bold flex items-center justify-center flex-shrink-0 transition-colors"
       >
         −
       </button>
-      <span className="text-white text-[10px] font-bold leading-none truncate">
-        {qty}× {label}
-      </span>
       <button
         onClick={e => { stop(e); if (!atLimit) onAdd(); }}
         disabled={atLimit}
-        className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold transition-colors flex-shrink-0 ${
-          atLimit ? 'opacity-40 cursor-not-allowed' : 'bg-brand-green hover:bg-brand-green-dark'
+        title={`Add another ${label}`}
+        className={`flex-1 h-6 rounded-full flex items-center justify-center text-sm font-bold transition-colors min-w-0 ${
+          atLimit
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : isDouble
+            ? 'bg-brand-green text-white hover:bg-brand-green-dark'
+            : 'bg-brand-charcoal text-white hover:bg-gray-700'
         }`}
       >
-        +
+        {qty}
       </button>
     </div>
   );

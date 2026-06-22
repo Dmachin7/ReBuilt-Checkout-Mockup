@@ -3,7 +3,10 @@ import MealCard from '../components/MealCard';
 import MealModal from '../components/MealModal';
 import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
-import { BREAKFAST_ITEMS, MEAL_COUNTS } from '../data/meals';
+import { BREAKFAST_ITEMS } from '../data/meals';
+
+const BREAKFAST_COUNTS_DEFAULT = [5, 7, 9, 10, 12];
+const BREAKFAST_COUNTS_MORE    = [14, 16, 18];
 
 const PRICING = {
   5:  { perMeal: 8.99 },
@@ -25,6 +28,10 @@ export default function StepBreakfast({
 }) {
   const [modalMeal, setModalMeal] = useState(null);
   const [chefBannerDismissed, setChefBannerDismissed] = useState(false);
+  const [showMoreCounts, setShowMoreCounts] = useState(false);
+  const visibleCounts = showMoreCounts
+    ? [...BREAKFAST_COUNTS_DEFAULT, ...BREAKFAST_COUNTS_MORE]
+    : BREAKFAST_COUNTS_DEFAULT;
 
   return (
     <div className="flex gap-6 px-4 sm:px-6 py-6 max-w-6xl mx-auto w-full">
@@ -42,7 +49,7 @@ export default function StepBreakfast({
           <p className="text-gray-400 text-xs mb-4">Each delivered fresh with your weekly order.</p>
 
           <div className="flex flex-wrap gap-2 mb-3">
-            {MEAL_COUNTS.map(n => {
+            {visibleCounts.map(n => {
               const p = PRICING[n];
               const isSelected = breakfastCount === n;
               return (
@@ -62,6 +69,14 @@ export default function StepBreakfast({
                 </button>
               );
             })}
+            {!showMoreCounts && (
+              <button
+                onClick={() => setShowMoreCounts(true)}
+                className="px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:text-gray-500 transition-colors min-w-[90px]"
+              >
+                More ↓
+              </button>
+            )}
           </div>
 
           {breakfastCount && (
@@ -71,10 +86,11 @@ export default function StepBreakfast({
             </div>
           )}
 
-          <div className="mt-3">
+          <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+            <p className="text-xs text-gray-400">No breakfast for me</p>
             <button
               onClick={onSkipBreakfast}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors font-medium"
+              className="text-sm text-gray-500 hover:text-gray-800 font-semibold border border-gray-300 hover:border-gray-400 bg-white rounded-full px-4 py-1.5 transition-all"
             >
               Skip breakfast →
             </button>
