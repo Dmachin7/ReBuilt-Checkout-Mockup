@@ -5,18 +5,19 @@ import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
 import { BREAKFAST_ITEMS } from '../data/meals';
 
-const BREAKFAST_COUNTS_DEFAULT = [5, 7, 9, 10, 12];
-const BREAKFAST_COUNTS_MORE    = [14, 16, 18];
+const BREAKFAST_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const PRICING = {
+  1:  { perMeal: 9.99 },
+  2:  { perMeal: 9.49 },
+  3:  { perMeal: 9.49 },
+  4:  { perMeal: 8.99 },
   5:  { perMeal: 8.99 },
+  6:  { perMeal: 8.49 },
   7:  { perMeal: 8.49 },
+  8:  { perMeal: 7.99 },
   9:  { perMeal: 7.99 },
-  10: { perMeal: 7.99 },
-  12: { perMeal: 7.49 },
-  14: { perMeal: 6.99 },
-  16: { perMeal: 6.49 },
-  18: { perMeal: 5.99 },
+  10: { perMeal: 7.49 },
 };
 
 export default function StepBreakfast({
@@ -28,12 +29,7 @@ export default function StepBreakfast({
 }) {
   const [modalMeal, setModalMeal] = useState(null);
   const [chefBannerDismissed, setChefBannerDismissed] = useState(false);
-  const [showMoreCounts, setShowMoreCounts] = useState(false);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
-
-  const visibleCounts = showMoreCounts
-    ? [...BREAKFAST_COUNTS_DEFAULT, ...BREAKFAST_COUNTS_MORE]
-    : BREAKFAST_COUNTS_DEFAULT;
 
   function handleSkipClick() {
     if (breakfastCount) {
@@ -59,7 +55,7 @@ export default function StepBreakfast({
           <p className="text-gray-400 text-xs mb-4">Each delivered fresh with your weekly order.</p>
 
           <div className="flex flex-wrap gap-2 mb-3">
-            {visibleCounts.map(n => {
+            {BREAKFAST_COUNTS.map(n => {
               const p = PRICING[n];
               const isSelected = breakfastCount === n;
               return (
@@ -79,14 +75,6 @@ export default function StepBreakfast({
                 </button>
               );
             })}
-            {!showMoreCounts && (
-              <button
-                onClick={() => setShowMoreCounts(true)}
-                className="px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:text-gray-500 transition-colors min-w-[90px]"
-              >
-                More ↓
-              </button>
-            )}
           </div>
 
           {breakfastCount && (
