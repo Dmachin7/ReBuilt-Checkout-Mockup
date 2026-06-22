@@ -1,6 +1,7 @@
 const PLAN_LABELS = {
   lifestyle:    'Lifestyle',
   performance:  'Performance',
+  keto:         'Keto',
   chefs_choice: "Chef's Choice",
   plant_based:  'Plant-Based',
 };

@@ -336,6 +336,14 @@ export const PLANS = [
     highlights: ["45–60g protein per meal", "Optimized for recovery", "Lean meats & fish"],
   },
   {
+    id: "keto",
+    name: "Keto",
+    tagline: "Low-carb, high-fat fuel",
+    color: "#F06292",
+    description: "Very low-carb, high-fat meals designed to keep you in ketosis. Meat-forward with no grains or added sugars.",
+    highlights: ["Under 10g carbs per meal", "High healthy fats", "No grains or sugars"],
+  },
+  {
     id: "chefs_choice",
     name: "Chef's Choice",
     tagline: "Surprise us!",

@@ -62,17 +62,13 @@ function computeEntreeCount(singles, doubles) {
   return count;
 }
 
-function computeUnlockedUpTo(mealCount, mealMode, entreeCount, breakfastCount, breakfastSkipped) {
-  if (!mealCount) return 1;
-  if (!mealMode) return 3;
-  if (entreeCount < mealCount) return 4;
-  if (!breakfastCount && !breakfastSkipped) return 5;
-  return 8;
-}
-
-function stepToNumber(step) {
-  const map = { mealCount: 1, plan: 2, mealMode: 3, entrees: 4, breakfast: 5, snacks: 6, allergies: 7, checkout: 8 };
-  return map[step] || 1;
+function computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, breakfastCount, breakfastSkipped) {
+  if (!mealCount) return 'mealCount';
+  if (!selectedPlan) return 'plan';
+  if (!mealMode) return 'mealMode';
+  if (entreeCount < mealCount) return 'entrees';
+  if (!breakfastCount && !breakfastSkipped) return 'breakfast';
+  return 'checkout';
 }
 
 export default function App() {
@@ -90,8 +86,8 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  const entreeCount = computeEntreeCount(cart.singles, cart.doubles);
-  const unlockedUpTo = computeUnlockedUpTo(mealCount, mealMode, entreeCount, breakfastCount, breakfastSkipped);
+  const entreeCount   = computeEntreeCount(cart.singles, cart.doubles);
+  const unlockedUntil = computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, breakfastCount, breakfastSkipped);
 
   function handleAddSingle(id)    { dispatch({ type: 'ADD_SINGLE', id }); }
   function handleRemoveSingle(id) { dispatch({ type: 'REMOVE_SINGLE', id }); }
@@ -100,7 +96,7 @@ export default function App() {
   function handleClearCart()      { dispatch({ type: 'RESET' }); }
 
   function handleChefChosen() {
-    const planCategoryMap = { lifestyle: 'LIFESTYLE', performance: 'PERFORMANCE', plant_based: 'PLANT-BASED' };
+    const planCategoryMap = { lifestyle: 'LIFESTYLE', performance: 'PERFORMANCE', keto: 'KETO', plant_based: 'PLANT-BASED' };
     const category = planCategoryMap[selectedPlan] || null;
     const allEntrees = [...MEALS_WEEK1, ...MEALS_WEEK2];
     const pool = category ? allEntrees.filter(m => m.category === category) : allEntrees;
@@ -166,7 +162,7 @@ export default function App() {
   if (step === 'confirmation') {
     return (
       <div className="min-h-svh bg-brand-mint flex flex-col">
-        <ProgressBar currentStep={8} unlockedUpTo={8} onNavigate={go} />
+        <ProgressBar currentRoute="checkout" unlockedUntil="checkout" onNavigate={go} />
         <ConfirmationScreen orderDetails={orderDetails} onReset={handleReset} />
       </div>
     );
@@ -174,7 +170,7 @@ export default function App() {
 
   return (
     <div className="min-h-svh bg-brand-mint flex flex-col">
-      <ProgressBar currentStep={stepToNumber(step)} unlockedUpTo={unlockedUpTo} onNavigate={go} />
+      <ProgressBar currentRoute={step} unlockedUntil={unlockedUntil} onNavigate={go} />
 
       {step === 'mealCount' && (
         <StepMealCount
