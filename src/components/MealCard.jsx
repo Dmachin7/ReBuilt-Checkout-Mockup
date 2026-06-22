@@ -22,7 +22,6 @@ const DIETARY = {
 
 function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble }) {
   const stop = e => e.stopPropagation();
-
   const dotCls = isDouble ? 'bg-brand-green text-white' : 'bg-brand-charcoal text-white';
 
   if (qty === 0) {
@@ -30,7 +29,7 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
       <button
         onClick={e => { stop(e); if (!atLimit) onAdd(); }}
         disabled={atLimit}
-        className={`flex items-center justify-center gap-1 px-2 py-1.5 rounded-full border text-[11px] font-semibold transition-colors flex-1 whitespace-nowrap overflow-hidden ${
+        className={`w-full flex items-center justify-between px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-colors ${
           atLimit
             ? 'border-gray-200 text-gray-300 bg-white cursor-not-allowed'
             : isDouble
@@ -38,18 +37,23 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
             : 'border-gray-300 text-gray-600 bg-white hover:border-gray-400 hover:bg-gray-50'
         }`}
       >
-        <span className="truncate">+ {label}{extraPrice != null ? ` +$${extraPrice.toFixed(2)}` : ''}</span>
+        <span>+ {label}</span>
+        {extraPrice != null && (
+          <span className={atLimit ? 'text-gray-300' : isDouble ? 'text-brand-green opacity-70' : 'text-gray-400'}>
+            +${extraPrice.toFixed(2)}
+          </span>
+        )}
       </button>
     );
   }
 
-  // Active: same pill shape, "✓ added" on left, compact [−][qty][+] locked to right
+  // Active: label on the left, [−][qty][+] locked to the right — full width, never overflows
   return (
     <div
-      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-gray-200 bg-white flex-1 min-w-0"
+      className="w-full flex items-center justify-between px-3 py-1.5 rounded-full border border-gray-200 bg-white"
       onClick={stop}
     >
-      <span className="text-[10px] text-gray-400 font-medium truncate flex-1 leading-none">✓ added</span>
+      <span className="text-[10px] text-gray-400 font-medium leading-none">✓ {label}</span>
       <div className="flex items-center gap-0.5 flex-shrink-0">
         <button
           onClick={e => { stop(e); onRemove(); }}
@@ -162,7 +166,7 @@ export default function MealCard({
             </div>
 
             {/* Add buttons */}
-            <div className="flex gap-1.5">
+            <div className="flex flex-col gap-1">
               <PortionBtn
                 label="Single"
                 qty={singleQty}
