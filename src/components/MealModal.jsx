@@ -121,7 +121,7 @@ export default function MealModal({
       onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-sm sm:max-w-md rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+        className="bg-white w-full max-w-sm sm:max-w-2xl rounded-2xl overflow-hidden flex flex-col shadow-2xl"
         style={{ maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}
       >

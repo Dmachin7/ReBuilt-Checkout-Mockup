@@ -10,7 +10,7 @@ const SNACK_IDS = new Set(SNACK_ITEMS.map(m => m.id));
 export default function StepSnacks({
   singles, doubles,
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
-  onNext, onBack, mealCount, onClear,
+  onNext, onSkipSnacks, onBack, mealCount, onClear,
 }) {
   const [modalMeal, setModalMeal] = useState(null);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
@@ -28,7 +28,7 @@ export default function StepSnacks({
     if (selectedSnackCount > 0) {
       setSkipConfirmOpen(true);
     } else {
-      onNext();
+      onSkipSnacks();
     }
   }
 
@@ -123,7 +123,7 @@ export default function StepSnacks({
             </ul>
             <div className="flex flex-col gap-2.5">
               <button
-                onClick={() => { onNext(); setSkipConfirmOpen(false); }}
+                onClick={() => { onSkipSnacks(); setSkipConfirmOpen(false); }}
                 className="w-full py-3 rounded-xl bg-brand-charcoal text-white font-bold text-sm hover:bg-gray-800 transition-colors"
               >
                 Yes, skip snacks

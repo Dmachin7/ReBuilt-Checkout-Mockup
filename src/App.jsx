@@ -9,9 +9,10 @@ import StepSnacks from './steps/StepSnacks';
 import StepAllergies from './steps/StepAllergies';
 import StepCheckout from './steps/StepCheckout';
 import ConfirmationScreen from './steps/ConfirmationScreen';
-import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS } from './data/meals';
+import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS } from './data/meals';
 
 const ALL_ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2].map(m => m.id));
+const ALL_SNACK_IDS = SNACK_ITEMS.map(m => m.id);
 
 function cartReducer(state, action) {
   switch (action.type) {
@@ -47,6 +48,12 @@ function cartReducer(state, action) {
       BREAKFAST_ITEMS.forEach(m => delete newSingles[m.id]);
       action.ids.forEach(id => { newSingles[id] = (newSingles[id] || 0) + 1; });
       return { ...state, singles: newSingles };
+    }
+    case 'CLEAR_SNACKS': {
+      const s = { ...state.singles };
+      const d = { ...state.doubles };
+      action.ids.forEach(id => { delete s[id]; delete d[id]; });
+      return { singles: s, doubles: d };
     }
     case 'RESET':
       return { singles: {}, doubles: {} };
@@ -130,6 +137,11 @@ export default function App() {
     setBreakfastSkipped(true);
     setBreakfastCount(null);
     go('snacks');
+  }
+
+  function handleSkipSnacks() {
+    dispatch({ type: 'CLEAR_SNACKS', ids: ALL_SNACK_IDS });
+    go('allergies');
   }
 
   function handleConfirm(details) {
@@ -224,6 +236,7 @@ export default function App() {
         <StepSnacks
           {...sharedCartProps}
           onNext={() => go('allergies')}
+          onSkipSnacks={handleSkipSnacks}
           onBack={() => go('breakfast')}
         />
       )}

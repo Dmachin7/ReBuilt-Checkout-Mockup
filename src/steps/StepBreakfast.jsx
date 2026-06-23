@@ -84,15 +84,18 @@ export default function StepBreakfast({
             </div>
           )}
 
-          <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
-            <p className="text-xs text-gray-400">No breakfast for me</p>
-            <button
-              onClick={handleSkipClick}
-              className="text-sm text-gray-500 hover:text-gray-800 font-semibold border border-gray-300 hover:border-gray-400 bg-white rounded-full px-4 py-1.5 transition-all"
-            >
-              Skip breakfast →
-            </button>
-          </div>
+          <button
+            onClick={handleSkipClick}
+            className="mt-3 w-full flex items-center justify-between gap-4 bg-brand-charcoal hover:bg-gray-800 text-white rounded-2xl px-5 py-4 transition-colors shadow-md group"
+          >
+            <div className="text-left">
+              <p className="font-bold text-base leading-tight">No breakfast for me</p>
+              <p className="text-gray-400 text-xs mt-0.5">Skip ahead → your entrées are already saved</p>
+            </div>
+            <div className="w-9 h-9 rounded-full border-2 border-gray-600 group-hover:border-brand-green group-hover:bg-brand-green flex items-center justify-center text-lg transition-all flex-shrink-0">
+              →
+            </div>
+          </button>
         </section>
 
         {/* Chef-chosen auto-select banner */}
