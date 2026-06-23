@@ -19,7 +19,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
           Choose your meal preference
         </h1>
         <p className="text-gray-500 text-sm">
-          Sets your backup plan if you miss the Thursday deadline, and helps us suggest meals you'll love.
+          Sets your backup plan if you miss the Tuesday deadline, and helps us suggest meals you'll love.
         </p>
       </div>
 

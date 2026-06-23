@@ -36,7 +36,7 @@ export default function ConfirmationScreen({ orderDetails, onReset }) {
 
           <div className="pt-3 border-t border-gray-100">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Skip / Cancel Deadline</p>
-            <p className="text-sm text-gray-900">Thursday at 11:59 PM each week</p>
+            <p className="text-sm text-gray-900">Tuesday at 11:59 PM each week</p>
             <p className="text-xs text-gray-500 mt-0.5">Log into your account to manage your subscription</p>
           </div>
 
@@ -54,7 +54,7 @@ export default function ConfirmationScreen({ orderDetails, onReset }) {
               'Confirmation email sent immediately',
               'Meals prep begins Monday morning',
               'Ready for pickup / delivery as scheduled',
-              'Skip or cancel anytime before Thursday',
+              'Skip or cancel anytime before Tuesday',
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="w-5 h-5 rounded-full bg-brand-green text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">

@@ -38,7 +38,7 @@ export default function StepCheckout({ singles, doubles, onBack, onConfirm }) {
             <p className="font-semibold text-amber-900 text-sm mb-1">Weekly subscription — pause or cancel anytime</p>
             <p className="text-amber-800 text-xs leading-relaxed">
               You'll be charged <strong>${total.toFixed(2)}</strong> for this week's order. After that, the same amount each week until you skip or cancel.{' '}
-              <strong>Skip deadline: Thursday 11:59 PM.</strong>
+              <strong>Skip deadline: Tuesday 11:59 PM.</strong>
             </p>
           </div>
         </div>
