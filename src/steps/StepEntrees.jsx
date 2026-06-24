@@ -55,9 +55,6 @@ export default function StepEntrees({
           <h2 className="font-display text-2xl sm:text-3xl text-gray-900 leading-tight">
             Choose your {mealCount} entrées
           </h2>
-          <p className="text-sm mt-0.5 text-gray-500">
-            {entreeCount} of {mealCount} selected
-          </p>
         </div>
 
         {/* Chef-chosen banner */}
