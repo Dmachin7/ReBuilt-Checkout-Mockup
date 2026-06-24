@@ -12,7 +12,13 @@ export default function StepAllergies({ onViewSummary, onCheckout, onBack }) {
     const next = new Set(selected);
     if (id === 'none') {
       next.clear();
-      if (!selected.has('none')) next.add('none');
+      if (!selected.has('none')) {
+        next.add('none');
+        setSelected(next);
+        // Auto-navigate when no restrictions selected
+        onViewSummary();
+        return;
+      }
     } else {
       next.delete('none');
       if (next.has(id)) next.delete(id);
@@ -45,7 +51,7 @@ export default function StepAllergies({ onViewSummary, onCheckout, onBack }) {
         </div>
         <div className="text-left flex-1">
           <p className="font-bold text-gray-900 text-base">No Restrictions — I can eat everything</p>
-          <p className="text-gray-500 text-xs mt-0.5">No allergies or dietary restrictions</p>
+          <p className="text-gray-500 text-xs mt-0.5">Selecting this will take you to your order summary</p>
         </div>
         {noAllergies && <span className="text-brand-green font-bold text-xl flex-shrink-0">✓</span>}
       </button>
@@ -82,17 +88,24 @@ export default function StepAllergies({ onViewSummary, onCheckout, onBack }) {
             </button>
           );
         })}
+
+        {/* Custom allergy — styled like an allergy card */}
+        <button
+          onClick={() => setShowCustom(!showCustom)}
+          className={`relative flex items-center gap-2.5 p-3 rounded-xl border-2 text-left transition-all ${
+            showCustom ? 'border-brand-green bg-green-50' : 'border-dashed border-gray-300 bg-white hover:border-gray-400'
+          }`}
+        >
+          <span className="text-base flex-shrink-0 leading-none">✏️</span>
+          <div className="min-w-0">
+            <p className="font-semibold text-gray-900 text-sm leading-tight">Other / Custom</p>
+            <p className="text-gray-400 text-[10px] leading-tight mt-0.5">Not listed? Add a note</p>
+          </div>
+        </button>
       </div>
 
-      {/* Custom allergy — hidden by default, revealed on click */}
-      {!showCustom ? (
-        <button
-          onClick={() => setShowCustom(true)}
-          className="text-sm text-brand-green font-semibold hover:underline mb-5 block"
-        >
-          Allergy not listed? Add a custom note →
-        </button>
-      ) : (
+      {/* Custom allergy textarea — revealed when custom card clicked */}
+      {showCustom && (
         <div className="bg-white rounded-2xl p-4 shadow-sm mb-5 animate-reveal">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-semibold text-gray-900">Anything else we should know?</label>
@@ -114,19 +127,13 @@ export default function StepAllergies({ onViewSummary, onCheckout, onBack }) {
           onClick={onViewSummary}
           className="w-full py-4 rounded-2xl font-bold text-base bg-brand-green hover:bg-brand-green-dark text-white transition-colors shadow-md"
         >
-          View Order Summary →
-        </button>
-        <button
-          onClick={onCheckout}
-          className="w-full py-4 rounded-2xl font-bold text-base bg-brand-charcoal hover:bg-gray-800 text-white transition-colors shadow-md"
-        >
-          Continue to Checkout →
+          Continue To Order Summary →
         </button>
         <button
           onClick={onBack}
           className="w-full text-gray-500 hover:text-gray-700 font-medium text-sm py-2 transition-colors text-center"
         >
-          ← Back to Snacks
+          ← Back
         </button>
       </div>
     </div>

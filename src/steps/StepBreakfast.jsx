@@ -51,7 +51,7 @@ export default function StepBreakfast({
 
         {/* Header */}
         <div>
-          <h2 className="font-display text-2xl sm:text-3xl text-gray-900 mb-1">Breakfast Add-ons</h2>
+          <h2 className="font-display text-2xl sm:text-3xl text-gray-900 mb-1">Choose your breakfast</h2>
           <p className="text-gray-500 text-sm">Completely optional — your entrées are already saved.</p>
         </div>
 
@@ -90,15 +90,16 @@ export default function StepBreakfast({
             </div>
           )}
 
+          {/* No breakfast — outlined, not dark */}
           <button
             onClick={handleSkipClick}
-            className="mt-3 w-full flex items-center justify-between gap-4 bg-brand-charcoal hover:bg-gray-800 text-white rounded-2xl px-5 py-4 transition-colors shadow-md group"
+            className="mt-3 w-full flex items-center justify-between gap-4 bg-white border-2 border-gray-200 hover:border-gray-400 text-gray-700 rounded-2xl px-5 py-4 transition-colors group"
           >
             <div className="text-left">
               <p className="font-bold text-base leading-tight">No breakfast for me</p>
               <p className="text-gray-400 text-xs mt-0.5">Skip ahead → your entrées are already saved</p>
             </div>
-            <div className="w-9 h-9 rounded-full border-2 border-gray-600 group-hover:border-brand-green group-hover:bg-brand-green flex items-center justify-center text-lg transition-all flex-shrink-0">
+            <div className="w-9 h-9 rounded-full border-2 border-gray-300 group-hover:border-brand-green group-hover:bg-brand-green group-hover:text-white flex items-center justify-center text-gray-400 text-lg transition-all flex-shrink-0">
               →
             </div>
           </button>
@@ -121,14 +122,8 @@ export default function StepBreakfast({
           </div>
         )}
 
-        <p className="text-center text-xs text-gray-400">— browse breakfast options below —</p>
-
-        <p className="text-xs text-gray-400 flex items-center gap-1.5">
-          <span>🍎</span> Snack options available after this step
-        </p>
-
-        {/* Breakfast grid — always visible for browsing / enticing */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-10">
+        {/* Breakfast grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
           {BREAKFAST_ITEMS.map(meal => (
             <MealCard
               key={meal.id}
@@ -141,18 +136,24 @@ export default function StepBreakfast({
               onRemoveDouble={onRemoveDouble}
               atLimit={false}
               onCardClick={() => setModalMeal(meal)}
+              singleLabel="Select"
             />
           ))}
         </div>
-
-        <div className="pt-2">
-          <button onClick={onBack} className="text-gray-400 hover:text-gray-600 text-sm transition-colors">
-            ← Back to Entrées
-          </button>
-        </div>
       </div>
 
-      <CartSidebar singles={singles} doubles={doubles} mealCount={mealCount} onClear={onClear} />
+      <CartSidebar
+        singles={singles}
+        doubles={doubles}
+        mealCount={mealCount}
+        onClear={onClear}
+        onAddSingle={onAddSingle}
+        onRemoveSingle={onRemoveSingle}
+        onAddDouble={onAddDouble}
+        onRemoveDouble={onRemoveDouble}
+        onBack={onBack}
+        onBackLabel="Back to Entrées"
+      />
 
       <MobileCartBar
         singles={singles}
@@ -162,6 +163,12 @@ export default function StepBreakfast({
         continueLabel="Continue →"
         visible
         onClear={onClear}
+        onAddSingle={onAddSingle}
+        onRemoveSingle={onRemoveSingle}
+        onAddDouble={onAddDouble}
+        onRemoveDouble={onRemoveDouble}
+        onBack={onBack}
+        onBackLabel="Back to Entrées"
       />
 
       {modalMeal && (

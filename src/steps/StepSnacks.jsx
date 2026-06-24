@@ -41,22 +41,21 @@ export default function StepSnacks({
           <p className="text-gray-500 text-sm">Keep momentum between meals. Completely optional.</p>
         </div>
 
+        {/* No snacks — outlined, not dark */}
         <button
           onClick={handleSkipClick}
-          className="w-full flex items-center justify-between gap-4 bg-brand-charcoal hover:bg-gray-800 text-white rounded-2xl px-6 py-5 transition-colors shadow-md group"
+          className="w-full flex items-center justify-between gap-4 bg-white border-2 border-gray-200 hover:border-gray-400 text-gray-700 rounded-2xl px-6 py-5 transition-colors group"
         >
           <div className="text-left">
             <p className="font-bold text-lg leading-tight">No snacks for me</p>
             <p className="text-gray-400 text-sm mt-0.5">Jump to Allergies → your selections are safe</p>
           </div>
-          <div className="w-11 h-11 rounded-full border-2 border-gray-600 group-hover:border-brand-green group-hover:bg-brand-green flex items-center justify-center text-xl transition-all flex-shrink-0">
+          <div className="w-11 h-11 rounded-full border-2 border-gray-300 group-hover:border-brand-green group-hover:bg-brand-green group-hover:text-white flex items-center justify-center text-gray-400 text-xl transition-all flex-shrink-0">
             →
           </div>
         </button>
 
-        <p className="text-center text-xs text-gray-400">— or browse snack options below —</p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
           {SNACK_ITEMS.map(meal => (
             <MealCard
               key={meal.id}
@@ -69,18 +68,24 @@ export default function StepSnacks({
               onRemoveDouble={onRemoveDouble}
               atLimit={false}
               onCardClick={() => setModalMeal(meal)}
+              singleLabel="Select"
             />
           ))}
         </div>
-
-        <div className="pt-2">
-          <button onClick={onBack} className="text-gray-400 hover:text-gray-600 text-sm transition-colors">
-            ← Back to Breakfast
-          </button>
-        </div>
       </div>
 
-      <CartSidebar singles={singles} doubles={doubles} mealCount={mealCount} onClear={onClear} />
+      <CartSidebar
+        singles={singles}
+        doubles={doubles}
+        mealCount={mealCount}
+        onClear={onClear}
+        onAddSingle={onAddSingle}
+        onRemoveSingle={onRemoveSingle}
+        onAddDouble={onAddDouble}
+        onRemoveDouble={onRemoveDouble}
+        onBack={onBack}
+        onBackLabel="Back to Breakfast"
+      />
 
       <MobileCartBar
         singles={singles}
@@ -90,6 +95,12 @@ export default function StepSnacks({
         continueLabel="Continue →"
         visible
         onClear={onClear}
+        onAddSingle={onAddSingle}
+        onRemoveSingle={onRemoveSingle}
+        onAddDouble={onAddDouble}
+        onRemoveDouble={onRemoveDouble}
+        onBack={onBack}
+        onBackLabel="Back to Breakfast"
       />
 
       {modalMeal && (

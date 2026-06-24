@@ -216,6 +216,7 @@ export default function App() {
           {...sharedCartProps}
           entreeCount={entreeCount}
           mealMode={mealMode}
+          selectedPlan={selectedPlan}
           onNext={() => go('breakfast')}
         />
       )}

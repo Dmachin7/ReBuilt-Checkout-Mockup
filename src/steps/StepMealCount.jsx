@@ -15,7 +15,6 @@ const PRICING = {
 export default function StepMealCount({ mealCount, setMealCount, onNext }) {
   const [showMore, setShowMore] = useState(false);
   const visibleCounts = showMore ? MEAL_COUNTS : MEAL_COUNTS.slice(0, 4);
-  const pricing = mealCount ? PRICING[mealCount] : null;
 
   return (
     <div className="flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full pb-28 sm:pb-10">
@@ -26,32 +25,43 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
         <p className="text-gray-500">More meals = lower price per meal. Change anytime.</p>
       </div>
 
-      {/* Grid so cards fill width on mobile */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         {visibleCounts.map(n => {
           const p = PRICING[n];
           const weekly = (p.perMeal * n).toFixed(2);
           const isSelected = mealCount === n;
+          const isMostPopular = n === 10;
           return (
-            <button
-              key={n}
-              onClick={() => setMealCount(n)}
-              className={`px-4 py-5 rounded-2xl text-left border-2 transition-all w-full ${
-                isSelected
-                  ? 'bg-brand-charcoal text-white border-brand-charcoal shadow-md'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:shadow-sm'
-              }`}
-            >
-              <p className="font-bold text-lg leading-tight">{n} meals</p>
-              <p className={`text-sm mt-1 leading-tight ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
-                ${p.perMeal}/meal
-              </p>
-              <p className={`text-xs leading-tight font-semibold mt-0.5 ${isSelected ? 'text-green-400' : 'text-gray-300'}`}>
-                ${weekly}/wk
-              </p>
-            </button>
+            <div key={n} className="relative">
+              {isMostPopular && (
+                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
+                  <span className="bg-brand-green text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap shadow-sm">
+                    ★ Most Popular
+                  </span>
+                </div>
+              )}
+              <button
+                onClick={() => setMealCount(n)}
+                className={`px-4 py-5 rounded-2xl text-left border-2 transition-all w-full ${
+                  isMostPopular ? 'pt-6' : ''
+                } ${
+                  isSelected
+                    ? 'bg-brand-charcoal text-white border-brand-charcoal shadow-md'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:shadow-sm'
+                }`}
+              >
+                <p className="font-bold text-lg leading-tight">{n} meals</p>
+                <p className={`text-sm mt-1 leading-tight ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
+                  ${p.perMeal}/meal
+                </p>
+                <p className={`text-xs leading-tight font-semibold mt-0.5 ${isSelected ? 'text-green-400' : 'text-gray-300'}`}>
+                  ${weekly}/wk
+                </p>
+              </button>
+            </div>
           );
         })}
+
         {!showMore && (
           <button
             onClick={() => setShowMore(true)}
@@ -60,14 +70,15 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
             More ↓
           </button>
         )}
+        {showMore && (
+          <button
+            onClick={() => setShowMore(false)}
+            className="col-span-2 py-2.5 rounded-2xl text-sm font-semibold text-gray-400 border-2 border-dashed border-gray-200 hover:border-gray-300 hover:text-gray-500 transition-colors w-full"
+          >
+            Show Less ↑
+          </button>
+        )}
       </div>
-
-      {mealCount && (
-        <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-800 text-sm font-medium px-4 py-2 rounded-xl animate-reveal">
-          <span className="text-green-500">✓</span>
-          {mealCount} meals · ${pricing.perMeal}/meal · ${(pricing.perMeal * mealCount).toFixed(2)}/week
-        </div>
-      )}
 
       {/* Floating on mobile, inline on sm+ */}
       <div className="fixed sm:static bottom-4 inset-x-4 sm:inset-auto z-20 mt-6 sm:mt-8">
