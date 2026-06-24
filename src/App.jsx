@@ -106,9 +106,8 @@ export default function App() {
   function handleChefChosen() {
     const planCategoryMap = { lifestyle: 'LIFESTYLE', performance: 'PERFORMANCE', keto: 'KETO', plant_based: 'PLANT-BASED' };
     const category = planCategoryMap[selectedPlan] || null;
-    const allEntrees = [...MEALS_WEEK1, ...MEALS_WEEK2];
-    const pool = category ? allEntrees.filter(m => m.category === category) : allEntrees;
-    const supplement = category ? allEntrees.filter(m => m.category !== category) : [];
+    const pool = category ? MEALS_WEEK1.filter(m => m.category === category) : MEALS_WEEK1;
+    const supplement = category ? MEALS_WEEK1.filter(m => m.category !== category) : [];
     const ordered = [...pool, ...supplement];
     const ids = [];
     for (let i = 0; i < mealCount; i++) ids.push(ordered[i % ordered.length].id);
