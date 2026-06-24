@@ -13,8 +13,8 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
   const [expandedPlan, setExpandedPlan] = useState(null);
 
   return (
-    <div className="flex-1 px-4 sm:px-6 py-3 sm:py-5 max-w-3xl lg:max-w-5xl mx-auto w-full flex flex-col" style={{ minHeight: 0 }}>
-      <div className="mb-3 sm:mb-4 flex-shrink-0">
+    <div className="flex-1 px-4 sm:px-6 py-3 sm:py-5 max-w-3xl lg:max-w-5xl mx-auto w-full">
+      <div className="mb-3 sm:mb-4">
         <h1 className="font-display text-xl sm:text-3xl text-gray-900 mb-1">
           Choose your meal preference
         </h1>
@@ -23,7 +23,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
         </p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 flex-1 min-h-0 mb-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 items-start mb-4">
         {PLANS.map(plan => {
           const img = PLAN_IMAGES[plan.id];
           const isSelected = selectedPlan === plan.id;
@@ -32,7 +32,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
           return (
             <div
               key={plan.id}
-              className={`rounded-2xl border-2 overflow-hidden transition-all flex flex-col ${
+              className={`rounded-2xl border-2 overflow-hidden transition-all ${
                 isSelected
                   ? 'border-brand-green shadow-md'
                   : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
@@ -40,7 +40,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
             >
               {/* Full-bleed hero image */}
               <div
-                className="relative w-full overflow-hidden cursor-pointer flex-shrink-0"
+                className="relative w-full overflow-hidden cursor-pointer"
                 style={{ aspectRatio: '16/7' }}
                 onClick={() => setSelectedPlan(isSelected ? null : plan.id)}
               >
@@ -60,7 +60,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
 
               {/* Title row */}
               <div
-                className={`px-3 pt-2 pb-1 cursor-pointer flex-shrink-0 ${isSelected ? 'bg-green-50' : 'bg-white'}`}
+                className={`px-3 pt-2 pb-1 cursor-pointer ${isSelected ? 'bg-green-50' : 'bg-white'}`}
                 onClick={() => setSelectedPlan(isSelected ? null : plan.id)}
               >
                 <p className="font-bold text-gray-900 text-xs sm:text-sm leading-tight">{plan.name}</p>
@@ -96,7 +96,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
       </div>
 
       {/* Floating on mobile, inline on sm+ */}
-      <div className="fixed sm:static bottom-4 inset-x-4 sm:inset-auto z-20 flex-shrink-0 space-y-2">
+      <div className="fixed sm:static bottom-4 inset-x-4 sm:inset-auto z-20 space-y-2">
         <button
           onClick={onNext}
           disabled={!selectedPlan}
