@@ -32,7 +32,7 @@ export default function ShopifyRedirectScreen({ onBack }) {
         <div className="bg-white rounded-2xl p-5 shadow-sm mb-8 text-left space-y-3">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">What to expect</p>
           {[
-            'Enter your payment details on Shopify's checkout',
+            "Enter your payment details on Shopify's checkout",
             'Subscription starts after your first payment',
             'Manage or cancel anytime from your account',
           ].map((line, i) => (
