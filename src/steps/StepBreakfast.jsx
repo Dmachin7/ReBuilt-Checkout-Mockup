@@ -128,7 +128,7 @@ export default function StepBreakfast({
         </p>
 
         {/* Breakfast grid — always visible for browsing / enticing */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-7">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-10">
           {BREAKFAST_ITEMS.map(meal => (
             <MealCard
               key={meal.id}

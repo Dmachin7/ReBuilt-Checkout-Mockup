@@ -13,13 +13,6 @@ const BADGE_STYLES = {
   'New':         { cls: 'bg-emerald-500 text-white', icon: '✦' },
 };
 
-const DIETARY_LABELS = {
-  'Gluten Free': 'Gluten Free',
-  'Soy Free':    'Soy Free',
-  'Dairy Free':  'Dairy Free',
-  'Vegan':       'Vegan',
-};
-
 function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble }) {
   const stop = e => e.stopPropagation();
   const activeCls = isDouble ? 'bg-brand-green text-white' : 'bg-brand-charcoal text-white';
@@ -29,7 +22,7 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
       <button
         onClick={e => { stop(e); if (!atLimit) onAdd(); }}
         disabled={atLimit}
-        className={`flex-1 flex items-center justify-between px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-colors ${
+        className={`flex-1 flex items-center justify-between px-2.5 py-1 rounded-full border text-[10px] font-semibold transition-colors ${
           atLimit
             ? 'border-gray-200 text-gray-300 bg-white cursor-not-allowed'
             : isDouble
@@ -49,11 +42,11 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
 
   return (
     <div
-      className="flex-1 flex items-center justify-between px-3 py-1.5 rounded-full border border-gray-200 bg-white"
+      className="flex-1 flex items-center justify-between px-2.5 py-1 rounded-full border border-gray-200 bg-white"
       onClick={stop}
     >
       <span className="text-[10px] text-gray-400 font-medium">✓ {label}</span>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1">
         <button
           onClick={e => { stop(e); onRemove(); }}
           className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${activeCls} hover:opacity-80`}
@@ -91,11 +84,18 @@ export default function MealCard({
   const badge = meal.badge ? BADGE_STYLES[meal.badge] : null;
 
   return (
-    /* Outer wrapper — image is positioned relative to this */
-    <div className="relative pl-10">
+    <div className="relative pl-14">
 
-      {/* Circular food photo — bleeds left outside the card */}
-      <div className="absolute left-0 top-1/2 -translate-y-[55%] z-10 w-24 h-24 flex-shrink-0">
+      {/* Badge — absolute relative to outer wrapper, top-right of card */}
+      {badge && (
+        <div className={`absolute top-2 right-2 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-sm ${badge.cls}`}>
+          <span>{badge.icon}</span>
+          {meal.badge}
+        </div>
+      )}
+
+      {/* Circular photo — 128 px, truly centered, bleeds 56 px off the card's left edge */}
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-32 h-32 flex-shrink-0">
         {meal.image && !imgError ? (
           <img
             src={meal.image}
@@ -105,57 +105,44 @@ export default function MealCard({
           />
         ) : (
           <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center shadow-xl">
-            <span className="text-2xl">📸</span>
+            <span className="text-3xl">📸</span>
             <span className="text-[9px] text-gray-400 mt-0.5 text-center leading-tight px-2">Coming soon</span>
           </div>
         )}
       </div>
 
-      {/* Card — starts to the right, leaving room for the image bleed */}
+      {/* Card body */}
       <div
         onClick={onCardClick}
-        className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
+        className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col cursor-pointer"
       >
-        {/* Badge — top-right */}
-        {badge && (
-          <div className={`absolute top-2 right-2 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${badge.cls}`}>
-            <span>{badge.icon}</span>
-            {meal.badge}
-          </div>
-        )}
-
-        {/* Content area */}
-        <div className="pl-[60px] pr-3 pt-3 pb-2.5 flex-1 flex flex-col gap-1.5">
+        {/* Content — compact, no description text */}
+        <div className="pl-20 pr-3 pt-3 pb-2 flex flex-col gap-1.5 flex-1">
 
           {/* Category pill */}
           <span className={`self-start text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full ${cat.pill}`}>
             {cat.label}
           </span>
 
-          {/* Title */}
-          <h3 className="font-display text-[15px] sm:text-[16px] font-bold text-gray-900 leading-tight">
+          {/* Title — clamped to 2 lines to keep card short */}
+          <h3 className="font-display text-[14px] sm:text-[15px] font-bold text-gray-900 leading-snug line-clamp-2">
             {meal.name}
           </h3>
-
-          {/* Description */}
-          <p className="text-gray-400 text-[11px] leading-snug line-clamp-2">
-            {meal.description}
-          </p>
 
           {/* Dietary tags */}
           <div className="flex flex-wrap gap-1">
             {meal.dietary.map(d => (
               <span
                 key={d}
-                className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-500 border border-gray-200"
+                className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-500 border border-gray-200"
               >
-                {DIETARY_LABELS[d] ?? d}
+                {d}
               </span>
             ))}
           </div>
 
           {/* Add buttons */}
-          <div className="flex gap-1.5 mt-auto pt-1">
+          <div className="flex gap-1.5 mt-auto">
             <PortionBtn
               label="Single"
               qty={singleQty}
@@ -178,11 +165,11 @@ export default function MealCard({
         </div>
 
         {/* Macro bar */}
-        <div className="bg-brand-charcoal px-4 py-2.5 flex items-center justify-center gap-4">
+        <div className="bg-brand-charcoal px-3 py-2 flex items-center justify-center gap-3">
           <MacroStat value={meal.protein} unit="g" label="Protein" />
-          <div className="w-px h-3.5 bg-gray-600" />
-          <MacroStat value={meal.calories} unit="" label="Calories" />
-          <div className="w-px h-3.5 bg-gray-600" />
+          <div className="w-px h-3 bg-gray-600" />
+          <MacroStat value={meal.calories} unit="" label="Cal" />
+          <div className="w-px h-3 bg-gray-600" />
           <MacroStat value={meal.carbs} unit="g" label="Carbs" />
         </div>
       </div>

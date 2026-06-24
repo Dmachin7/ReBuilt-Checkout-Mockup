@@ -128,7 +128,7 @@ export default function StepEntrees({
         </div>
 
         {/* Meal grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-10">
           {meals.length === 0 && (
             <div className="col-span-2 py-10 text-center text-gray-400">
               <p className="text-3xl mb-2">🍽️</p>
