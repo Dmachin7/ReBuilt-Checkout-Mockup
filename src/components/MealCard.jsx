@@ -1,35 +1,35 @@
 import { useState } from 'react';
 
 const CATEGORY_STYLES = {
-  LIFESTYLE:     { text: 'text-green-600',  label: 'Lifestyle' },
-  KETO:          { text: 'text-pink-600',   label: 'Keto' },
-  PERFORMANCE:   { text: 'text-blue-600',   label: 'Performance' },
-  'PLANT-BASED': { text: 'text-orange-500', label: 'Plant-Based' },
+  LIFESTYLE:     { pill: 'bg-green-100 text-green-700',   label: 'Lifestyle' },
+  KETO:          { pill: 'bg-pink-100 text-pink-700',     label: 'Keto' },
+  PERFORMANCE:   { pill: 'bg-blue-100 text-blue-700',     label: 'Performance' },
+  'PLANT-BASED': { pill: 'bg-orange-100 text-orange-700', label: 'Plant-Based' },
 };
 
 const BADGE_STYLES = {
-  'Best Seller': { cls: 'bg-gradient-to-r from-amber-400 to-orange-400 text-white', icon: '★' },
-  'Going Fast':  { cls: 'bg-gradient-to-r from-rose-500 to-red-500 text-white',    icon: '🔥' },
-  'New':         { cls: 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white', icon: '✦' },
+  'Best Seller': { cls: 'bg-amber-400 text-white',  icon: '★' },
+  'Going Fast':  { cls: 'bg-rose-500 text-white',   icon: '🔥' },
+  'New':         { cls: 'bg-emerald-500 text-white', icon: '✦' },
 };
 
-const DIETARY = {
-  'Gluten Free': { icon: '🌾', label: 'GF',    cls: 'bg-amber-50 text-amber-700 border border-amber-200' },
-  'Soy Free':    { icon: '🫘', label: 'SF',    cls: 'bg-violet-50 text-violet-700 border border-violet-200' },
-  'Dairy Free':  { icon: '🥛', label: 'DF',    cls: 'bg-sky-50 text-sky-700 border border-sky-200' },
-  'Vegan':       { icon: '🌿', label: 'Vegan', cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
+const DIETARY_LABELS = {
+  'Gluten Free': 'Gluten Free',
+  'Soy Free':    'Soy Free',
+  'Dairy Free':  'Dairy Free',
+  'Vegan':       'Vegan',
 };
 
 function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble }) {
   const stop = e => e.stopPropagation();
-  const dotCls = isDouble ? 'bg-brand-green text-white' : 'bg-brand-charcoal text-white';
+  const activeCls = isDouble ? 'bg-brand-green text-white' : 'bg-brand-charcoal text-white';
 
   if (qty === 0) {
     return (
       <button
         onClick={e => { stop(e); if (!atLimit) onAdd(); }}
         disabled={atLimit}
-        className={`w-full flex items-center justify-between px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-colors ${
+        className={`flex-1 flex items-center justify-between px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-colors ${
           atLimit
             ? 'border-gray-200 text-gray-300 bg-white cursor-not-allowed'
             : isDouble
@@ -49,50 +49,29 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
 
   return (
     <div
-      className="w-full flex items-center justify-between px-3 py-1.5 rounded-full border border-gray-200 bg-white"
+      className="flex-1 flex items-center justify-between px-3 py-1.5 rounded-full border border-gray-200 bg-white"
       onClick={stop}
     >
-      <span className="text-[10px] text-gray-400 font-medium leading-none">✓ {label}</span>
-      <div className="flex items-center gap-1.5 flex-shrink-0">
+      <span className="text-[10px] text-gray-400 font-medium">✓ {label}</span>
+      <div className="flex items-center gap-1.5">
         <button
           onClick={e => { stop(e); onRemove(); }}
-          className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${dotCls} hover:opacity-80`}
+          className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${activeCls} hover:opacity-80`}
         >
           −
         </button>
-        <span className="text-sm font-bold text-gray-700 min-w-[16px] text-center">
-          {qty}
-        </span>
+        <span className="text-xs font-bold text-gray-700 w-4 text-center">{qty}</span>
         <button
           onClick={e => { stop(e); if (!atLimit) onAdd(); }}
           disabled={atLimit}
-          className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-            atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${dotCls} hover:opacity-80`
+          className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+            atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${activeCls} hover:opacity-80`
           }`}
         >
           +
         </button>
       </div>
     </div>
-  );
-}
-
-function CircularImage({ src, alt, hasError, onError }) {
-  if (!src || hasError) {
-    return (
-      <div className="w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-full flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center shadow-lg ring-4 ring-white">
-        <span className="text-xl">📸</span>
-        <span className="text-[9px] text-gray-400 mt-0.5 text-center leading-tight px-1">Coming soon</span>
-      </div>
-    );
-  }
-  return (
-    <img
-      src={src}
-      alt={alt}
-      onError={onError}
-      className="w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-full flex-shrink-0 object-cover shadow-lg ring-4 ring-white"
-    />
   );
 }
 
@@ -108,93 +87,102 @@ export default function MealCard({
   onCardClick,
 }) {
   const [imgError, setImgError] = useState(false);
-  const cat = CATEGORY_STYLES[meal.category] || CATEGORY_STYLES.LIFESTYLE;
+  const cat   = CATEGORY_STYLES[meal.category] || CATEGORY_STYLES.LIFESTYLE;
   const badge = meal.badge ? BADGE_STYLES[meal.badge] : null;
 
-  const singleAtLimit = atLimit;
-  const doubleAtLimit = atLimit;
-
   return (
-    <div className="relative">
+    /* Outer wrapper — image is positioned relative to this */
+    <div className="relative pl-10">
+
+      {/* Circular food photo — bleeds left outside the card */}
+      <div className="absolute left-0 top-1/2 -translate-y-[55%] z-10 w-24 h-24 flex-shrink-0">
+        {meal.image && !imgError ? (
+          <img
+            src={meal.image}
+            alt={meal.name}
+            onError={() => setImgError(true)}
+            className="w-full h-full rounded-full object-cover shadow-xl"
+          />
+        ) : (
+          <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center shadow-xl">
+            <span className="text-2xl">📸</span>
+            <span className="text-[9px] text-gray-400 mt-0.5 text-center leading-tight px-2">Coming soon</span>
+          </div>
+        )}
+      </div>
+
+      {/* Card — starts to the right, leaving room for the image bleed */}
       <div
         onClick={onCardClick}
-        className="relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
+        className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
       >
-        {/* Badge — top-right corner of the card */}
+        {/* Badge — top-right */}
         {badge && (
-          <div className={`absolute top-2 right-2 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide shadow-md whitespace-nowrap ${badge.cls}`}>
+          <div className={`absolute top-2 right-2 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${badge.cls}`}>
             <span>{badge.icon}</span>
             {meal.badge}
           </div>
         )}
 
-        <div className="flex items-start gap-3 px-3 pt-3 pb-2">
-          <CircularImage
-            src={meal.image}
-            alt={meal.name}
-            hasError={imgError}
-            onError={() => setImgError(true)}
-          />
+        {/* Content area */}
+        <div className="pl-[60px] pr-3 pt-3 pb-2.5 flex-1 flex flex-col gap-1.5">
 
-          <div className="flex-1 min-w-0">
-            <p className={`text-[10px] font-bold tracking-widest uppercase ${cat.text} leading-tight mb-1`}>
-              {cat.label}
-            </p>
+          {/* Category pill */}
+          <span className={`self-start text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full ${cat.pill}`}>
+            {cat.label}
+          </span>
 
-            <h3 className="font-display text-[14px] sm:text-[15px] font-semibold text-gray-900 leading-snug mb-1">
-              {meal.name}
-            </h3>
+          {/* Title */}
+          <h3 className="font-display text-[15px] sm:text-[16px] font-bold text-gray-900 leading-tight">
+            {meal.name}
+          </h3>
 
-            <p className="text-gray-400 text-[11px] leading-snug line-clamp-1 mb-1.5">
-              {meal.description}
-            </p>
+          {/* Description */}
+          <p className="text-gray-400 text-[11px] leading-snug line-clamp-2">
+            {meal.description}
+          </p>
 
-            <div className="flex flex-wrap gap-1 mb-2.5">
-              {meal.dietary.map((d) => {
-                const info = DIETARY[d] || { icon: '✓', label: d, cls: 'bg-gray-100 text-gray-600 border border-gray-200' };
-                return (
-                  <span
-                    key={d}
-                    title={d}
-                    className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${info.cls}`}
-                  >
-                    <span className="text-[11px]">{info.icon}</span>
-                    {info.label}
-                  </span>
-                );
-              })}
-            </div>
+          {/* Dietary tags */}
+          <div className="flex flex-wrap gap-1">
+            {meal.dietary.map(d => (
+              <span
+                key={d}
+                className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-500 border border-gray-200"
+              >
+                {DIETARY_LABELS[d] ?? d}
+              </span>
+            ))}
+          </div>
 
-            {/* Add buttons */}
-            <div className="flex flex-col gap-1">
+          {/* Add buttons */}
+          <div className="flex gap-1.5 mt-auto pt-1">
+            <PortionBtn
+              label="Single"
+              qty={singleQty}
+              onAdd={() => onAddSingle(meal.id)}
+              onRemove={() => onRemoveSingle(meal.id)}
+              atLimit={atLimit}
+            />
+            {meal.doubleProtein && (
               <PortionBtn
-                label="Single"
-                qty={singleQty}
-                onAdd={() => onAddSingle(meal.id)}
-                onRemove={() => onRemoveSingle(meal.id)}
-                atLimit={singleAtLimit}
+                label="2× Protein"
+                extraPrice={meal.doubleProteinPrice}
+                qty={doubleQty}
+                onAdd={() => onAddDouble(meal.id)}
+                onRemove={() => onRemoveDouble(meal.id)}
+                atLimit={atLimit}
+                isDouble
               />
-              {meal.doubleProtein && (
-                <PortionBtn
-                  label="Double Protein"
-                  extraPrice={meal.doubleProteinPrice}
-                  qty={doubleQty}
-                  onAdd={() => onAddDouble(meal.id)}
-                  onRemove={() => onRemoveDouble(meal.id)}
-                  atLimit={doubleAtLimit}
-                  isDouble
-                />
-              )}
-            </div>
+            )}
           </div>
         </div>
 
         {/* Macro bar */}
-        <div className="bg-brand-charcoal px-4 py-2.5 flex items-center justify-center gap-5 mt-auto">
+        <div className="bg-brand-charcoal px-4 py-2.5 flex items-center justify-center gap-4">
           <MacroStat value={meal.protein} unit="g" label="Protein" />
-          <div className="w-px h-4 bg-gray-600" />
-          <MacroStat value={meal.calories} unit="" label="Cal" />
-          <div className="w-px h-4 bg-gray-600" />
+          <div className="w-px h-3.5 bg-gray-600" />
+          <MacroStat value={meal.calories} unit="" label="Calories" />
+          <div className="w-px h-3.5 bg-gray-600" />
           <MacroStat value={meal.carbs} unit="g" label="Carbs" />
         </div>
       </div>
@@ -204,9 +192,9 @@ export default function MealCard({
 
 function MacroStat({ value, unit, label }) {
   return (
-    <div className="flex items-baseline gap-0.5">
-      <span className="text-white text-xs sm:text-sm font-bold">{value}{unit}</span>
-      <span className="text-gray-500 text-[10px]">{label}</span>
+    <div className="flex items-baseline gap-1">
+      <span className="text-white text-xs font-bold">{value}{unit}</span>
+      <span className="text-gray-400 text-[10px]">{label}</span>
     </div>
   );
 }
