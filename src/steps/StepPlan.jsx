@@ -68,7 +68,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
               </div>
 
               {/* Details toggle */}
-              <div className={`px-3 pb-2 flex-1 ${isSelected ? 'bg-green-50' : 'bg-white'}`}>
+              <div className={`px-3 pb-2 ${isSelected ? 'bg-green-50' : 'bg-white'}`}>
                 <button
                   onClick={() => setExpandedPlan(isExpanded ? null : plan.id)}
                   className="text-[10px] text-brand-green font-semibold hover:underline"
