@@ -13,17 +13,17 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
   const [expandedPlan, setExpandedPlan] = useState(null);
 
   return (
-    <div className="flex-1 px-4 sm:px-6 py-8 max-w-3xl lg:max-w-5xl mx-auto w-full pb-28 sm:pb-10">
-      <div className="mb-6">
-        <h1 className="font-display text-3xl sm:text-4xl text-gray-900 mb-2">
+    <div className="flex-1 px-4 sm:px-6 py-4 sm:py-8 max-w-3xl lg:max-w-5xl mx-auto w-full pb-28 sm:pb-10">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="font-display text-xl sm:text-4xl text-gray-900 mb-1 sm:mb-2">
           Choose your meal preference
         </h1>
-        <p className="text-gray-500 text-sm">
+        <p className="text-gray-500 text-xs sm:text-sm">
           Sets your backup plan if you miss the Tuesday deadline, and helps us suggest meals you'll love.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
         {PLANS.map(plan => {
           const img = PLAN_IMAGES[plan.id];
           const isSelected = selectedPlan === plan.id;
@@ -40,7 +40,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
             >
               {/* Full-bleed hero image */}
               <div
-                className="relative w-full aspect-[4/3] overflow-hidden cursor-pointer"
+                className="relative w-full aspect-video sm:aspect-[4/3] overflow-hidden cursor-pointer"
                 onClick={() => setSelectedPlan(isSelected ? null : plan.id)}
               >
                 {img ? (
@@ -66,8 +66,8 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-gray-900 text-base leading-tight">{plan.name}</p>
-                    <p className="text-gray-500 text-xs mt-0.5 line-clamp-2">{plan.tagline}</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-base leading-tight">{plan.name}</p>
+                    <p className="text-gray-500 text-[10px] sm:text-xs mt-0.5 line-clamp-2 hidden sm:block">{plan.tagline}</p>
                   </div>
                   <div className="w-3 h-3 rounded-full flex-shrink-0 mt-0.5" style={{ background: plan.color }} />
                 </div>
