@@ -28,7 +28,7 @@ export default function StepMealMode({ selectedPlan, mealCount, onChefChosen, on
         >
           <div className="text-2xl sm:text-4xl mb-2 sm:mb-4">🎯</div>
           <h2 className="font-display text-sm sm:text-xl text-gray-900 mb-1 sm:mb-2 leading-snug">I'll choose my own</h2>
-          <p className="text-gray-500 text-xs leading-relaxed hidden sm:block">
+          <p className="text-gray-500 text-xs leading-relaxed">
             Browse the full menu and hand-pick exactly what you want. You control every slot.
           </p>
           <div className="mt-2 sm:mt-4 inline-flex items-center gap-1 text-brand-charcoal text-xs sm:text-sm font-semibold group-hover:gap-2 transition-all">
@@ -43,7 +43,7 @@ export default function StepMealMode({ selectedPlan, mealCount, onChefChosen, on
         >
           <div className="text-2xl sm:text-4xl mb-2 sm:mb-4">👨‍🍳</div>
           <h2 className="font-display text-sm sm:text-xl text-white mb-1 sm:mb-2 leading-snug">Chef picks for me</h2>
-          <p className="text-gray-400 text-xs leading-relaxed hidden sm:block">
+          <p className="text-gray-400 text-xs leading-relaxed">
             We'll pre-select {mealCount} meals
             {planLabel ? ` from the ${planLabel} menu` : ' from this week\'s top picks'}.
             Swap anything you don't love.
