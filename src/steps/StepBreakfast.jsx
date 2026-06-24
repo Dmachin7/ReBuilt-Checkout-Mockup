@@ -5,6 +5,8 @@ import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
 import { BREAKFAST_ITEMS } from '../data/meals';
 
+const BREAKFAST_IDS = new Set(BREAKFAST_ITEMS.map(m => m.id));
+
 const BREAKFAST_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const PRICING = {
@@ -31,8 +33,12 @@ export default function StepBreakfast({
   const [chefBannerDismissed, setChefBannerDismissed] = useState(false);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
 
+  const selectedBreakfastNames = BREAKFAST_ITEMS
+    .filter(m => (singles[m.id] || 0) + (doubles[m.id] || 0) > 0)
+    .map(m => m.name);
+
   function handleSkipClick() {
-    if (breakfastCount) {
+    if (breakfastCount || selectedBreakfastNames.length > 0) {
       setSkipConfirmOpen(true);
     } else {
       onSkipBreakfast();
@@ -177,9 +183,22 @@ export default function StepBreakfast({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full animate-reveal">
             <h3 className="font-display text-xl text-gray-900 mb-1">Skip breakfast?</h3>
-            <p className="text-gray-600 text-sm mb-4">
-              You selected {breakfastCount} breakfast plate{breakfastCount > 1 ? 's' : ''}. Are you sure you want to skip?
+            <p className="text-gray-600 text-sm mb-3">
+              You had selected:
             </p>
+            <ul className="mb-4 space-y-1">
+              {breakfastCount && (
+                <li className="text-sm text-gray-500 flex items-start gap-1.5">
+                  <span className="text-brand-green mt-0.5 flex-shrink-0">•</span>
+                  {breakfastCount} breakfast plate{breakfastCount > 1 ? 's' : ''}
+                </li>
+              )}
+              {selectedBreakfastNames.map(name => (
+                <li key={name} className="text-sm text-gray-500 flex items-start gap-1.5">
+                  <span className="text-brand-green mt-0.5 flex-shrink-0">•</span>{name}
+                </li>
+              ))}
+            </ul>
             <div className="flex flex-col gap-2.5">
               <button
                 onClick={() => { onSkipBreakfast(); setSkipConfirmOpen(false); }}

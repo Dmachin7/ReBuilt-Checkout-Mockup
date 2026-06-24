@@ -9,17 +9,9 @@ const MAJOR_STEPS = [
   { id: 6, label: 'Checkout',   short: 'Checkout', route: 'checkout'   },
 ];
 
-const CONNECTOR_SUBSTEPS = {
-  'mealCount-entrees': [
-    { route: 'plan',     label: 'Plan' },
-    { route: 'mealMode', label: 'Mode' },
-  ],
-};
-
 export default function ProgressBar({ currentRoute, unlockedUntil = 'mealCount', onNavigate }) {
   const currentIdx  = FULL_STEPS.indexOf(currentRoute);
   const unlockedIdx = FULL_STEPS.indexOf(unlockedUntil);
-  // Allow navigating back to any step already visited, regardless of unlock gate
   const maxUnlocked = Math.max(unlockedIdx, currentIdx);
 
   const prevRoute = currentIdx > 0 ? FULL_STEPS[currentIdx - 1] : null;
@@ -50,7 +42,7 @@ export default function ProgressBar({ currentRoute, unlockedUntil = 'mealCount',
         <div className="flex-1" />
       </div>
 
-      {/* Steps row — inner min-w-max+mx-auto fixes justify-center clipping on overflow */}
+      {/* Steps row */}
       <div className="overflow-x-auto py-2 sm:py-3" style={{ scrollbarWidth: 'none' }}>
         <div className="flex items-center justify-center min-w-max mx-auto px-3 sm:px-8">
           {MAJOR_STEPS.map((step, i) => {
@@ -58,42 +50,38 @@ export default function ProgressBar({ currentRoute, unlockedUntil = 'mealCount',
             const active   = isActive(step.route);
             const locked   = isLocked(step.route);
 
-            const prevMajor = MAJOR_STEPS[i - 1];
-            const subSteps  = prevMajor ? (CONNECTOR_SUBSTEPS[`${prevMajor.route}-${step.route}`] || []) : null;
+            // Connector between this step and the previous major step
+            let connector = null;
+            if (i > 0) {
+              const prevMajor = MAJOR_STEPS[i - 1];
+              const segStart  = FULL_STEPS.indexOf(prevMajor.route);
+              const segEnd    = FULL_STEPS.indexOf(step.route);
+              const hasGap    = segEnd - segStart > 1;
+
+              if (hasGap) {
+                // Fill bar — grows as user advances through the sub-steps
+                const total    = segEnd - segStart;
+                const progress = Math.min(Math.max(currentIdx - segStart, 0), total);
+                const fillPct  = Math.round((progress / total) * 100);
+                connector = (
+                  <div className="relative mx-1 sm:mx-2 flex-shrink-0 h-1.5 w-12 sm:w-20 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-brand-green rounded-full transition-all duration-500"
+                      style={{ width: `${fillPct}%` }}
+                    />
+                  </div>
+                );
+              } else {
+                // Plain line for adjacent major steps
+                connector = (
+                  <div className={`w-3 sm:w-10 h-px mx-0.5 sm:mx-1 flex-shrink-0 ${complete ? 'bg-brand-green' : 'bg-gray-200'}`} />
+                );
+              }
+            }
 
             return (
               <div key={step.route} className="flex items-center flex-shrink-0">
-                {i > 0 && (
-                  subSteps && subSteps.length > 0 ? (
-                    <div className="flex items-center mx-0.5 sm:mx-1">
-                      {subSteps.map((sub) => {
-                        const subIdx      = FULL_STEPS.indexOf(sub.route);
-                        const subActive   = sub.route === currentRoute;
-                        const subComplete = subIdx < currentIdx;
-                        const subLocked   = subIdx > maxUnlocked;
-                        return (
-                          <div key={sub.route} className="flex items-center">
-                            <div className={`w-2.5 sm:w-5 h-px ${subComplete || subActive ? 'bg-brand-green' : 'bg-gray-200'}`} />
-                            <button
-                              onClick={() => !subLocked && onNavigate?.(sub.route)}
-                              disabled={subLocked}
-                              title={sub.label}
-                              className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full flex-shrink-0 transition-colors ${
-                                subLocked   ? 'bg-gray-200 cursor-not-allowed' :
-                                subActive   ? 'bg-brand-charcoal ring-1 ring-brand-charcoal ring-offset-1' :
-                                subComplete ? 'bg-brand-green cursor-pointer' :
-                                              'bg-gray-300 cursor-pointer'
-                              }`}
-                            />
-                          </div>
-                        );
-                      })}
-                      <div className={`w-2.5 sm:w-5 h-px ${isComplete(step.route) || isActive(step.route) ? 'bg-brand-green' : 'bg-gray-200'}`} />
-                    </div>
-                  ) : (
-                    <div className={`w-3 sm:w-10 h-px mx-0.5 sm:mx-1 flex-shrink-0 ${complete ? 'bg-brand-green' : 'bg-gray-200'}`} />
-                  )
-                )}
+                {connector}
 
                 <button
                   onClick={() => !locked && onNavigate?.(step.route)}

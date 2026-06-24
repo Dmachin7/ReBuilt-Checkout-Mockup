@@ -9,6 +9,7 @@ import StepSnacks from './steps/StepSnacks';
 import StepAllergies from './steps/StepAllergies';
 import StepCheckout from './steps/StepCheckout';
 import ConfirmationScreen from './steps/ConfirmationScreen';
+import ShopifyRedirectScreen from './steps/ShopifyRedirectScreen';
 import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS } from './data/meals';
 
 const ALL_ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2].map(m => m.id));
@@ -244,9 +245,13 @@ export default function App() {
       {step === 'allergies' && (
         <StepAllergies
           onViewSummary={() => go('checkout')}
-          onCheckout={() => go('checkout')}
+          onCheckout={() => go('shopifyRedirect')}
           onBack={() => go('snacks')}
         />
+      )}
+
+      {step === 'shopifyRedirect' && (
+        <ShopifyRedirectScreen onBack={() => go('allergies')} />
       )}
 
       {step === 'checkout' && (

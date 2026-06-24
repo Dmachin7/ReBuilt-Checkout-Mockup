@@ -30,7 +30,7 @@ export default function CartSidebar({ singles, doubles, mealCount, onClear }) {
   const total = subtotal + tax;
 
   return (
-    <div className="hidden lg:flex flex-col w-80 xl:w-96 flex-shrink-0">
+    <div className="hidden lg:flex flex-col w-96 xl:w-[28rem] flex-shrink-0">
       <div className="sticky top-32 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden pb-24">
         <div className="bg-brand-charcoal px-5 py-4">
           <div className="flex items-center justify-between">
@@ -52,7 +52,7 @@ export default function CartSidebar({ singles, doubles, mealCount, onClear }) {
           </div>
         </div>
 
-        <div className="divide-y divide-gray-50 max-h-80 overflow-y-auto">
+        <div className="divide-y divide-gray-50 max-h-[32rem] overflow-y-auto">
           {cartItems.length === 0 ? (
             <div className="px-5 py-8 text-center text-gray-400 text-sm">
               <div className="text-3xl mb-2">🛒</div>
@@ -60,15 +60,26 @@ export default function CartSidebar({ singles, doubles, mealCount, onClear }) {
             </div>
           ) : (
             cartItems.map((item, i) => (
-              <div key={`${item.meal.id}-${item.isDouble}-${i}`} className="px-4 py-3 flex items-start gap-3">
-                <span className="w-5 h-5 rounded-full bg-brand-green text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-                  {item.qty}
-                </span>
+              <div key={`${item.meal.id}-${item.isDouble}-${i}`} className="px-4 py-3 flex items-center gap-3">
+                {item.meal.image ? (
+                  <img
+                    src={item.meal.image}
+                    alt={item.meal.name}
+                    className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 text-xl">
+                    🍽️
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{item.meal.name}</p>
+                  <p className="text-sm font-medium text-gray-900 leading-snug">{item.meal.name}</p>
                   {item.isDouble && <p className="text-[11px] text-green-600">2× Protein</p>}
                 </div>
-                <span className="text-sm font-semibold text-gray-800">${item.price.toFixed(2)}</span>
+                <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+                  <span className="text-sm font-semibold text-gray-800">${item.price.toFixed(2)}</span>
+                  <span className="text-[11px] text-gray-400">qty {item.qty}</span>
+                </div>
               </div>
             ))
           )}
