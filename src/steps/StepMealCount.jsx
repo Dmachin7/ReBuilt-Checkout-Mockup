@@ -47,6 +47,8 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
                 } ${
                   isSelected
                     ? 'bg-brand-charcoal text-white border-brand-charcoal shadow-md'
+                    : isMostPopular
+                    ? 'bg-white text-gray-700 border-brand-green shadow-sm hover:shadow-md'
                     : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:shadow-sm'
                 }`}
               >
