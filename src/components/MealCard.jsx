@@ -128,7 +128,7 @@ export default function MealCard({
           </div>
         )}
 
-        <div className="flex items-start gap-2.5 px-3 pt-3 pb-2">
+        <div className="flex items-start gap-2.5 px-3 pt-3 pb-2 flex-1">
           <CircularImage
             src={meal.image}
             alt={meal.name}
