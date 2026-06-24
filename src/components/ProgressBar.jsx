@@ -23,23 +23,12 @@ export default function ProgressBar({ currentRoute, unlockedUntil = 'mealCount',
   return (
     <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
 
-      {/* Header: back button + logo */}
-      <div className="flex items-center px-3 sm:px-6 py-2 sm:py-3 border-b border-gray-100">
-        <div className="flex-1 flex items-center">
-          {prevRoute ? (
-            <button
-              onClick={() => onNavigate?.(prevRoute)}
-              className="inline-flex items-center gap-1.5 bg-brand-charcoal hover:bg-gray-800 active:bg-gray-700 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-colors select-none shadow-sm"
-            >
-              ← Back
-            </button>
-          ) : null}
-        </div>
+      {/* Header: logo only */}
+      <div className="flex items-center justify-center px-3 sm:px-6 py-2 sm:py-3 border-b border-gray-100">
         <div className="flex flex-col leading-none items-center">
           <span className="font-display text-lg sm:text-xl font-bold text-gray-900 tracking-tight">ReBuilt</span>
           <span className="text-[9px] sm:text-[10px] font-semibold tracking-[0.3em] uppercase text-gray-400">MEALS</span>
         </div>
-        <div className="flex-1" />
       </div>
 
       {/* Steps row */}

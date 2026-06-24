@@ -106,7 +106,7 @@ export default function MealCard({
   onRemoveDouble,
   atLimit,
   onCardClick,
-  singleLabel = 'Add',
+  singleLabel = 'Single',
 }) {
   const [imgError, setImgError] = useState(false);
   const cat = CATEGORY_STYLES[meal.category] || CATEGORY_STYLES.LIFESTYLE;
@@ -180,7 +180,7 @@ export default function MealCard({
           />
           {meal.doubleProtein && (
             <PortionBtn
-              label="2× Protein"
+              label="Double Protein"
               extraPrice={meal.doubleProteinPrice}
               qty={doubleQty}
               onAdd={() => onAddDouble(meal.id)}

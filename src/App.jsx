@@ -218,6 +218,7 @@ export default function App() {
           mealMode={mealMode}
           selectedPlan={selectedPlan}
           onNext={() => go('breakfast')}
+          onBack={() => go('mealMode')}
         />
       )}
 

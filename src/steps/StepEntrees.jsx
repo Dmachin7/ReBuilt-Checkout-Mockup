@@ -23,7 +23,7 @@ export default function StepEntrees({
   singles, doubles,
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
   entreeCount, mealCount, mealMode,
-  onNext, onClear, selectedPlan,
+  onNext, onBack, onClear, selectedPlan,
 }) {
   const [activeWeek, setActiveWeek] = useState('w1');
   const [activeCategory, setActiveCategory] = useState('ALL');
@@ -163,6 +163,8 @@ export default function StepEntrees({
         onRemoveSingle={onRemoveSingle}
         onAddDouble={onAddDouble}
         onRemoveDouble={onRemoveDouble}
+        onBack={onBack}
+        onBackLabel="Back"
       />
 
       {modalMeal && (
