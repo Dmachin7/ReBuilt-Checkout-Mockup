@@ -61,7 +61,7 @@ export default function StepBreakfast({
           <p className="text-gray-400 text-xs mb-4">Each delivered fresh with your weekly order.</p>
 
           <div className="flex flex-wrap gap-2 mb-3">
-            {BREAKFAST_COUNTS.map(n => {
+            {BREAKFAST_COUNTS.map((n, idx) => {
               const p = PRICING[n];
               const isSelected = breakfastCount === n;
               return (
@@ -72,7 +72,7 @@ export default function StepBreakfast({
                     isSelected
                       ? 'bg-brand-charcoal text-white border-brand-charcoal shadow-md'
                       : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:shadow-sm'
-                  }`}
+                  } ${idx >= 5 ? 'hidden sm:inline-block' : ''}`}
                 >
                   <p className="font-bold text-sm">{n}</p>
                   <p className={`text-[10px] mt-0.5 ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>

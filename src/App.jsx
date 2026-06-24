@@ -257,7 +257,7 @@ export default function App() {
         <StepCheckout
           {...sharedCartProps}
           onBack={() => go('allergies')}
-          onConfirm={handleConfirm}
+          onConfirm={() => go('shopifyRedirect')}
         />
       )}
     </div>
