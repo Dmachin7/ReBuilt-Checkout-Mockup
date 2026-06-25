@@ -53,7 +53,7 @@ function CartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, o
           )}
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-gray-900 leading-snug truncate">{item.meal.name}</p>
-            {item.isDouble && <p className="text-[10px] text-green-600">2× Protein</p>}
+            {item.isDouble && <p className="text-[10px] text-green-600">Double Protein</p>}
           </div>
           <QtyControl
             item={item}

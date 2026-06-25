@@ -121,8 +121,8 @@ export default function MealCard({
       >
         {/* Angled corner ribbon badge */}
         {badge && (
-          <div className="absolute top-0 right-0 overflow-hidden w-20 h-20 z-10 pointer-events-none">
-            <div className={`absolute -right-5 top-4 w-24 text-center py-0.5 text-[9px] font-bold tracking-wide shadow-sm transform rotate-45 whitespace-nowrap ${badge.cls}`}>
+          <div className="absolute top-0 right-0 overflow-hidden w-24 h-24 z-10 pointer-events-none">
+            <div className={`absolute -right-4 top-5 w-28 text-center py-1.5 text-[10px] font-bold tracking-wide shadow-md transform rotate-45 whitespace-nowrap ${badge.cls}`}>
               {meal.badge}
             </div>
           </div>
@@ -161,10 +161,9 @@ export default function MealCard({
               })}
             </div>
 
-            {/* Ingredients */}
+            {/* Main components */}
             <p className="text-gray-400 text-[10px] leading-snug">
-              <span className="font-semibold text-gray-500">Ingredients: </span>
-              {details.ingredients}
+              {details.mainIngredients || details.ingredients}
             </p>
           </div>
         </div>

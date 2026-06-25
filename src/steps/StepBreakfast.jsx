@@ -32,6 +32,14 @@ export default function StepBreakfast({
   const [modalMeal, setModalMeal] = useState(null);
   const [chefBannerDismissed, setChefBannerDismissed] = useState(false);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
+  const [countPromptOpen, setCountPromptOpen] = useState(false);
+
+  function guardCount(fn) {
+    return (id) => {
+      if (!breakfastCount) { setCountPromptOpen(true); return; }
+      fn(id);
+    };
+  }
 
   const selectedBreakfastNames = BREAKFAST_ITEMS
     .filter(m => (singles[m.id] || 0) + (doubles[m.id] || 0) > 0)
@@ -144,9 +152,9 @@ export default function StepBreakfast({
               meal={meal}
               singleQty={singles[meal.id] || 0}
               doubleQty={doubles[meal.id] || 0}
-              onAddSingle={onAddSingle}
+              onAddSingle={guardCount(onAddSingle)}
               onRemoveSingle={onRemoveSingle}
-              onAddDouble={onAddDouble}
+              onAddDouble={guardCount(onAddDouble)}
               onRemoveDouble={onRemoveDouble}
               atLimit={false}
               onCardClick={() => setModalMeal(meal)}
@@ -193,12 +201,31 @@ export default function StepBreakfast({
           onClose={() => setModalMeal(null)}
           singleQty={singles[modalMeal.id] || 0}
           doubleQty={doubles[modalMeal.id] || 0}
-          onAddSingle={onAddSingle}
+          onAddSingle={guardCount(onAddSingle)}
           onRemoveSingle={onRemoveSingle}
-          onAddDouble={onAddDouble}
+          onAddDouble={guardCount(onAddDouble)}
           onRemoveDouble={onRemoveDouble}
           atLimit={false}
         />
+      )}
+
+      {/* Plate count required prompt */}
+      {countPromptOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full animate-reveal">
+            <div className="text-3xl mb-3 text-center">🍳</div>
+            <h3 className="font-display text-xl text-gray-900 mb-2 text-center">Choose your plate count first</h3>
+            <p className="text-gray-500 text-sm text-center mb-5">
+              Select how many breakfast plates you'd like above, then pick your meals.
+            </p>
+            <button
+              onClick={() => setCountPromptOpen(false)}
+              className="w-full py-3 rounded-xl bg-brand-green text-white font-bold text-sm hover:bg-brand-green-dark transition-colors"
+            >
+              Got it — I'll choose a count
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Skip confirmation dialog */}

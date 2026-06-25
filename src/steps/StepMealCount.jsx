@@ -46,17 +46,17 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
                   isMostPopular ? 'pt-6' : ''
                 } ${
                   isSelected
-                    ? 'bg-brand-charcoal text-white border-brand-charcoal shadow-md'
+                    ? 'bg-brand-green text-white border-brand-green shadow-md'
                     : isMostPopular
                     ? 'bg-white text-gray-700 border-brand-green shadow-sm hover:shadow-md'
                     : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:shadow-sm'
                 }`}
               >
                 <p className="font-bold text-lg leading-tight">{n} meals</p>
-                <p className={`text-sm mt-1 leading-tight ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
+                <p className={`text-sm mt-1 leading-tight ${isSelected ? 'text-green-100' : 'text-gray-400'}`}>
                   ${p.perMeal}/meal
                 </p>
-                <p className={`text-xs leading-tight font-semibold mt-0.5 ${isSelected ? 'text-green-400' : 'text-gray-300'}`}>
+                <p className={`text-xs leading-tight font-semibold mt-0.5 ${isSelected ? 'text-white/70' : 'text-gray-300'}`}>
                   ${weekly}/wk
                 </p>
               </button>

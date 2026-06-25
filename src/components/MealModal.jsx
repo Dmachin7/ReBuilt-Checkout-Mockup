@@ -29,8 +29,7 @@ function QtyRow({ label, price, qty, onAdd, onRemove, atLimit }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-400">per meal</p>
-        <p className="text-sm font-bold text-gray-900">${price.toFixed(2)} · {label}</p>
+        <p className="text-sm font-bold text-gray-900">{label}</p>
       </div>
       {qty === 0 ? (
         <button
@@ -152,20 +151,13 @@ export default function MealModal({
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between"><span className="text-gray-500">Protein</span><span className="font-semibold">{meal.protein}g</span></div>
                     <div className="flex justify-between"><span className="text-gray-500">Calories</span><span className="font-semibold">{meal.calories}</span></div>
-                    <div className="flex justify-between"><span className="text-gray-500">Price</span><span className="font-semibold">${meal.basePrice.toFixed(2)}</span></div>
                   </div>
                 </div>
                 <div className="p-4 rounded-2xl border border-brand-green bg-green-50">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-bold text-gray-900 text-sm">2× Protein</p>
-                    <span className="text-[10px] font-semibold text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-full">
-                      +${meal.doubleProteinPrice?.toFixed(2)}
-                    </span>
-                  </div>
+                  <p className="font-bold text-gray-900 text-sm mb-2">Double Protein</p>
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between"><span className="text-gray-500">Protein</span><span className="font-semibold text-green-700">{doubleProteinVal}g ↑</span></div>
                     <div className="flex justify-between"><span className="text-gray-500">Calories</span><span className="font-semibold">{doubleCals}</span></div>
-                    <div className="flex justify-between"><span className="text-gray-500">Price</span><span className="font-semibold">${(meal.basePrice + meal.doubleProteinPrice).toFixed(2)}</span></div>
                   </div>
                 </div>
               </div>
@@ -205,7 +197,7 @@ export default function MealModal({
           />
           {meal.doubleProtein && (
             <QtyRow
-              label="2× Protein"
+              label="Double Protein"
               price={meal.basePrice + meal.doubleProteinPrice}
               qty={doubleQty}
               onAdd={() => onAddDouble(meal.id)}
