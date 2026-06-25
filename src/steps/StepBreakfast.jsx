@@ -67,7 +67,7 @@ export default function StepBreakfast({
               return (
                 <button
                   key={n}
-                  onClick={() => onSetBreakfastCount(n)}
+                  onClick={() => onSetBreakfastCount(breakfastCount === n ? null : n)}
                   className={`px-4 py-3 rounded-xl text-left border-2 transition-all min-w-[90px] ${
                     isSelected
                       ? 'bg-brand-charcoal text-white border-brand-charcoal shadow-md'

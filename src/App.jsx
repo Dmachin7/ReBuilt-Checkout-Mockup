@@ -125,7 +125,7 @@ export default function App() {
   function handleSetBreakfastCount(count) {
     setBreakfastCount(count);
     setBreakfastSkipped(false);
-    if (mealMode === 'chef') {
+    if (count && mealMode === 'chef') {
       const shuffled = [...BREAKFAST_ITEMS].sort(() => Math.random() - 0.5);
       const ids = [];
       for (let i = 0; i < count; i++) ids.push(shuffled[i % shuffled.length].id);
