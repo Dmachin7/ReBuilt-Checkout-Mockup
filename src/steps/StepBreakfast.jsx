@@ -153,6 +153,7 @@ export default function StepBreakfast({
         onRemoveDouble={onRemoveDouble}
         onBack={onBack}
         onBackLabel="Back to Entrées"
+        breakfastCount={breakfastCount}
       />
 
       <MobileCartBar

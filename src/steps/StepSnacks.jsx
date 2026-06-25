@@ -10,7 +10,7 @@ const SNACK_IDS = new Set(SNACK_ITEMS.map(m => m.id));
 export default function StepSnacks({
   singles, doubles,
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
-  onNext, onSkipSnacks, onBack, mealCount, onClear,
+  onNext, onSkipSnacks, onBack, mealCount, onClear, breakfastCount,
 }) {
   const [modalMeal, setModalMeal] = useState(null);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
@@ -85,6 +85,7 @@ export default function StepSnacks({
         onRemoveDouble={onRemoveDouble}
         onBack={onBack}
         onBackLabel="Back to Breakfast"
+        breakfastCount={breakfastCount}
       />
 
       <MobileCartBar

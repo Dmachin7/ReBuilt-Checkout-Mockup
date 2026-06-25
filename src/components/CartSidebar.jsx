@@ -71,7 +71,7 @@ function CartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, o
 export default function CartSidebar({
   singles, doubles, mealCount, onClear,
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
-  onBack, onBackLabel,
+  onBack, onBackLabel, breakfastCount,
 }) {
   const allItems = [];
 
@@ -92,7 +92,8 @@ export default function CartSidebar({
   const breakfastItems = allItems.filter(item => BREAKFAST_IDS.has(item.meal.id));
   const snackItems     = allItems.filter(item => SNACK_IDS.has(item.meal.id));
 
-  const entreeCount = entreeItems.reduce((sum, item) => sum + item.qty, 0);
+  const entreeCount    = entreeItems.reduce((sum, item) => sum + item.qty, 0);
+  const breakfastSelected = breakfastItems.reduce((sum, item) => sum + item.qty, 0);
   const subtotal = allItems.reduce((sum, item) => sum + item.price, 0);
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
@@ -104,20 +105,37 @@ export default function CartSidebar({
         <div className="bg-brand-charcoal px-5 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <h3 className="font-display text-white text-lg">Your Order</h3>
-            <div className="flex items-center gap-3">
-              {allItems.length > 0 && (
-                <button onClick={onClear} className="text-xs text-red-300 hover:text-red-200 transition-colors font-medium">
-                  Clear
-                </button>
-              )}
-              <span className="text-sm text-gray-300">{entreeCount} / {mealCount} entrées</span>
-            </div>
+            {allItems.length > 0 && (
+              <button onClick={onClear} className="text-xs text-red-300 hover:text-red-200 transition-colors font-medium">
+                Clear
+              </button>
+            )}
           </div>
-          <div className="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-brand-green rounded-full transition-all duration-300"
-              style={{ width: `${Math.min(100, (entreeCount / mealCount) * 100)}%` }}
-            />
+          <div className="mt-2 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-400">Entrées</span>
+              <span className="text-xs text-gray-300">{entreeCount} / {mealCount}</span>
+            </div>
+            <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-brand-green rounded-full transition-all duration-300"
+                style={{ width: `${Math.min(100, (entreeCount / mealCount) * 100)}%` }}
+              />
+            </div>
+            {breakfastCount > 0 && (
+              <>
+                <div className="flex items-center justify-between pt-0.5">
+                  <span className="text-xs text-gray-400">Breakfast</span>
+                  <span className="text-xs text-gray-300">{breakfastSelected} / {breakfastCount}</span>
+                </div>
+                <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-brand-green rounded-full transition-all duration-300"
+                    style={{ width: `${Math.min(100, (breakfastSelected / breakfastCount) * 100)}%` }}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
 

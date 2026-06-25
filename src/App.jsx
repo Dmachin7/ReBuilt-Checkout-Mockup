@@ -240,6 +240,7 @@ export default function App() {
           onNext={() => go('allergies')}
           onSkipSnacks={handleSkipSnacks}
           onBack={() => go('breakfast')}
+          breakfastCount={breakfastCount}
         />
       )}
 
