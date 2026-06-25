@@ -119,12 +119,10 @@ export default function MealCard({
         onClick={onCardClick}
         className="relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
       >
-        {/* Angled corner ribbon badge */}
+        {/* Angled corner ribbon badge — clipped cleanly by the card's own overflow-hidden */}
         {badge && (
-          <div className="absolute top-0 right-0 overflow-hidden w-24 h-24 z-10 pointer-events-none">
-            <div className={`absolute -right-4 top-5 w-28 text-center py-1.5 text-[10px] font-bold tracking-wide shadow-md transform rotate-45 whitespace-nowrap ${badge.cls}`}>
-              {meal.badge}
-            </div>
+          <div className={`absolute top-5 -right-10 w-36 text-center py-1.5 text-[10px] font-bold tracking-wide shadow-md transform rotate-45 whitespace-nowrap z-10 pointer-events-none ${badge.cls}`}>
+            {meal.badge}
           </div>
         )}
 

@@ -13,10 +13,14 @@ const MOCK_DISCOUNTS = {
 };
 
 export default function StepCheckout({ singles, doubles, onBack, onConfirm }) {
-  const [showItems, setShowItems] = useState(true);
+  const [openSections, setOpenSections] = useState({ entrees: false, breakfast: false, snacks: false });
   const [discountCode, setDiscountCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState(null);
   const [discountError, setDiscountError] = useState('');
+
+  function toggleSection(key) {
+    setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  }
 
   const cartItems = [];
   Object.entries(singles).forEach(([id, qty]) => {
@@ -58,32 +62,47 @@ export default function StepCheckout({ singles, doubles, onBack, onConfirm }) {
     onConfirm({ total });
   }
 
-  function ItemSection({ title, items }) {
+  function ItemSection({ title, items, sectionKey }) {
     if (items.length === 0) return null;
+    const totalQty = items.reduce((sum, i) => sum + i.qty, 0);
+    const isOpen = openSections[sectionKey];
     return (
-      <div>
-        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-5 py-2.5 bg-gray-50 border-b border-gray-100">
-          {title}
-        </p>
-        {items.map((item, i) => (
-          <div key={`${item.meal.id}-${item.isDouble}-${i}`} className="px-5 py-3.5 flex items-center gap-3 border-b border-gray-50">
-            {item.meal.image ? (
-              <img
-                src={item.meal.image}
-                alt={item.meal.name}
-                className="w-12 h-12 rounded-xl object-cover flex-shrink-0 shadow-sm"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-xl">📸</span>
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">{item.meal.name}</p>
-              <p className="text-xs text-gray-500">{item.isDouble ? 'Double Protein' : 'Single'} · qty {item.qty}</p>
-            </div>
+      <div className="border-b border-gray-100 last:border-0">
+        <button
+          onClick={() => toggleSection(sectionKey)}
+          className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+        >
+          <div className="text-left">
+            <p className="text-sm font-semibold text-gray-900">{title}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{totalQty} item{totalQty !== 1 ? 's' : ''} selected</p>
           </div>
-        ))}
+          <span className="text-xs text-brand-green font-semibold flex-shrink-0 ml-3">
+            {isOpen ? 'Hide ▲' : 'View selections ▼'}
+          </span>
+        </button>
+        {isOpen && (
+          <div className="border-t border-gray-50">
+            {items.map((item, i) => (
+              <div key={`${item.meal.id}-${item.isDouble}-${i}`} className="px-5 py-3 flex items-center gap-3 border-b border-gray-50 last:border-0">
+                {item.meal.image ? (
+                  <img
+                    src={item.meal.image}
+                    alt={item.meal.name}
+                    className="w-11 h-11 rounded-xl object-cover flex-shrink-0 shadow-sm"
+                  />
+                ) : (
+                  <div className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xl">📸</span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{item.meal.name}</p>
+                  <p className="text-xs text-gray-500">{item.isDouble ? 'Double Protein' : 'Single'} · qty {item.qty}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -118,32 +137,22 @@ export default function StepCheckout({ singles, doubles, onBack, onConfirm }) {
         </div>
       </div>
 
-      {/* Item list with collapse */}
+      {/* Item list with per-section collapse */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">
-        <div className="bg-brand-charcoal px-5 py-4 flex items-center justify-between">
+        <div className="bg-brand-charcoal px-5 py-4">
           <h3 className="font-display text-white text-lg">Your Meals</h3>
-          <button
-            onClick={() => setShowItems(!showItems)}
-            className="text-gray-400 hover:text-gray-200 text-xs font-semibold transition-colors"
-          >
-            {showItems ? 'Hide ▲' : 'Show Selected Entrées ▼'}
-          </button>
         </div>
 
-        {showItems && (
+        {cartItems.length === 0 ? (
+          <div className="px-5 py-10 text-center text-gray-400 text-sm">
+            <div className="text-4xl mb-2">🛒</div>
+            No items — go back and add some meals!
+          </div>
+        ) : (
           <>
-            {cartItems.length === 0 ? (
-              <div className="px-5 py-10 text-center text-gray-400 text-sm">
-                <div className="text-4xl mb-2">🛒</div>
-                No items — go back and add some meals!
-              </div>
-            ) : (
-              <>
-                <ItemSection title="Entrées" items={entreeItems} />
-                <ItemSection title="Breakfast" items={breakfastItems} />
-                <ItemSection title="Snacks" items={snackItems} />
-              </>
-            )}
+            <ItemSection title="Entrées"   items={entreeItems}    sectionKey="entrees" />
+            <ItemSection title="Breakfast" items={breakfastItems} sectionKey="breakfast" />
+            <ItemSection title="Snacks"    items={snackItems}     sectionKey="snacks" />
           </>
         )}
 

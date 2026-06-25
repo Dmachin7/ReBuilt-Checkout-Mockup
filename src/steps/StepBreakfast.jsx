@@ -50,6 +50,7 @@ export default function StepBreakfast({
   );
   const breakfastComplete = !breakfastCount || breakfastSelected >= breakfastCount;
   const breakfastRemaining = breakfastCount ? Math.max(0, breakfastCount - breakfastSelected) : 0;
+  const breakfastAtLimit = breakfastCount !== null && breakfastSelected >= breakfastCount;
 
   function handleSkipClick() {
     if (breakfastCount || selectedBreakfastNames.length > 0) {
@@ -156,7 +157,7 @@ export default function StepBreakfast({
               onRemoveSingle={onRemoveSingle}
               onAddDouble={guardCount(onAddDouble)}
               onRemoveDouble={onRemoveDouble}
-              atLimit={false}
+              atLimit={breakfastAtLimit && (singles[meal.id] || 0) === 0 && (doubles[meal.id] || 0) === 0}
               onCardClick={() => setModalMeal(meal)}
               singleLabel="Select"
             />
@@ -205,7 +206,7 @@ export default function StepBreakfast({
           onRemoveSingle={onRemoveSingle}
           onAddDouble={guardCount(onAddDouble)}
           onRemoveDouble={onRemoveDouble}
-          atLimit={false}
+          atLimit={breakfastAtLimit && (singles[modalMeal?.id] || 0) === 0 && (doubles[modalMeal?.id] || 0) === 0}
         />
       )}
 
