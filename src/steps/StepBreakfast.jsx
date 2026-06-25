@@ -37,6 +37,12 @@ export default function StepBreakfast({
     .filter(m => (singles[m.id] || 0) + (doubles[m.id] || 0) > 0)
     .map(m => m.name);
 
+  const breakfastSelected = BREAKFAST_ITEMS.reduce(
+    (sum, m) => sum + (singles[m.id] || 0) + (doubles[m.id] || 0), 0
+  );
+  const breakfastComplete = !breakfastCount || breakfastSelected >= breakfastCount;
+  const breakfastRemaining = breakfastCount ? Math.max(0, breakfastCount - breakfastSelected) : 0;
+
   function handleSkipClick() {
     if (breakfastCount || selectedBreakfastNames.length > 0) {
       setSkipConfirmOpen(true);
@@ -52,7 +58,15 @@ export default function StepBreakfast({
         {/* Header */}
         <div>
           <h2 className="font-display text-2xl sm:text-3xl text-gray-900 mb-1">Choose your breakfast</h2>
-          <p className="text-gray-500 text-sm">Completely optional — your entrées are already saved.</p>
+          {breakfastCount && !breakfastComplete ? (
+            <p className="text-sm text-amber-600 font-medium">
+              {breakfastRemaining} more breakfast item{breakfastRemaining !== 1 ? 's' : ''} needed
+            </p>
+          ) : breakfastCount && breakfastComplete ? (
+            <p className="text-sm text-brand-green font-semibold">All {breakfastCount} breakfast slots filled ✓</p>
+          ) : (
+            <p className="text-gray-500 text-sm">Completely optional — your entrées are already saved.</p>
+          )}
         </div>
 
         {/* Count picker */}
@@ -161,7 +175,8 @@ export default function StepBreakfast({
         doubles={doubles}
         mealCount={mealCount}
         onContinue={onNext}
-        continueLabel="Continue →"
+        continueLabel={breakfastComplete ? 'Continue →' : `${breakfastRemaining} more needed`}
+        continueDisabled={!breakfastComplete}
         visible
         onClear={onClear}
         onAddSingle={onAddSingle}
