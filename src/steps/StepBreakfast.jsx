@@ -80,9 +80,6 @@ export default function StepBreakfast({
 
         {/* Count picker */}
         <section className="bg-white rounded-2xl p-5 shadow-sm">
-          <h3 className="font-semibold text-gray-900 mb-1">How many breakfast plates?</h3>
-          <p className="text-gray-400 text-xs mb-4">Each delivered fresh with your weekly order.</p>
-
           <div className="flex flex-wrap gap-2 mb-3">
             {BREAKFAST_COUNTS.map((n, idx) => {
               const p = PRICING[n];
@@ -177,6 +174,7 @@ export default function StepBreakfast({
         onBack={onBack}
         onBackLabel="Back to Entrées"
         breakfastCount={breakfastCount}
+        lockEntrees
       />
 
       <MobileCartBar
@@ -194,6 +192,7 @@ export default function StepBreakfast({
         onRemoveDouble={onRemoveDouble}
         onBack={onBack}
         onBackLabel="Back to Entrées"
+        lockEntrees
       />
 
       {modalMeal && (

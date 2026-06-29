@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/meals';
+import { MEALS_WEEK1, MEALS_WEEK2, MEALS_WEEK3, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/meals';
 
-const ALL_MEALS = [...MEALS_WEEK1, ...MEALS_WEEK2, ...BREAKFAST_ITEMS, ...SNACK_ITEMS];
-const ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2].map(m => m.id));
+const ALL_MEALS = [...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3, ...BREAKFAST_ITEMS, ...SNACK_ITEMS];
+const ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3].map(m => m.id));
 const BREAKFAST_IDS = new Set(BREAKFAST_ITEMS.map(m => m.id));
 const SNACK_IDS = new Set(SNACK_ITEMS.map(m => m.id));
 
@@ -30,7 +30,7 @@ function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDo
   );
 }
 
-function MobileCartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble }) {
+function MobileCartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble, locked = false }) {
   if (items.length === 0) return null;
   return (
     <div>
@@ -54,13 +54,17 @@ function MobileCartSection({ title, items, onAddSingle, onRemoveSingle, onAddDou
             <p className="text-sm font-semibold text-gray-900 truncate">{item.meal.name}</p>
             <p className="text-xs text-gray-500">{item.isDouble ? 'Double Protein' : 'Single'}</p>
           </div>
-          <QtyControl
-            item={item}
-            onAddSingle={onAddSingle}
-            onRemoveSingle={onRemoveSingle}
-            onAddDouble={onAddDouble}
-            onRemoveDouble={onRemoveDouble}
-          />
+          {locked ? (
+            <span className="text-xs text-gray-400 font-semibold flex-shrink-0">×{item.qty}</span>
+          ) : (
+            <QtyControl
+              item={item}
+              onAddSingle={onAddSingle}
+              onRemoveSingle={onRemoveSingle}
+              onAddDouble={onAddDouble}
+              onRemoveDouble={onRemoveDouble}
+            />
+          )}
         </div>
       ))}
     </div>
@@ -70,7 +74,7 @@ function MobileCartSection({ title, items, onAddSingle, onRemoveSingle, onAddDou
 export default function MobileCartBar({
   singles, doubles, mealCount, onContinue, continueLabel, visible = true, onClear,
   continueDisabled = false, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
-  onBack, onBackLabel,
+  onBack, onBackLabel, lockEntrees = false,
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -140,6 +144,7 @@ export default function MobileCartBar({
                   onRemoveSingle={onRemoveSingle}
                   onAddDouble={onAddDouble}
                   onRemoveDouble={onRemoveDouble}
+                  locked={lockEntrees}
                 />
                 <MobileCartSection
                   title="Breakfast"

@@ -500,6 +500,14 @@ export const SNACK_ITEMS = [
 
 export const PLANS = [
   {
+    id: "chefs_choice",
+    name: "Chef's Choice",
+    tagline: "Surprise us!",
+    color: "#FF6F00",
+    description: "Trust our chefs to curate the week's best meals — a balanced mix of Lifestyle and Performance favorites. Great for adventurous eaters.",
+    highlights: ["Rotating weekly variety", "Chef-curated picks", "Lifestyle + Performance mix"],
+  },
+  {
     id: "lifestyle",
     name: "Lifestyle",
     tagline: "Balanced & satisfying",
@@ -522,14 +530,6 @@ export const PLANS = [
     color: "#F06292",
     description: "Very low-carb, high-fat meals designed to keep you in ketosis. Meat-forward with no grains or added sugars.",
     highlights: ["Under 10g carbs per meal", "High healthy fats", "No grains or sugars"],
-  },
-  {
-    id: "chefs_choice",
-    name: "Chef's Choice",
-    tagline: "Surprise us!",
-    color: "#FF6F00",
-    description: "Trust our chefs to curate the week's best meals — a rotating mix across all categories. Great for adventurous eaters.",
-    highlights: ["Rotating weekly variety", "Chef-curated picks", "Mix of all categories"],
   },
   {
     id: "plant_based",

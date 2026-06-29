@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { MEAL_DETAILS, DEFAULT_MEAL_DETAILS } from '../data/mealDetails';
 
 const CATEGORY_STYLES = {
   LIFESTYLE:     { text: 'text-green-600',  label: 'Lifestyle' },
@@ -21,16 +20,17 @@ const DIETARY = {
   'Vegan':       { icon: '🌿', label: 'Vegan', cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
 };
 
-function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble }) {
+function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble, stretch = true }) {
   const stop = e => e.stopPropagation();
   const dotCls = isDouble ? 'bg-brand-green text-white' : 'bg-brand-charcoal text-white';
+  const widthCls = stretch ? 'flex-1' : '';
 
   if (qty === 0) {
     return (
       <button
         onClick={e => { stop(e); if (!atLimit) onAdd(); }}
         disabled={atLimit}
-        className={`flex-1 flex items-center justify-between px-3 py-2 rounded-full border text-[11px] font-semibold transition-colors ${
+        className={`${widthCls} flex items-center justify-between px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-colors ${
           atLimit
             ? 'border-gray-200 text-gray-300 bg-white cursor-not-allowed'
             : isDouble
@@ -50,7 +50,7 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
 
   return (
     <div
-      className="flex-1 flex items-center justify-between px-3 py-2 rounded-full border border-gray-200 bg-white"
+      className={`${widthCls} flex items-center justify-between px-3 py-1.5 rounded-full border border-gray-200 bg-white`}
       onClick={stop}
     >
       <span className="text-[10px] text-gray-400 font-medium leading-none">✓ {label}</span>
@@ -78,24 +78,6 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
   );
 }
 
-function CircularImage({ src, alt, hasError, onError }) {
-  if (!src || hasError) {
-    return (
-      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center shadow-lg ring-2 ring-white">
-        <span className="text-lg">📸</span>
-      </div>
-    );
-  }
-  return (
-    <img
-      src={src}
-      alt={alt}
-      onError={onError}
-      className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex-shrink-0 object-cover shadow-lg ring-2 ring-white"
-    />
-  );
-}
-
 export default function MealCard({
   meal,
   singleQty = 0,
@@ -111,91 +93,97 @@ export default function MealCard({
   const [imgError, setImgError] = useState(false);
   const cat = CATEGORY_STYLES[meal.category] || CATEGORY_STYLES.LIFESTYLE;
   const badge = meal.badge ? BADGE_STYLES[meal.badge] : null;
-  const details = MEAL_DETAILS[meal.id] || DEFAULT_MEAL_DETAILS;
 
   return (
-    <div className="relative">
-      <div
-        onClick={onCardClick}
-        className="relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
-      >
-        {/* Angled corner ribbon badge — clipped cleanly by the card's own overflow-hidden */}
-        {badge && (
-          <div className={`absolute top-5 -right-10 w-36 text-center py-1.5 text-[10px] font-bold tracking-wide shadow-md transform rotate-45 whitespace-nowrap z-10 pointer-events-none ${badge.cls}`}>
-            {meal.badge}
+    <div
+      onClick={onCardClick}
+      className="relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
+    >
+      {/* Full-width top image */}
+      <div className="relative w-full overflow-hidden flex-shrink-0 bg-gray-100" style={{ aspectRatio: '16/9' }}>
+        {meal.image && !imgError ? (
+          <img
+            src={meal.image}
+            alt={meal.name}
+            onError={() => setImgError(true)}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+            <span className="text-3xl">📸</span>
           </div>
         )}
 
-        <div className="flex items-start gap-2.5 px-3 pt-3 pb-2 flex-1">
-          <CircularImage
-            src={meal.image}
-            alt={meal.name}
-            hasError={imgError}
-            onError={() => setImgError(true)}
-          />
-
-          <div className="flex-1 min-w-0">
-            <p className={`text-[10px] font-bold tracking-widest uppercase ${cat.text} leading-tight mb-0.5`}>
-              {cat.label}
-            </p>
-
-            <h3 className="font-display text-[13px] sm:text-[14px] font-semibold text-gray-900 leading-snug mb-1">
-              {meal.name}
-            </h3>
-
-            <div className="flex flex-wrap gap-1 mb-1.5">
-              {meal.dietary.map((d) => {
-                const info = DIETARY[d] || { icon: '✓', label: d, cls: 'bg-gray-100 text-gray-600 border border-gray-200' };
-                return (
-                  <span
-                    key={d}
-                    title={d}
-                    className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold ${info.cls}`}
-                  >
-                    <span className="text-[10px]">{info.icon}</span>
-                    {info.label}
-                  </span>
-                );
-              })}
-            </div>
-
-            {/* Main components */}
-            <p className="text-gray-400 text-[10px] leading-snug">
-              {details.mainIngredients || details.ingredients}
-            </p>
+        {/* Corner ribbon badge — clipped by this div's overflow-hidden */}
+        {badge && (
+          <div className={`absolute -top-3.5 -right-12 w-24 text-center py-2 text-[9px] font-bold tracking-wide shadow transform rotate-45 whitespace-nowrap z-10 pointer-events-none ${badge.cls}`}>
+            {meal.badge}
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* Full-width buttons directly above macro bar */}
-        <div className="flex gap-2 px-3 pb-2.5">
+      {/* Card body */}
+      <div className="px-3 pt-2.5 pb-1.5 flex-1 flex flex-col">
+        <p className={`text-[10px] font-bold tracking-widest uppercase ${cat.text} leading-tight mb-0.5`}>
+          {cat.label}
+        </p>
+
+        <h3 className="text-[13px] sm:text-[14px] font-semibold text-gray-900 leading-snug mb-1">
+          {meal.name}
+        </h3>
+
+        {/* Ingredients right under meal name */}
+        <p className="text-gray-400 text-[10px] leading-snug mb-1.5 line-clamp-2">
+          {meal.description}
+        </p>
+
+        <div className="flex flex-wrap gap-1 mt-auto">
+          {meal.dietary.map((d) => {
+            const info = DIETARY[d] || { icon: '✓', label: d, cls: 'bg-gray-100 text-gray-600 border border-gray-200' };
+            return (
+              <span
+                key={d}
+                title={d}
+                className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold ${info.cls}`}
+              >
+                <span className="text-[10px]">{info.icon}</span>
+                {info.label}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex gap-2 px-3 pb-2.5 pt-2">
+        <PortionBtn
+          label={singleLabel}
+          qty={singleQty}
+          onAdd={() => onAddSingle(meal.id)}
+          onRemove={() => onRemoveSingle(meal.id)}
+          atLimit={atLimit}
+          stretch={!!meal.doubleProtein}
+        />
+        {meal.doubleProtein && (
           <PortionBtn
-            label={singleLabel}
-            qty={singleQty}
-            onAdd={() => onAddSingle(meal.id)}
-            onRemove={() => onRemoveSingle(meal.id)}
+            label="Double Protein"
+            extraPrice={meal.doubleProteinPrice}
+            qty={doubleQty}
+            onAdd={() => onAddDouble(meal.id)}
+            onRemove={() => onRemoveDouble(meal.id)}
             atLimit={atLimit}
+            isDouble
           />
-          {meal.doubleProtein && (
-            <PortionBtn
-              label="Double Protein"
-              extraPrice={meal.doubleProteinPrice}
-              qty={doubleQty}
-              onAdd={() => onAddDouble(meal.id)}
-              onRemove={() => onRemoveDouble(meal.id)}
-              atLimit={atLimit}
-              isDouble
-            />
-          )}
-        </div>
+        )}
+      </div>
 
-        {/* Macro bar — ReBuilt green */}
-        <div className="bg-brand-green px-4 py-2 flex items-center justify-center gap-5 mt-auto">
-          <MacroStat value={meal.protein} unit="g" label="Protein" />
-          <div className="w-px h-4 bg-green-300" />
-          <MacroStat value={meal.calories} unit="" label="Cal" />
-          <div className="w-px h-4 bg-green-300" />
-          <MacroStat value={meal.carbs} unit="g" label="Carbs" />
-        </div>
+      {/* Macro bar */}
+      <div className="bg-brand-green px-4 py-2 flex items-center justify-center gap-5 mt-auto">
+        <MacroStat value={meal.protein} unit="g" label="Protein" />
+        <div className="w-px h-4 bg-green-300" />
+        <MacroStat value={meal.calories} unit="" label="Cal" />
+        <div className="w-px h-4 bg-green-300" />
+        <MacroStat value={meal.carbs} unit="g" label="Carbs" />
       </div>
     </div>
   );

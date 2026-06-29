@@ -14,7 +14,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
 
   return (
     <div className="flex-1 px-4 sm:px-6 py-3 sm:py-5 max-w-3xl lg:max-w-5xl mx-auto w-full">
-      <div className="mb-3 sm:mb-4">
+      <div className="mb-3 sm:mb-4 text-center">
         <h1 className="font-display text-xl sm:text-3xl text-gray-900 mb-1">
           Choose your meal preference
         </h1>
@@ -115,7 +115,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
         </div>
         <button
           onClick={onBack}
-          className="w-full text-gray-500 hover:text-gray-700 font-medium text-sm py-1.5 transition-colors text-center"
+          className="w-full bg-red-50 text-red-600 hover:bg-red-100 font-semibold text-sm py-3 rounded-xl border border-red-200 transition-colors text-center"
         >
           ← Back
         </button>

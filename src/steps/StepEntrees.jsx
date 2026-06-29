@@ -3,7 +3,9 @@ import MealCard from '../components/MealCard';
 import MealModal from '../components/MealModal';
 import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
-import { MEALS_WEEK1, MEALS_WEEK2, MEALS_WEEK3 } from '../data/meals';
+import { MEALS_WEEK1, MEALS_WEEK2, MEALS_WEEK3, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/meals';
+
+const ENTREE_ALL_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3].map(m => m.id));
 
 const WEEKS = [
   { id: 'w1', label: 'Week of Jun 29' },
@@ -24,19 +26,40 @@ export default function StepEntrees({
   singles, doubles,
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
   entreeCount, mealCount, mealMode,
-  onNext, onBack, onClear, selectedPlan,
+  onNext, onBack, onClear, selectedPlan, onClearEntrees,
 }) {
   const [activeWeek, setActiveWeek] = useState('w1');
   const [activeCategory, setActiveCategory] = useState('ALL');
   const [modalMeal, setModalMeal] = useState(null);
   const [chefBannerDismissed, setChefBannerDismissed] = useState(false);
+  const [pendingWeek, setPendingWeek] = useState(null);
 
   const weekMeals = activeWeek === 'w1' ? MEALS_WEEK1 : activeWeek === 'w2' ? MEALS_WEEK2 : MEALS_WEEK3;
+
+  function handleWeekTabClick(weekId) {
+    if (weekId === activeWeek) return;
+    const hasEntrees =
+      Object.entries(singles).some(([id, qty]) => qty > 0 && ENTREE_ALL_IDS.has(Number(id))) ||
+      Object.entries(doubles).some(([id, qty]) => qty > 0 && ENTREE_ALL_IDS.has(Number(id)));
+    if (hasEntrees) {
+      setPendingWeek(weekId);
+    } else {
+      setActiveWeek(weekId);
+    }
+  }
+
+  function confirmWeekChange() {
+    onClearEntrees?.();
+    setActiveWeek(pendingWeek);
+    setPendingWeek(null);
+  }
 
   function getMeals() {
     if (activeCategory === 'ALL') return weekMeals;
     if (activeCategory === 'CHEF') {
-      // Show Best Seller meals + any that match the selected plan category
+      if (selectedPlan === 'chefs_choice') {
+        return weekMeals.filter(m => m.category === 'PERFORMANCE' || m.category === 'LIFESTYLE');
+      }
       const planCategoryMap = { lifestyle: 'LIFESTYLE', performance: 'PERFORMANCE', keto: 'KETO', plant_based: 'PLANT-BASED' };
       const planCat = selectedPlan ? planCategoryMap[selectedPlan] : null;
       return weekMeals.filter(m => m.badge === 'Best Seller' || (planCat && m.category === planCat));
@@ -80,7 +103,7 @@ export default function StepEntrees({
           {WEEKS.map(w => (
             <button
               key={w.id}
-              onClick={() => setActiveWeek(w.id)}
+              onClick={() => handleWeekTabClick(w.id)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 activeWeek === w.id
                   ? 'bg-white text-gray-900 font-semibold shadow-sm'
@@ -180,6 +203,33 @@ export default function StepEntrees({
           onRemoveDouble={onRemoveDouble}
           atLimit={isAtLimit}
         />
+      )}
+
+      {/* Week-change confirmation */}
+      {pendingWeek && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full animate-reveal">
+            <div className="text-3xl mb-3 text-center">📅</div>
+            <h3 className="font-display text-xl text-gray-900 mb-2 text-center">Switch weeks?</h3>
+            <p className="text-gray-500 text-sm text-center mb-5">
+              Switching to <strong>{WEEKS.find(w => w.id === pendingWeek)?.label}</strong> will clear your current meal selections.
+            </p>
+            <div className="flex flex-col gap-2.5">
+              <button
+                onClick={confirmWeekChange}
+                className="w-full py-3 rounded-xl bg-brand-charcoal text-white font-bold text-sm hover:bg-gray-800 transition-colors"
+              >
+                Yes, switch weeks
+              </button>
+              <button
+                onClick={() => setPendingWeek(null)}
+                className="w-full py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-colors"
+              >
+                Keep current week
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

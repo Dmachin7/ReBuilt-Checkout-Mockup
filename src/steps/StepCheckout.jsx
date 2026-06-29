@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/meals';
+import { MEALS_WEEK1, MEALS_WEEK2, MEALS_WEEK3, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/meals';
 
-const ALL_MEALS = [...MEALS_WEEK1, ...MEALS_WEEK2, ...BREAKFAST_ITEMS, ...SNACK_ITEMS];
-const ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2].map(m => m.id));
+const ALL_MEALS = [...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3, ...BREAKFAST_ITEMS, ...SNACK_ITEMS];
+const ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3].map(m => m.id));
 const BREAKFAST_IDS = new Set(BREAKFAST_ITEMS.map(m => m.id));
 const SNACK_IDS = new Set(SNACK_ITEMS.map(m => m.id));
 
@@ -177,9 +177,6 @@ export default function StepCheckout({ singles, doubles, onBack, onConfirm }) {
           <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
             <span>Weekly total</span><span>${total.toFixed(2)}</span>
           </div>
-          <p className="text-[11px] text-gray-400 text-center pt-1">
-            Recurring weekly via Recharge · Cancel anytime
-          </p>
         </div>
       </div>
 
@@ -221,9 +218,6 @@ export default function StepCheckout({ singles, doubles, onBack, onConfirm }) {
             Continue to Checkout
             <span className="text-xl">→</span>
           </button>
-          <p className="text-center text-xs text-gray-400 mt-2">
-            128-bit SSL encrypted · Powered by Shopify
-          </p>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
-import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/meals';
+import { MEALS_WEEK1, MEALS_WEEK2, MEALS_WEEK3, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/meals';
 
-const ALL_MEALS = [...MEALS_WEEK1, ...MEALS_WEEK2, ...BREAKFAST_ITEMS, ...SNACK_ITEMS];
-const ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2].map(m => m.id));
+const ALL_MEALS = [...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3, ...BREAKFAST_ITEMS, ...SNACK_ITEMS];
+const ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3].map(m => m.id));
 const BREAKFAST_IDS = new Set(BREAKFAST_ITEMS.map(m => m.id));
 const SNACK_IDS = new Set(SNACK_ITEMS.map(m => m.id));
 
@@ -31,7 +31,7 @@ function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDo
   );
 }
 
-function CartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble }) {
+function CartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble, locked = false }) {
   if (items.length === 0) return null;
   return (
     <div>
@@ -55,13 +55,17 @@ function CartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, o
             <p className="text-xs font-medium text-gray-900 leading-snug truncate">{item.meal.name}</p>
             {item.isDouble && <p className="text-[10px] text-green-600">Double Protein</p>}
           </div>
-          <QtyControl
-            item={item}
-            onAddSingle={onAddSingle}
-            onRemoveSingle={onRemoveSingle}
-            onAddDouble={onAddDouble}
-            onRemoveDouble={onRemoveDouble}
-          />
+          {locked ? (
+            <span className="text-xs text-gray-400 font-semibold flex-shrink-0">×{item.qty}</span>
+          ) : (
+            <QtyControl
+              item={item}
+              onAddSingle={onAddSingle}
+              onRemoveSingle={onRemoveSingle}
+              onAddDouble={onAddDouble}
+              onRemoveDouble={onRemoveDouble}
+            />
+          )}
         </div>
       ))}
     </div>
@@ -71,7 +75,7 @@ function CartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, o
 export default function CartSidebar({
   singles, doubles, mealCount, onClear,
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
-  onBack, onBackLabel, breakfastCount,
+  onBack, onBackLabel, breakfastCount, lockEntrees = false,
 }) {
   const allItems = [];
 
@@ -155,6 +159,7 @@ export default function CartSidebar({
                 onRemoveSingle={onRemoveSingle}
                 onAddDouble={onAddDouble}
                 onRemoveDouble={onRemoveDouble}
+                locked={lockEntrees}
               />
               <CartSection
                 title="Breakfast"
@@ -193,7 +198,6 @@ export default function CartSidebar({
               <span>Total / week</span><span>${total.toFixed(2)}</span>
             </div>
           </div>
-          <p className="text-[11px] text-gray-400 mt-2 text-center">Recurring weekly · Cancel anytime</p>
 
           {onBack && (
             <button

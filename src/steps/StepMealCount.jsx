@@ -17,8 +17,8 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
   const visibleCounts = showMore ? MEAL_COUNTS : MEAL_COUNTS.slice(0, 4);
 
   return (
-    <div className="flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full pb-28 sm:pb-10">
-      <div className="mb-6">
+    <div className={`flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full sm:pb-10 ${showMore ? 'pb-40' : 'pb-28'}`}>
+      <div className="mb-6 text-center">
         <h1 className="font-display text-3xl sm:text-4xl text-gray-900 mb-2">
           How many meals per week?
         </h1>
@@ -34,8 +34,8 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
           return (
             <div key={n} className="relative">
               {isMostPopular && (
-                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
-                  <span className="bg-brand-green text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap shadow-sm">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+                  <span className="bg-brand-green text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap shadow">
                     ★ Most Popular
                   </span>
                 </div>
@@ -48,7 +48,7 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
                   isSelected
                     ? 'bg-brand-green text-white border-brand-green shadow-md'
                     : isMostPopular
-                    ? 'bg-white text-gray-700 border-brand-green shadow-sm hover:shadow-md'
+                    ? 'bg-white text-gray-700 border-gray-200 shadow-sm hover:shadow-md'
                     : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:shadow-sm'
                 }`}
               >

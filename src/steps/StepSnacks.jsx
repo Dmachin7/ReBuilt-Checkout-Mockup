@@ -86,6 +86,7 @@ export default function StepSnacks({
         onBack={onBack}
         onBackLabel="Back to Breakfast"
         breakfastCount={breakfastCount}
+        lockEntrees
       />
 
       <MobileCartBar
@@ -102,6 +103,7 @@ export default function StepSnacks({
         onRemoveDouble={onRemoveDouble}
         onBack={onBack}
         onBackLabel="Back to Breakfast"
+        lockEntrees
       />
 
       {modalMeal && (

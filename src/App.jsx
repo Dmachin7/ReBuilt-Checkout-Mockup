@@ -56,6 +56,12 @@ function cartReducer(state, action) {
       action.ids.forEach(id => { delete s[id]; delete d[id]; });
       return { singles: s, doubles: d };
     }
+    case 'CLEAR_ENTREES': {
+      const s = { ...state.singles };
+      const d = { ...state.doubles };
+      action.ids.forEach(id => { delete s[id]; delete d[id]; });
+      return { singles: s, doubles: d };
+    }
     case 'RESET':
       return { singles: {}, doubles: {} };
     default:
@@ -104,16 +110,32 @@ export default function App() {
   function handleClearCart()      { dispatch({ type: 'RESET' }); }
 
   function handleChefChosen() {
-    const planCategoryMap = { lifestyle: 'LIFESTYLE', performance: 'PERFORMANCE', keto: 'KETO', plant_based: 'PLANT-BASED' };
-    const category = planCategoryMap[selectedPlan] || null;
-    const pool = category ? MEALS_WEEK1.filter(m => m.category === category) : MEALS_WEEK1;
-    const supplement = category ? MEALS_WEEK1.filter(m => m.category !== category) : [];
-    const ordered = [...pool, ...supplement];
+    let ordered;
+    if (selectedPlan === 'chefs_choice') {
+      const life = MEALS_WEEK1.filter(m => m.category === 'LIFESTYLE');
+      const perf = MEALS_WEEK1.filter(m => m.category === 'PERFORMANCE');
+      ordered = [];
+      const maxLen = Math.max(life.length, perf.length);
+      for (let i = 0; i < maxLen; i++) {
+        if (i < life.length) ordered.push(life[i]);
+        if (i < perf.length) ordered.push(perf[i]);
+      }
+    } else {
+      const planCategoryMap = { lifestyle: 'LIFESTYLE', performance: 'PERFORMANCE', keto: 'KETO', plant_based: 'PLANT-BASED' };
+      const category = planCategoryMap[selectedPlan] || null;
+      const pool = category ? MEALS_WEEK1.filter(m => m.category === category) : MEALS_WEEK1;
+      const supplement = category ? MEALS_WEEK1.filter(m => m.category !== category) : [];
+      ordered = [...pool, ...supplement];
+    }
     const ids = [];
     for (let i = 0; i < mealCount; i++) ids.push(ordered[i % ordered.length].id);
     dispatch({ type: 'SET_BULK_SINGLES', ids });
     setMealMode('chef');
     go('entrees');
+  }
+
+  function handleClearEntrees() {
+    dispatch({ type: 'CLEAR_ENTREES', ids: [...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3].map(m => m.id) });
   }
 
   function handleOwnMeals() {
@@ -223,6 +245,7 @@ export default function App() {
           selectedPlan={selectedPlan}
           onNext={() => go('breakfast')}
           onBack={() => go('mealMode')}
+          onClearEntrees={handleClearEntrees}
         />
       )}
 
