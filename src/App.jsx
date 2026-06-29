@@ -125,11 +125,15 @@ export default function App() {
   function handleSetBreakfastCount(count) {
     setBreakfastCount(count);
     setBreakfastSkipped(false);
-    if (count && mealMode === 'chef') {
-      const shuffled = [...BREAKFAST_ITEMS].sort(() => Math.random() - 0.5);
-      const ids = [];
-      for (let i = 0; i < count; i++) ids.push(shuffled[i % shuffled.length].id);
-      dispatch({ type: 'SET_BULK_BREAKFAST', ids });
+    if (mealMode === 'chef') {
+      if (count) {
+        const shuffled = [...BREAKFAST_ITEMS].sort(() => Math.random() - 0.5);
+        const ids = [];
+        for (let i = 0; i < count; i++) ids.push(shuffled[i % shuffled.length].id);
+        dispatch({ type: 'SET_BULK_BREAKFAST', ids });
+      } else {
+        dispatch({ type: 'SET_BULK_BREAKFAST', ids: [] });
+      }
     }
   }
 
