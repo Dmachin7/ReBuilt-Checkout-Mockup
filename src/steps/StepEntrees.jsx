@@ -3,11 +3,12 @@ import MealCard from '../components/MealCard';
 import MealModal from '../components/MealModal';
 import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
-import { MEALS_WEEK1, MEALS_WEEK2 } from '../data/meals';
+import { MEALS_WEEK1, MEALS_WEEK2, MEALS_WEEK3 } from '../data/meals';
 
 const WEEKS = [
-  { id: 'w1', label: 'Week of Jun 15' },
-  { id: 'w2', label: 'Week of Jun 22' },
+  { id: 'w1', label: 'Week of Jun 29' },
+  { id: 'w2', label: 'Week of Jul 6' },
+  { id: 'w3', label: 'Week of Jul 13' },
 ];
 
 const CATEGORIES = [
@@ -30,7 +31,7 @@ export default function StepEntrees({
   const [modalMeal, setModalMeal] = useState(null);
   const [chefBannerDismissed, setChefBannerDismissed] = useState(false);
 
-  const weekMeals = activeWeek === 'w1' ? MEALS_WEEK1 : MEALS_WEEK2;
+  const weekMeals = activeWeek === 'w1' ? MEALS_WEEK1 : activeWeek === 'w2' ? MEALS_WEEK2 : MEALS_WEEK3;
 
   function getMeals() {
     if (activeCategory === 'ALL') return weekMeals;

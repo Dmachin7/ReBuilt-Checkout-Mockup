@@ -10,9 +10,9 @@ import StepAllergies from './steps/StepAllergies';
 import StepCheckout from './steps/StepCheckout';
 import ConfirmationScreen from './steps/ConfirmationScreen';
 import ShopifyRedirectScreen from './steps/ShopifyRedirectScreen';
-import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS } from './data/meals';
+import { MEALS_WEEK1, MEALS_WEEK2, MEALS_WEEK3, BREAKFAST_ITEMS, SNACK_ITEMS } from './data/meals';
 
-const ALL_ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2].map(m => m.id));
+const ALL_ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3].map(m => m.id));
 const ALL_SNACK_IDS = SNACK_ITEMS.map(m => m.id);
 
 function cartReducer(state, action) {
