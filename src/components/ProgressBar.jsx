@@ -25,7 +25,7 @@ export default function ProgressBar({ currentRoute, unlockedUntil = 'mealCount',
 
       {/* Header: logo only */}
       <div className="flex items-center justify-center px-3 sm:px-6 py-2 sm:py-3 border-b border-gray-100">
-        <img src="/logo.png" alt="ReBuilt Meals" className="h-12 sm:h-16 object-contain" />
+        <img src="/logo.png" alt="ReBuilt Meals" className="h-14 sm:h-20 object-contain" />
       </div>
 
       {/* Steps row */}

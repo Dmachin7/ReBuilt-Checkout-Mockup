@@ -243,8 +243,8 @@ export default function MobileCartBar({
       )}
 
       {/* Floating pill bar — always visible */}
-      <div className="fixed bottom-4 z-40 left-4 right-4 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[520px]">
-        <div className="bg-brand-charcoal rounded-2xl shadow-2xl flex items-center gap-2 px-3 py-2.5">
+      <div className="fixed bottom-4 z-40 left-4 right-4 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:w-[640px]">
+        <div className="bg-brand-charcoal rounded-2xl shadow-[0_10px_40px_-5px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex items-center gap-3 px-3 py-2.5">
           {onBack && (
             <button
               onClick={onBack}
@@ -255,7 +255,7 @@ export default function MobileCartBar({
           )}
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-2 flex-1 min-w-0"
+            className="flex items-center justify-center gap-2 flex-1 min-w-0"
           >
             <div className="relative flex-shrink-0">
               <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-base">

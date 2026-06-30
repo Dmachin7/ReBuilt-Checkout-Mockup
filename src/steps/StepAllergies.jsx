@@ -30,7 +30,7 @@ export default function StepAllergies({ onViewSummary, onCheckout, onBack }) {
   const noAllergies = selected.has('none');
 
   return (
-    <div className="px-4 sm:px-6 py-6 max-w-2xl lg:max-w-3xl mx-auto w-full pb-64 sm:pb-16">
+    <div className={`px-4 sm:px-6 py-6 max-w-2xl lg:max-w-3xl mx-auto w-full ${showCustom ? 'pb-96' : 'pb-64'} sm:pb-16`}>
 
       <div className="mb-5">
         <h2 className="font-display text-2xl sm:text-3xl text-gray-900 mb-1">Any dietary restrictions?</h2>

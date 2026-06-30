@@ -193,7 +193,7 @@ export default function MealModal({
             qty={singleQty}
             onAdd={() => onAddSingle(meal.id)}
             onRemove={() => onRemoveSingle(meal.id)}
-            atLimit={atLimit && singleQty === 0}
+            atLimit={atLimit}
           />
           {meal.doubleProtein && (
             <QtyRow
@@ -202,7 +202,7 @@ export default function MealModal({
               qty={doubleQty}
               onAdd={() => onAddDouble(meal.id)}
               onRemove={() => onRemoveDouble(meal.id)}
-              atLimit={atLimit && doubleQty === 0}
+              atLimit={atLimit}
             />
           )}
         </div>

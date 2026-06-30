@@ -143,7 +143,7 @@ export default function StepBreakfast({
         )}
 
         {/* Breakfast grid */}
-        <div className="mt-16 sm:mt-24 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-8 sm:gap-y-10">
+        <div className="mt-20 sm:mt-28 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 sm:gap-y-12">
           {BREAKFAST_ITEMS.map(meal => (
             <MealCard
               key={meal.id}
@@ -154,7 +154,7 @@ export default function StepBreakfast({
               onRemoveSingle={onRemoveSingle}
               onAddDouble={guardCount(onAddDouble)}
               onRemoveDouble={onRemoveDouble}
-              atLimit={breakfastAtLimit && (singles[meal.id] || 0) === 0 && (doubles[meal.id] || 0) === 0}
+              atLimit={breakfastAtLimit}
               onCardClick={() => setModalMeal(meal)}
               singleLabel="Select"
             />
@@ -205,7 +205,7 @@ export default function StepBreakfast({
           onRemoveSingle={onRemoveSingle}
           onAddDouble={guardCount(onAddDouble)}
           onRemoveDouble={onRemoveDouble}
-          atLimit={breakfastAtLimit && (singles[modalMeal?.id] || 0) === 0 && (doubles[modalMeal?.id] || 0) === 0}
+          atLimit={breakfastAtLimit}
         />
       )}
 
