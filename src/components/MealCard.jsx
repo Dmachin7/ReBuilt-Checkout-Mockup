@@ -95,95 +95,92 @@ export default function MealCard({
   const badge = meal.badge ? BADGE_STYLES[meal.badge] : null;
 
   return (
-    <div
-      onClick={onCardClick}
-      className="relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
-    >
-      {/* Plate image — square crop, plate fills the frame edge to edge */}
-      <div className="relative w-full aspect-square bg-white flex-shrink-0">
+    <div onClick={onCardClick} className="relative h-full cursor-pointer">
+      {/* Plate/photo — circular, bleeds off the left edge of the card */}
+      <div className="absolute left-0 top-3 w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden shadow-lg ring-4 ring-white bg-white z-10">
         {meal.image && !imgError ? (
           <img
             src={meal.image}
             alt={meal.name}
             onError={() => setImgError(true)}
-            className="w-full h-full object-cover scale-[1.06]"
+            className="w-full h-full object-cover scale-105"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-            <span className="text-3xl">📸</span>
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+            <span className="text-xl">📸</span>
           </div>
         )}
+      </div>
 
-        {/* Badge pill — sits over the image, never clipped */}
+      {/* Card — shifted right so half the plate hangs off its left edge */}
+      <div className="relative ml-10 sm:ml-12 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full">
         {badge && (
-          <span className={`absolute top-2 right-2 z-10 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wide shadow-md whitespace-nowrap ${badge.cls}`}>
+          <span className={`absolute top-2 right-2 z-20 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wide shadow-md whitespace-nowrap ${badge.cls}`}>
             {meal.badge}
           </span>
         )}
-      </div>
 
-      {/* Card body */}
-      <div className="px-3 pt-2.5 pb-1.5 flex-1 flex flex-col">
-        <p className={`text-[10px] font-bold tracking-widest uppercase ${cat.text} leading-tight mb-0.5`}>
-          {cat.label}
-        </p>
+        <div className="pl-12 sm:pl-14 pr-8 pt-3 flex-1 flex flex-col">
+          <p className={`text-[10px] font-bold tracking-widest uppercase ${cat.text} leading-tight mb-0.5`}>
+            {cat.label}
+          </p>
 
-        <h3 className="text-[13px] sm:text-[14px] font-semibold text-gray-900 leading-snug mb-1">
-          {meal.name}
-        </h3>
+          <h3 className="text-[13px] sm:text-[14px] font-semibold text-gray-900 leading-snug mb-1">
+            {meal.name}
+          </h3>
 
-        {/* Ingredients right under meal name */}
-        <p className="text-gray-400 text-[10px] leading-snug mb-1.5 line-clamp-2">
-          {meal.description}
-        </p>
+          <p className="text-gray-400 text-[10px] leading-snug line-clamp-2">
+            {meal.description}
+          </p>
 
-        <div className="flex flex-wrap gap-1 mt-auto">
-          {meal.dietary.map((d) => {
-            const info = DIETARY[d] || { icon: '✓', label: d, cls: 'bg-gray-100 text-gray-600 border border-gray-200' };
-            return (
-              <span
-                key={d}
-                title={d}
-                className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold ${info.cls}`}
-              >
-                <span className="text-[10px]">{info.icon}</span>
-                {info.label}
-              </span>
-            );
-          })}
+          <div className="flex flex-wrap gap-1 mt-auto pt-1.5">
+            {meal.dietary.map((d) => {
+              const info = DIETARY[d] || { icon: '✓', label: d, cls: 'bg-gray-100 text-gray-600 border border-gray-200' };
+              return (
+                <span
+                  key={d}
+                  title={d}
+                  className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold ${info.cls}`}
+                >
+                  <span className="text-[10px]">{info.icon}</span>
+                  {info.label}
+                </span>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* Action buttons */}
-      <div className={`flex gap-2 px-3 pb-2 pt-1.5 ${!meal.doubleProtein ? 'justify-end' : ''}`}>
-        <PortionBtn
-          label={singleLabel}
-          qty={singleQty}
-          onAdd={() => onAddSingle(meal.id)}
-          onRemove={() => onRemoveSingle(meal.id)}
-          atLimit={atLimit}
-          stretch={!!meal.doubleProtein}
-        />
-        {meal.doubleProtein && (
+        {/* Action buttons */}
+        <div className={`flex gap-2 px-3 pb-2 pt-1.5 ${!meal.doubleProtein ? 'justify-end' : ''}`}>
           <PortionBtn
-            label="Double Protein"
-            extraPrice={meal.doubleProteinPrice}
-            qty={doubleQty}
-            onAdd={() => onAddDouble(meal.id)}
-            onRemove={() => onRemoveDouble(meal.id)}
+            label={singleLabel}
+            qty={singleQty}
+            onAdd={() => onAddSingle(meal.id)}
+            onRemove={() => onRemoveSingle(meal.id)}
             atLimit={atLimit}
-            isDouble
+            stretch={!!meal.doubleProtein}
           />
-        )}
-      </div>
+          {meal.doubleProtein && (
+            <PortionBtn
+              label="Double Protein"
+              extraPrice={meal.doubleProteinPrice}
+              qty={doubleQty}
+              onAdd={() => onAddDouble(meal.id)}
+              onRemove={() => onRemoveDouble(meal.id)}
+              atLimit={atLimit}
+              isDouble
+            />
+          )}
+        </div>
 
-      {/* Macro bar */}
-      <div className="bg-brand-green px-4 py-1.5 flex items-center justify-center gap-5 mt-auto">
-        <MacroStat value={meal.protein} unit="g" label="Protein" />
-        <div className="w-px h-4 bg-green-300" />
-        <MacroStat value={meal.calories} unit="" label="Cal" />
-        <div className="w-px h-4 bg-green-300" />
-        <MacroStat value={meal.carbs} unit="g" label="Carbs" />
+        {/* Macro bar */}
+        <div className="bg-brand-green px-4 py-1.5 flex items-center justify-center gap-5 mt-auto">
+          <MacroStat value={meal.protein} unit="g" label="Protein" />
+          <div className="w-px h-4 bg-green-300" />
+          <MacroStat value={meal.calories} unit="" label="Cal" />
+          <div className="w-px h-4 bg-green-300" />
+          <MacroStat value={meal.carbs} unit="g" label="Carbs" />
+        </div>
       </div>
     </div>
   );

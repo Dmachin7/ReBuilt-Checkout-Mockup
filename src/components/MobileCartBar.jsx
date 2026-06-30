@@ -248,7 +248,7 @@ export default function MobileCartBar({
           {onBack && (
             <button
               onClick={onBack}
-              className="flex-shrink-0 font-bold text-sm px-3 py-2.5 rounded-xl whitespace-nowrap transition-colors bg-gray-700 hover:bg-gray-600 text-white"
+              className="flex-shrink-0 font-bold text-sm px-3 py-2.5 rounded-xl whitespace-nowrap transition-colors bg-red-600 hover:bg-red-700 text-white"
             >
               ← Back
             </button>
