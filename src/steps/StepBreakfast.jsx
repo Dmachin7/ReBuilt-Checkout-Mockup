@@ -61,7 +61,7 @@ export default function StepBreakfast({
   }
 
   return (
-    <div className="flex gap-6 px-4 sm:px-6 py-6 max-w-7xl mx-auto w-full">
+    <div className="flex gap-6 px-4 sm:px-6 lg:px-10 py-6 max-w-[1800px] mx-auto w-full">
       <div className="flex-1 min-w-0 pb-32 space-y-6">
 
         {/* Header */}
