@@ -26,7 +26,7 @@ export default function StepEntrees({
   singles, doubles,
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
   entreeCount, mealCount, mealMode,
-  onNext, onBack, onClear, selectedPlan, onClearEntrees,
+  onNext, onBack, onClear, selectedPlan, onClearEntrees, onRechefWeek,
 }) {
   const [activeWeek, setActiveWeek] = useState('w1');
   const [activeCategory, setActiveCategory] = useState('ALL');
@@ -49,7 +49,11 @@ export default function StepEntrees({
   }
 
   function confirmWeekChange() {
-    onClearEntrees?.();
+    if (mealMode === 'chef') {
+      onRechefWeek?.(pendingWeek);
+    } else {
+      onClearEntrees?.();
+    }
     setActiveWeek(pendingWeek);
     setPendingWeek(null);
   }
@@ -212,7 +216,11 @@ export default function StepEntrees({
             <div className="text-3xl mb-3 text-center">📅</div>
             <h3 className="font-display text-xl text-gray-900 mb-2 text-center">Switch weeks?</h3>
             <p className="text-gray-500 text-sm text-center mb-5">
-              Switching to <strong>{WEEKS.find(w => w.id === pendingWeek)?.label}</strong> will clear your current meal selections.
+              {mealMode === 'chef' ? (
+                <>Switching to <strong>{WEEKS.find(w => w.id === pendingWeek)?.label}</strong> will pick a fresh chef's mix for that week.</>
+              ) : (
+                <>Switching to <strong>{WEEKS.find(w => w.id === pendingWeek)?.label}</strong> will clear your current meal selections.</>
+              )}
             </p>
             <div className="flex flex-col gap-2.5">
               <button

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { MEALS_WEEK1, MEALS_WEEK2, MEALS_WEEK3, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/meals';
 
 const ALL_MEALS = [...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3, ...BREAKFAST_ITEMS, ...SNACK_ITEMS];
@@ -77,6 +78,7 @@ export default function CartSidebar({
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
   onBack, onBackLabel, breakfastCount, lockEntrees = false,
 }) {
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const allItems = [];
 
   Object.entries(singles).forEach(([id, qty]) => {
@@ -110,7 +112,7 @@ export default function CartSidebar({
           <div className="flex items-center justify-between">
             <h3 className="font-display text-white text-lg">Your Order</h3>
             {allItems.length > 0 && (
-              <button onClick={onClear} className="text-xs text-red-300 hover:text-red-200 transition-colors font-medium">
+              <button onClick={() => setClearConfirmOpen(true)} className="text-xs text-red-300 hover:text-red-200 transition-colors font-medium">
                 Clear
               </button>
             )}
@@ -209,6 +211,33 @@ export default function CartSidebar({
           )}
         </div>
       </div>
+
+      {/* Clear cart confirmation */}
+      {clearConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full animate-reveal">
+            <div className="text-3xl mb-3 text-center">⚠️</div>
+            <h3 className="font-display text-xl text-gray-900 mb-2 text-center">Clear your cart?</h3>
+            <p className="text-gray-500 text-sm text-center mb-5">
+              This removes everything you've selected, including your entrées — you'll need to pick them again.
+            </p>
+            <div className="flex flex-col gap-2.5">
+              <button
+                onClick={() => { onClear?.(); setClearConfirmOpen(false); }}
+                className="w-full py-3 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 transition-colors"
+              >
+                Yes, clear my cart
+              </button>
+              <button
+                onClick={() => setClearConfirmOpen(false)}
+                className="w-full py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-colors"
+              >
+                Keep my selections
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

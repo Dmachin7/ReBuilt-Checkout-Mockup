@@ -502,7 +502,7 @@ export const PLANS = [
   {
     id: "chefs_choice",
     name: "Chef's Choice",
-    tagline: "Surprise us!",
+    tagline: "Mix of Performance & Lifestyle",
     color: "#FF6F00",
     description: "Trust our chefs to curate the week's best meals — a balanced mix of Lifestyle and Performance favorites. Great for adventurous eaters.",
     highlights: ["Rotating weekly variety", "Chef-curated picks", "Lifestyle + Performance mix"],

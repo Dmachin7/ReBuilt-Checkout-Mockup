@@ -107,13 +107,16 @@ export default function App() {
   function handleRemoveSingle(id) { dispatch({ type: 'REMOVE_SINGLE', id }); }
   function handleAddDouble(id)    { dispatch({ type: 'ADD_DOUBLE', id }); }
   function handleRemoveDouble(id) { dispatch({ type: 'REMOVE_DOUBLE', id }); }
-  function handleClearCart()      { dispatch({ type: 'RESET' }); }
+  function handleClearCart() {
+    dispatch({ type: 'RESET' });
+    go('entrees');
+  }
 
-  function handleChefChosen() {
+  function rechefMeals(weekMeals) {
     let ordered;
     if (selectedPlan === 'chefs_choice') {
-      const life = MEALS_WEEK1.filter(m => m.category === 'LIFESTYLE');
-      const perf = MEALS_WEEK1.filter(m => m.category === 'PERFORMANCE');
+      const life = weekMeals.filter(m => m.category === 'LIFESTYLE');
+      const perf = weekMeals.filter(m => m.category === 'PERFORMANCE');
       ordered = [];
       const maxLen = Math.max(life.length, perf.length);
       for (let i = 0; i < maxLen; i++) {
@@ -123,15 +126,24 @@ export default function App() {
     } else {
       const planCategoryMap = { lifestyle: 'LIFESTYLE', performance: 'PERFORMANCE', keto: 'KETO', plant_based: 'PLANT-BASED' };
       const category = planCategoryMap[selectedPlan] || null;
-      const pool = category ? MEALS_WEEK1.filter(m => m.category === category) : MEALS_WEEK1;
-      const supplement = category ? MEALS_WEEK1.filter(m => m.category !== category) : [];
+      const pool = category ? weekMeals.filter(m => m.category === category) : weekMeals;
+      const supplement = category ? weekMeals.filter(m => m.category !== category) : [];
       ordered = [...pool, ...supplement];
     }
     const ids = [];
     for (let i = 0; i < mealCount; i++) ids.push(ordered[i % ordered.length].id);
     dispatch({ type: 'SET_BULK_SINGLES', ids });
+  }
+
+  function handleChefChosen() {
+    rechefMeals(MEALS_WEEK1);
     setMealMode('chef');
     go('entrees');
+  }
+
+  function handleRechefWeek(weekId) {
+    const weekMeals = weekId === 'w1' ? MEALS_WEEK1 : weekId === 'w2' ? MEALS_WEEK2 : MEALS_WEEK3;
+    rechefMeals(weekMeals);
   }
 
   function handleClearEntrees() {
@@ -246,6 +258,7 @@ export default function App() {
           onNext={() => go('breakfast')}
           onBack={() => go('mealMode')}
           onClearEntrees={handleClearEntrees}
+          onRechefWeek={handleRechefWeek}
         />
       )}
 

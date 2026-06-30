@@ -30,7 +30,7 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
       <button
         onClick={e => { stop(e); if (!atLimit) onAdd(); }}
         disabled={atLimit}
-        className={`${widthCls} flex items-center justify-between px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-colors ${
+        className={`${widthCls} flex items-center justify-between px-2.5 py-1 rounded-full border text-[10px] font-semibold transition-colors ${
           atLimit
             ? 'border-gray-200 text-gray-300 bg-white cursor-not-allowed'
             : isDouble
@@ -50,24 +50,24 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
 
   return (
     <div
-      className={`${widthCls} flex items-center justify-between px-3 py-1.5 rounded-full border border-gray-200 bg-white`}
+      className={`${widthCls} flex items-center justify-between px-2.5 py-1 rounded-full border border-gray-200 bg-white`}
       onClick={stop}
     >
-      <span className="text-[10px] text-gray-400 font-medium leading-none">✓ {label}</span>
+      <span className="text-[9px] text-gray-400 font-medium leading-none">✓ {label}</span>
       <div className="flex items-center gap-1 flex-shrink-0">
         <button
           onClick={e => { stop(e); onRemove(); }}
-          className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${dotCls} hover:opacity-80`}
+          className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${dotCls} hover:opacity-80`}
         >
           −
         </button>
-        <span className="text-xs font-bold text-gray-700 min-w-[14px] text-center">
+        <span className="text-[11px] font-bold text-gray-700 min-w-[12px] text-center">
           {qty}
         </span>
         <button
           onClick={e => { stop(e); if (!atLimit) onAdd(); }}
           disabled={atLimit}
-          className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+          className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
             atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${dotCls} hover:opacity-80`
           }`}
         >
@@ -99,14 +99,14 @@ export default function MealCard({
       onClick={onCardClick}
       className="relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
     >
-      {/* Full-width top image */}
-      <div className="relative w-full overflow-hidden flex-shrink-0 bg-gray-100" style={{ aspectRatio: '16/9' }}>
+      {/* Plate image — square crop, plate fills the frame edge to edge */}
+      <div className="relative w-full aspect-square bg-white flex-shrink-0">
         {meal.image && !imgError ? (
           <img
             src={meal.image}
             alt={meal.name}
             onError={() => setImgError(true)}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover scale-[1.06]"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
@@ -114,11 +114,11 @@ export default function MealCard({
           </div>
         )}
 
-        {/* Corner ribbon badge — clipped by this div's overflow-hidden */}
+        {/* Badge pill — sits over the image, never clipped */}
         {badge && (
-          <div className={`absolute -top-3.5 -right-12 w-24 text-center py-2 text-[9px] font-bold tracking-wide shadow transform rotate-45 whitespace-nowrap z-10 pointer-events-none ${badge.cls}`}>
+          <span className={`absolute top-2 right-2 z-10 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wide shadow-md whitespace-nowrap ${badge.cls}`}>
             {meal.badge}
-          </div>
+          </span>
         )}
       </div>
 
@@ -155,7 +155,7 @@ export default function MealCard({
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-2 px-3 pb-2.5 pt-2">
+      <div className={`flex gap-2 px-3 pb-2 pt-1.5 ${!meal.doubleProtein ? 'justify-end' : ''}`}>
         <PortionBtn
           label={singleLabel}
           qty={singleQty}
@@ -178,7 +178,7 @@ export default function MealCard({
       </div>
 
       {/* Macro bar */}
-      <div className="bg-brand-green px-4 py-2 flex items-center justify-center gap-5 mt-auto">
+      <div className="bg-brand-green px-4 py-1.5 flex items-center justify-center gap-5 mt-auto">
         <MacroStat value={meal.protein} unit="g" label="Protein" />
         <div className="w-px h-4 bg-green-300" />
         <MacroStat value={meal.calories} unit="" label="Cal" />

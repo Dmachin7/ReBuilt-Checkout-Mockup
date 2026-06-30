@@ -77,6 +77,7 @@ export default function MobileCartBar({
   onBack, onBackLabel, lockEntrees = false,
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
 
   if (!visible) return null;
 
@@ -196,7 +197,7 @@ export default function MobileCartBar({
             </button>
             <div className="flex items-center justify-between mt-2">
               <button
-                onClick={() => { onClear?.(); setExpanded(false); }}
+                onClick={() => setClearConfirmOpen(true)}
                 className="text-sm text-red-400 hover:text-red-600 font-medium transition-colors"
               >
                 Clear cart
@@ -204,11 +205,38 @@ export default function MobileCartBar({
               {onBack && (
                 <button
                   onClick={() => { setExpanded(false); onBack(); }}
-                  className="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
+                  className="text-sm font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
                 >
                   ← {onBackLabel || 'Back'}
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear cart confirmation */}
+      {clearConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full animate-reveal">
+            <div className="text-3xl mb-3 text-center">⚠️</div>
+            <h3 className="font-display text-xl text-gray-900 mb-2 text-center">Clear your cart?</h3>
+            <p className="text-gray-500 text-sm text-center mb-5">
+              This removes everything you've selected, including your entrées — you'll need to pick them again.
+            </p>
+            <div className="flex flex-col gap-2.5">
+              <button
+                onClick={() => { onClear?.(); setClearConfirmOpen(false); setExpanded(false); }}
+                className="w-full py-3 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 transition-colors"
+              >
+                Yes, clear my cart
+              </button>
+              <button
+                onClick={() => setClearConfirmOpen(false)}
+                className="w-full py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-colors"
+              >
+                Keep my selections
+              </button>
             </div>
           </div>
         </div>
