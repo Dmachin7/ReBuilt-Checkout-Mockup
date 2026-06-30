@@ -6,7 +6,7 @@ const ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3].map(
 const BREAKFAST_IDS = new Set(BREAKFAST_ITEMS.map(m => m.id));
 const SNACK_IDS = new Set(SNACK_ITEMS.map(m => m.id));
 
-function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble }) {
+function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble, atLimit }) {
   const handler = item.isDouble
     ? { add: () => onAddDouble(item.meal.id), remove: () => onRemoveDouble(item.meal.id) }
     : { add: () => onAddSingle(item.meal.id), remove: () => onRemoveSingle(item.meal.id) };
@@ -21,8 +21,11 @@ function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDo
       </button>
       <span className="text-sm font-semibold text-gray-800 min-w-[18px] text-center">{item.qty}</span>
       <button
-        onClick={handler.add}
-        className="w-6 h-6 rounded-full bg-brand-green hover:bg-brand-green-dark text-white font-bold text-sm flex items-center justify-center transition-colors"
+        onClick={() => { if (!atLimit) handler.add(); }}
+        disabled={atLimit}
+        className={`w-6 h-6 rounded-full font-bold text-sm flex items-center justify-center transition-colors ${
+          atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-brand-green hover:bg-brand-green-dark text-white'
+        }`}
       >
         +
       </button>
@@ -30,7 +33,7 @@ function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDo
   );
 }
 
-function MobileCartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble, locked = false }) {
+function MobileCartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble, locked = false, atLimit = false }) {
   if (items.length === 0) return null;
   return (
     <div>
@@ -63,6 +66,7 @@ function MobileCartSection({ title, items, onAddSingle, onRemoveSingle, onAddDou
               onRemoveSingle={onRemoveSingle}
               onAddDouble={onAddDouble}
               onRemoveDouble={onRemoveDouble}
+              atLimit={atLimit}
             />
           )}
         </div>
@@ -74,7 +78,7 @@ function MobileCartSection({ title, items, onAddSingle, onRemoveSingle, onAddDou
 export default function MobileCartBar({
   singles, doubles, mealCount, onContinue, continueLabel, visible = true, onClear,
   continueDisabled = false, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
-  onBack, onBackLabel, lockEntrees = false,
+  onBack, onBackLabel, lockEntrees = false, breakfastCount,
 }) {
   const [expanded, setExpanded] = useState(false);
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
@@ -100,6 +104,7 @@ export default function MobileCartBar({
   const snackItems     = allItems.filter(item => SNACK_IDS.has(item.meal.id));
 
   const entreeCount = entreeItems.reduce((sum, item) => sum + item.qty, 0);
+  const breakfastSelected = breakfastItems.reduce((sum, item) => sum + item.qty, 0);
   const totalItems  = allItems.reduce((sum, item) => sum + item.qty, 0);
   const subtotal    = allItems.reduce((sum, item) => sum + item.price, 0);
   const tax = subtotal * 0.08;
@@ -146,6 +151,7 @@ export default function MobileCartBar({
                   onAddDouble={onAddDouble}
                   onRemoveDouble={onRemoveDouble}
                   locked={lockEntrees}
+                  atLimit={mealCount != null && entreeCount >= mealCount}
                 />
                 <MobileCartSection
                   title="Breakfast"
@@ -154,6 +160,7 @@ export default function MobileCartBar({
                   onRemoveSingle={onRemoveSingle}
                   onAddDouble={onAddDouble}
                   onRemoveDouble={onRemoveDouble}
+                  atLimit={breakfastCount > 0 && breakfastSelected >= breakfastCount}
                 />
                 <MobileCartSection
                   title="Snacks"

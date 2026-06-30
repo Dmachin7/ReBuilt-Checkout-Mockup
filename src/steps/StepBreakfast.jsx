@@ -143,7 +143,7 @@ export default function StepBreakfast({
         )}
 
         {/* Breakfast grid */}
-        <div className="mt-20 sm:mt-28 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 sm:gap-y-12">
+        <div className="pt-20 sm:pt-28 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 sm:gap-y-12">
           {BREAKFAST_ITEMS.map(meal => (
             <MealCard
               key={meal.id}
@@ -193,6 +193,7 @@ export default function StepBreakfast({
         onBack={onBack}
         onBackLabel="Back to Entrées"
         lockEntrees
+        breakfastCount={breakfastCount}
       />
 
       {modalMeal && (

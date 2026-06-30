@@ -20,60 +20,51 @@ const DIETARY = {
   'Vegan':       { icon: '🌿', label: 'Vegan', cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
 };
 
-function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble, stretch = true }) {
+function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble }) {
   const stop = e => e.stopPropagation();
   const dotCls = isDouble ? 'bg-brand-green text-white' : 'bg-brand-charcoal text-white';
-  const widthCls = stretch ? 'w-full sm:flex-1' : 'w-full sm:w-auto';
-
-  if (qty === 0) {
-    return (
-      <button
-        onClick={e => { stop(e); if (!atLimit) onAdd(); }}
-        disabled={atLimit}
-        className={`${widthCls} flex items-center justify-between px-2.5 py-2 sm:py-0.5 rounded-full border text-[10px] font-semibold leading-none transition-colors ${
-          atLimit
-            ? 'border-gray-200 text-gray-300 bg-white cursor-not-allowed'
-            : isDouble
-            ? 'border-brand-green text-brand-green bg-white hover:bg-green-50'
-            : 'border-gray-300 text-gray-600 bg-white hover:border-gray-400 hover:bg-gray-50'
-        }`}
-      >
-        <span>+ {label}</span>
-        {extraPrice != null && (
-          <span className={atLimit ? 'text-gray-300' : isDouble ? 'text-brand-green opacity-70' : 'text-gray-400'}>
-            +${extraPrice.toFixed(2)}
-          </span>
-        )}
-      </button>
-    );
-  }
 
   return (
-    <div
-      className={`${widthCls} flex items-center justify-between px-2.5 py-2 sm:py-0.5 rounded-full border border-gray-200 bg-white`}
-      onClick={stop}
-    >
-      <span className="text-[9px] text-gray-400 font-medium leading-none">✓ {label}</span>
-      <div className="flex items-center gap-2 sm:gap-1.5 flex-shrink-0">
-        <button
-          onClick={e => { stop(e); onRemove(); }}
-          className={`w-6 h-6 sm:w-3.5 sm:h-3.5 rounded-full flex items-center justify-center leading-none text-[13px] sm:text-[9px] font-bold transition-colors ${dotCls} hover:opacity-80`}
-        >
-          −
-        </button>
-        <span className="text-[12px] sm:text-[11px] font-bold text-gray-700 min-w-[14px] text-center leading-none">
-          {qty}
-        </span>
+    <div className="w-full flex items-center justify-between gap-2 py-1">
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold text-gray-700 leading-tight truncate">{label}</p>
+        {extraPrice != null && (
+          <p className="text-[9px] text-gray-400 leading-tight">+${extraPrice.toFixed(2)}</p>
+        )}
+      </div>
+
+      {qty === 0 ? (
         <button
           onClick={e => { stop(e); if (!atLimit) onAdd(); }}
           disabled={atLimit}
-          className={`w-6 h-6 sm:w-3.5 sm:h-3.5 rounded-full flex items-center justify-center leading-none text-[13px] sm:text-[9px] font-bold transition-colors ${
+          className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-bold text-base leading-none transition-colors ${
             atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${dotCls} hover:opacity-80`
           }`}
         >
           +
         </button>
-      </div>
+      ) : (
+        <div className="flex-shrink-0 flex items-center gap-2" onClick={stop}>
+          <button
+            onClick={e => { stop(e); onRemove(); }}
+            className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-base leading-none transition-colors ${dotCls} hover:opacity-80`}
+          >
+            −
+          </button>
+          <span className="text-[13px] font-bold text-gray-700 min-w-[16px] text-center">
+            {qty}
+          </span>
+          <button
+            onClick={e => { stop(e); if (!atLimit) onAdd(); }}
+            disabled={atLimit}
+            className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-base leading-none transition-colors ${
+              atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${dotCls} hover:opacity-80`
+            }`}
+          >
+            +
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -163,15 +154,14 @@ export default function MealCard({
           </div>
         </div>
 
-        {/* Action buttons — stacked on mobile to avoid the "Double Protein" label wrapping and cramping the +/- controls, side-by-side on desktop where there's room */}
-        <div className={`flex flex-col sm:flex-row gap-1.5 sm:gap-2 pl-[100px] sm:pl-[125px] pr-2 sm:pr-3 pb-2 pt-1.5 ${!meal.doubleProtein ? 'sm:justify-end' : ''}`}>
+        {/* Action rows — stacked, label left / fixed +- control right, same layout at every breakpoint */}
+        <div className="flex flex-col divide-y divide-gray-100 pl-[100px] sm:pl-[125px] pr-2 sm:pr-3 pb-1 pt-1">
           <PortionBtn
             label={singleLabel}
             qty={singleQty}
             onAdd={() => onAddSingle(meal.id)}
             onRemove={() => onRemoveSingle(meal.id)}
             atLimit={atLimit}
-            stretch={!!meal.doubleProtein}
           />
           {meal.doubleProtein && (
             <PortionBtn

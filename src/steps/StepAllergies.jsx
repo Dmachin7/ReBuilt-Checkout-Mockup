@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ALLERGY_OPTIONS } from '../data/meals';
 
 const ALLERGY_REST = ALLERGY_OPTIONS.filter(o => o.id !== 'none');
@@ -7,6 +7,13 @@ export default function StepAllergies({ onViewSummary, onCheckout, onBack }) {
   const [selected, setSelected] = useState(new Set());
   const [customText, setCustomText] = useState('');
   const [showCustom, setShowCustom] = useState(false);
+  const customBoxRef = useRef(null);
+
+  useEffect(() => {
+    if (showCustom && customBoxRef.current) {
+      customBoxRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [showCustom]);
 
   function toggle(id) {
     const next = new Set(selected);
@@ -106,7 +113,7 @@ export default function StepAllergies({ onViewSummary, onCheckout, onBack }) {
 
       {/* Custom allergy textarea — revealed when custom card clicked */}
       {showCustom && (
-        <div className="bg-white rounded-2xl p-4 shadow-sm mb-5 animate-reveal">
+        <div ref={customBoxRef} className="bg-white rounded-2xl p-4 shadow-sm mb-5 animate-reveal">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-semibold text-gray-900">Anything else we should know?</label>
             <button onClick={() => setShowCustom(false)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>

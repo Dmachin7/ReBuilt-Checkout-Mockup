@@ -8,7 +8,7 @@ const SNACK_IDS = new Set(SNACK_ITEMS.map(m => m.id));
 
 function findMeal(id) { return ALL_MEALS.find(m => m.id === id); }
 
-function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble }) {
+function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble, atLimit }) {
   const handler = item.isDouble
     ? { add: () => onAddDouble(item.meal.id), remove: () => onRemoveDouble(item.meal.id) }
     : { add: () => onAddSingle(item.meal.id), remove: () => onRemoveSingle(item.meal.id) };
@@ -23,8 +23,11 @@ function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDo
       </button>
       <span className="text-sm font-semibold text-gray-800 min-w-[18px] text-center">{item.qty}</span>
       <button
-        onClick={handler.add}
-        className="w-6 h-6 rounded-full bg-brand-green hover:bg-brand-green-dark text-white font-bold text-sm flex items-center justify-center transition-colors"
+        onClick={() => { if (!atLimit) handler.add(); }}
+        disabled={atLimit}
+        className={`w-6 h-6 rounded-full font-bold text-sm flex items-center justify-center transition-colors ${
+          atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-brand-green hover:bg-brand-green-dark text-white'
+        }`}
       >
         +
       </button>
@@ -32,7 +35,7 @@ function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDo
   );
 }
 
-function CartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble, locked = false }) {
+function CartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble, locked = false, atLimit = false }) {
   if (items.length === 0) return null;
   return (
     <div>
@@ -65,6 +68,7 @@ function CartSection({ title, items, onAddSingle, onRemoveSingle, onAddDouble, o
               onRemoveSingle={onRemoveSingle}
               onAddDouble={onAddDouble}
               onRemoveDouble={onRemoveDouble}
+              atLimit={atLimit}
             />
           )}
         </div>
@@ -162,6 +166,7 @@ export default function CartSidebar({
                 onAddDouble={onAddDouble}
                 onRemoveDouble={onRemoveDouble}
                 locked={lockEntrees}
+                atLimit={mealCount != null && entreeCount >= mealCount}
               />
               <CartSection
                 title="Breakfast"
@@ -170,6 +175,7 @@ export default function CartSidebar({
                 onRemoveSingle={onRemoveSingle}
                 onAddDouble={onAddDouble}
                 onRemoveDouble={onRemoveDouble}
+                atLimit={breakfastCount > 0 && breakfastSelected >= breakfastCount}
               />
               <CartSection
                 title="Snacks"
