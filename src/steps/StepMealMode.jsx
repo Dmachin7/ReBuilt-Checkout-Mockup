@@ -20,14 +20,14 @@ export default function StepMealMode({ selectedPlan, mealCount, onChefChosen, on
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-8">
         {/* Choose own meals */}
         <button
           onClick={onOwnMeals}
-          className="group text-left p-3 sm:p-6 rounded-2xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:shadow-md transition-all"
+          className="group text-left p-4 sm:p-6 rounded-2xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:shadow-md transition-all"
         >
-          <div className="text-2xl sm:text-4xl mb-2 sm:mb-4">🎯</div>
-          <h2 className="font-display text-sm sm:text-xl text-gray-900 mb-1 sm:mb-2 leading-snug">I'll choose my own</h2>
+          <div className="text-3xl sm:text-4xl mb-2 sm:mb-4">🎯</div>
+          <h2 className="font-display text-base sm:text-xl text-gray-900 mb-1 sm:mb-2 leading-snug">I'll choose my own</h2>
           <p className="text-gray-500 text-xs leading-relaxed">
             Browse the full menu and hand-pick exactly what you want. You control every slot.
           </p>
@@ -39,10 +39,10 @@ export default function StepMealMode({ selectedPlan, mealCount, onChefChosen, on
         {/* Chef-chosen — styled same as own so it doesn't look pre-selected */}
         <button
           onClick={onChefChosen}
-          className="group text-left p-3 sm:p-6 rounded-2xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:shadow-md transition-all"
+          className="group text-left p-4 sm:p-6 rounded-2xl bg-white border-2 border-gray-200 hover:border-brand-charcoal hover:shadow-md transition-all"
         >
-          <div className="text-2xl sm:text-4xl mb-2 sm:mb-4">👨‍🍳</div>
-          <h2 className="font-display text-sm sm:text-xl text-gray-900 mb-1 sm:mb-2 leading-snug">Chef picks for me</h2>
+          <div className="text-3xl sm:text-4xl mb-2 sm:mb-4">👨‍🍳</div>
+          <h2 className="font-display text-base sm:text-xl text-gray-900 mb-1 sm:mb-2 leading-snug">Chef picks for me</h2>
           <p className="text-gray-500 text-xs leading-relaxed">
             We'll pre-select {mealCount} meals
             {planLabel ? ` from the ${planLabel} menu` : ' from this week\'s top picks'}.
