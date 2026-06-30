@@ -61,7 +61,7 @@ export default function StepBreakfast({
   }
 
   return (
-    <div className="flex gap-6 px-4 sm:px-6 py-6 max-w-6xl mx-auto w-full">
+    <div className="flex gap-6 px-4 sm:px-6 py-6 max-w-7xl mx-auto w-full">
       <div className="flex-1 min-w-0 pb-32 space-y-6">
 
         {/* Header */}
@@ -143,7 +143,7 @@ export default function StepBreakfast({
         )}
 
         {/* Breakfast grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-8">
           {BREAKFAST_ITEMS.map(meal => (
             <MealCard
               key={meal.id}

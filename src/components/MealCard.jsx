@@ -30,7 +30,7 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
       <button
         onClick={e => { stop(e); if (!atLimit) onAdd(); }}
         disabled={atLimit}
-        className={`${widthCls} flex items-center justify-between px-2.5 py-1 rounded-full border text-[10px] font-semibold transition-colors ${
+        className={`${widthCls} flex items-center justify-between px-2.5 py-0.5 rounded-full border text-[10px] font-semibold transition-colors ${
           atLimit
             ? 'border-gray-200 text-gray-300 bg-white cursor-not-allowed'
             : isDouble
@@ -50,14 +50,14 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
 
   return (
     <div
-      className={`${widthCls} flex items-center justify-between px-2.5 py-1 rounded-full border border-gray-200 bg-white`}
+      className={`${widthCls} flex items-center justify-between px-2.5 py-0.5 rounded-full border border-gray-200 bg-white`}
       onClick={stop}
     >
       <span className="text-[9px] text-gray-400 font-medium leading-none">✓ {label}</span>
       <div className="flex items-center gap-1 flex-shrink-0">
         <button
           onClick={e => { stop(e); onRemove(); }}
-          className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${dotCls} hover:opacity-80`}
+          className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold transition-colors ${dotCls} hover:opacity-80`}
         >
           −
         </button>
@@ -67,7 +67,7 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
         <button
           onClick={e => { stop(e); if (!atLimit) onAdd(); }}
           disabled={atLimit}
-          className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
+          className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold transition-colors ${
             atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${dotCls} hover:opacity-80`
           }`}
         >
@@ -93,34 +93,47 @@ export default function MealCard({
   const [imgError, setImgError] = useState(false);
   const cat = CATEGORY_STYLES[meal.category] || CATEGORY_STYLES.LIFESTYLE;
   const badge = meal.badge ? BADGE_STYLES[meal.badge] : null;
+  const badgeWords = meal.badge ? meal.badge.split(' ') : [];
 
   return (
-    <div onClick={onCardClick} className="relative h-full cursor-pointer">
-      {/* Plate/photo — circular, bleeds off the left edge of the card */}
-      <div className="absolute left-0 top-3 w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden shadow-lg ring-4 ring-white bg-white z-10">
-        {meal.image && !imgError ? (
-          <img
-            src={meal.image}
-            alt={meal.name}
-            onError={() => setImgError(true)}
-            className="w-full h-full object-cover scale-105"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-            <span className="text-xl">📸</span>
+    <div
+      onClick={onCardClick}
+      className="relative ml-14 sm:ml-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full cursor-pointer"
+    >
+      {/* Diagonal corner ribbon — own small clip box so the rotated strip is actually visible */}
+      {badge && (
+        <div className="absolute top-0 right-0 w-20 h-20 sm:w-24 sm:h-24 overflow-hidden rounded-tr-2xl z-20 pointer-events-none">
+          <div
+            className={`absolute top-[10px] right-[-30px] sm:top-[13px] sm:right-[-35px] w-[130px] sm:w-[155px] py-1 text-center shadow-md transform rotate-45 ${badge.cls}`}
+          >
+            {badgeWords.map((w, i) => (
+              <div key={i} className="text-[7px] sm:text-[8.5px] font-extrabold tracking-wider leading-[9px] sm:leading-[11px] uppercase">
+                {w}
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Card — shifted right so half the plate hangs off its left edge */}
-      <div className="relative ml-10 sm:ml-12 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full">
-        {badge && (
-          <span className={`absolute top-2 right-2 z-20 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wide shadow-md whitespace-nowrap ${badge.cls}`}>
-            {meal.badge}
-          </span>
-        )}
+      {/* Header zone — the plate centers vertically against this block, not the macro bar */}
+      <div className="relative flex-1 flex flex-col">
+        {/* Plate/photo — big circle, bleeds off the card's left edge, vertically centered */}
+        <div className="absolute -left-14 sm:-left-20 top-1/2 -translate-y-1/2 w-28 h-28 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-lg ring-4 ring-white bg-white z-10">
+          {meal.image && !imgError ? (
+            <img
+              src={meal.image}
+              alt={meal.name}
+              onError={() => setImgError(true)}
+              className="w-full h-full object-cover scale-105"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+              <span className="text-2xl">📸</span>
+            </div>
+          )}
+        </div>
 
-        <div className="pl-12 sm:pl-14 pr-8 pt-3 flex-1 flex flex-col">
+        <div className="pl-16 sm:pl-24 pr-8 pt-3 flex-1 flex flex-col">
           <p className={`text-[10px] font-bold tracking-widest uppercase ${cat.text} leading-tight mb-0.5`}>
             {cat.label}
           </p>
@@ -172,15 +185,15 @@ export default function MealCard({
             />
           )}
         </div>
+      </div>
 
-        {/* Macro bar */}
-        <div className="bg-brand-green px-4 py-1.5 flex items-center justify-center gap-5 mt-auto">
-          <MacroStat value={meal.protein} unit="g" label="Protein" />
-          <div className="w-px h-4 bg-green-300" />
-          <MacroStat value={meal.calories} unit="" label="Cal" />
-          <div className="w-px h-4 bg-green-300" />
-          <MacroStat value={meal.carbs} unit="g" label="Carbs" />
-        </div>
+      {/* Macro bar */}
+      <div className="bg-brand-green rounded-b-2xl px-4 py-1 flex items-center justify-center gap-5">
+        <MacroStat value={meal.protein} unit="g" label="Protein" />
+        <div className="w-px h-4 bg-green-300" />
+        <MacroStat value={meal.calories} unit="" label="Cal" />
+        <div className="w-px h-4 bg-green-300" />
+        <MacroStat value={meal.carbs} unit="g" label="Carbs" />
       </div>
     </div>
   );
