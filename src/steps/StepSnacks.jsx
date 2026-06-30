@@ -55,7 +55,7 @@ export default function StepSnacks({
           </div>
         </button>
 
-        <div className="pt-20 sm:pt-28 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 sm:gap-y-12">
+        <div className="pt-10 sm:pt-14 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 sm:gap-y-12">
           {SNACK_ITEMS.map(meal => (
             <MealCard
               key={meal.id}
