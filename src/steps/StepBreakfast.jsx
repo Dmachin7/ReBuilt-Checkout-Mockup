@@ -143,7 +143,7 @@ export default function StepBreakfast({
         )}
 
         {/* Breakfast grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-8">
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-16 sm:gap-y-20">
           {BREAKFAST_ITEMS.map(meal => (
             <MealCard
               key={meal.id}

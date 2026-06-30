@@ -100,17 +100,18 @@ export default function MealCard({
       onClick={onCardClick}
       className="relative ml-[70px] sm:ml-[100px] bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full cursor-pointer"
     >
-      {/* Diagonal corner ribbon — bigger box + strip so it reaches well into the card, still centered exactly on the corner point */}
+      {/* Diagonal corner ribbon — solid clip-path triangle fills the corner exactly (no rotation math to get wrong), text is just rotated + nudged to sit inside it */}
       {badge && (
         <div className="absolute top-0 right-0 w-28 h-28 sm:w-36 sm:h-36 overflow-hidden rounded-tr-2xl z-20 pointer-events-none">
-          <div
-            className={`absolute left-[7px] top-[-17px] sm:left-[9px] sm:top-[-21px] w-[210px] sm:w-[270px] h-[34px] sm:h-[42px] flex flex-col items-center justify-center shadow-md transform rotate-45 ${badge.cls}`}
-          >
-            {badgeWords.map((w, i) => (
-              <div key={i} className="text-[8px] sm:text-[10px] font-extrabold tracking-wider leading-[10px] sm:leading-[12px] uppercase">
-                {w}
-              </div>
-            ))}
+          <div className={`absolute inset-0 [clip-path:polygon(0_0,100%_0,100%_100%)] ${badge.cls}`} />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center text-white translate-x-[19px] -translate-y-[19px] sm:translate-x-[24px] sm:-translate-y-[24px] transform rotate-45">
+              {badgeWords.map((w, i) => (
+                <div key={i} className="text-[8px] sm:text-[10px] font-extrabold tracking-wider leading-[10px] sm:leading-[12px] uppercase">
+                  {w}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
