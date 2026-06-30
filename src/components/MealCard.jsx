@@ -98,16 +98,16 @@ export default function MealCard({
   return (
     <div
       onClick={onCardClick}
-      className="relative ml-14 sm:ml-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full cursor-pointer"
+      className="relative ml-[70px] sm:ml-[100px] bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full cursor-pointer"
     >
-      {/* Diagonal corner ribbon — centered exactly on the box's corner point so it touches flush with no gap */}
+      {/* Diagonal corner ribbon — bigger box + strip so it reaches well into the card, still centered exactly on the corner point */}
       {badge && (
-        <div className="absolute top-0 right-0 w-20 h-20 sm:w-24 sm:h-24 overflow-hidden rounded-tr-2xl z-20 pointer-events-none">
+        <div className="absolute top-0 right-0 w-28 h-28 sm:w-36 sm:h-36 overflow-hidden rounded-tr-2xl z-20 pointer-events-none">
           <div
-            className={`absolute left-[15px] top-[-14px] sm:left-[18px] sm:top-[-16px] w-[130px] sm:w-[155px] h-7 sm:h-8 flex flex-col items-center justify-center shadow-md transform rotate-45 ${badge.cls}`}
+            className={`absolute left-[7px] top-[-17px] sm:left-[9px] sm:top-[-21px] w-[210px] sm:w-[270px] h-[34px] sm:h-[42px] flex flex-col items-center justify-center shadow-md transform rotate-45 ${badge.cls}`}
           >
             {badgeWords.map((w, i) => (
-              <div key={i} className="text-[7px] sm:text-[8.5px] font-extrabold tracking-wider leading-[9px] sm:leading-[11px] uppercase">
+              <div key={i} className="text-[8px] sm:text-[10px] font-extrabold tracking-wider leading-[10px] sm:leading-[12px] uppercase">
                 {w}
               </div>
             ))}
@@ -117,8 +117,8 @@ export default function MealCard({
 
       {/* Header zone — the plate centers vertically against this block, not the macro bar */}
       <div className="relative flex-1 flex flex-col">
-        {/* Plate/photo — big circle, bleeds off the card's left edge, vertically centered */}
-        <div className="absolute -left-14 sm:-left-20 top-1/2 -translate-y-1/2 w-28 h-28 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-lg bg-white z-10">
+        {/* Plate/photo — big circle, bleeds off the card's left edge, vertically centered, tall enough to overflow the card top/bottom */}
+        <div className="absolute -left-[70px] sm:-left-[100px] top-1/2 -translate-y-1/2 w-[140px] h-[140px] sm:w-[200px] sm:h-[200px] rounded-full overflow-hidden shadow-lg bg-white z-10">
           {meal.image && !imgError ? (
             <img
               src={meal.image}
@@ -133,7 +133,7 @@ export default function MealCard({
           )}
         </div>
 
-        <div className="pl-16 sm:pl-24 pr-8 pt-3 flex-1 flex flex-col">
+        <div className="pl-[88px] sm:pl-[125px] pr-8 pt-3 flex-1 flex flex-col">
           <p className={`text-[10px] font-bold tracking-widest uppercase ${cat.text} leading-tight mb-0.5`}>
             {cat.label}
           </p>
@@ -164,7 +164,7 @@ export default function MealCard({
         </div>
 
         {/* Action buttons */}
-        <div className={`flex gap-2 pl-16 sm:pl-24 pr-3 pb-2 pt-1.5 ${!meal.doubleProtein ? 'justify-end' : ''}`}>
+        <div className={`flex gap-2 pl-[88px] sm:pl-[125px] pr-3 pb-2 pt-1.5 ${!meal.doubleProtein ? 'justify-end' : ''}`}>
           <PortionBtn
             label={singleLabel}
             qty={singleQty}
