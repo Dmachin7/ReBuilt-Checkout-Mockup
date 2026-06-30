@@ -100,11 +100,11 @@ export default function MealCard({
       onClick={onCardClick}
       className="relative ml-14 sm:ml-20 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full cursor-pointer"
     >
-      {/* Diagonal corner ribbon — own small clip box so the rotated strip is actually visible */}
+      {/* Diagonal corner ribbon — centered exactly on the box's corner point so it touches flush with no gap */}
       {badge && (
         <div className="absolute top-0 right-0 w-20 h-20 sm:w-24 sm:h-24 overflow-hidden rounded-tr-2xl z-20 pointer-events-none">
           <div
-            className={`absolute top-[10px] right-[-30px] sm:top-[13px] sm:right-[-35px] w-[130px] sm:w-[155px] py-1 text-center shadow-md transform rotate-45 ${badge.cls}`}
+            className={`absolute left-[15px] top-[-14px] sm:left-[18px] sm:top-[-16px] w-[130px] sm:w-[155px] h-7 sm:h-8 flex flex-col items-center justify-center shadow-md transform rotate-45 ${badge.cls}`}
           >
             {badgeWords.map((w, i) => (
               <div key={i} className="text-[7px] sm:text-[8.5px] font-extrabold tracking-wider leading-[9px] sm:leading-[11px] uppercase">
@@ -118,7 +118,7 @@ export default function MealCard({
       {/* Header zone — the plate centers vertically against this block, not the macro bar */}
       <div className="relative flex-1 flex flex-col">
         {/* Plate/photo — big circle, bleeds off the card's left edge, vertically centered */}
-        <div className="absolute -left-14 sm:-left-20 top-1/2 -translate-y-1/2 w-28 h-28 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-lg ring-4 ring-white bg-white z-10">
+        <div className="absolute -left-14 sm:-left-20 top-1/2 -translate-y-1/2 w-28 h-28 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-lg bg-white z-10">
           {meal.image && !imgError ? (
             <img
               src={meal.image}
@@ -164,7 +164,7 @@ export default function MealCard({
         </div>
 
         {/* Action buttons */}
-        <div className={`flex gap-2 px-3 pb-2 pt-1.5 ${!meal.doubleProtein ? 'justify-end' : ''}`}>
+        <div className={`flex gap-2 pl-16 sm:pl-24 pr-3 pb-2 pt-1.5 ${!meal.doubleProtein ? 'justify-end' : ''}`}>
           <PortionBtn
             label={singleLabel}
             qty={singleQty}
