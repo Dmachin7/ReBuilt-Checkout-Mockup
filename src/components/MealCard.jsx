@@ -102,12 +102,12 @@ export default function MealCard({
     >
       {/* Diagonal corner ribbon — solid clip-path triangle fills the corner exactly (no rotation math to get wrong), text is just rotated + nudged to sit inside it */}
       {badge && (
-        <div className="absolute top-0 right-0 w-28 h-28 sm:w-36 sm:h-36 overflow-hidden rounded-tr-2xl z-20 pointer-events-none">
+        <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 overflow-hidden rounded-tr-2xl z-20 pointer-events-none">
           <div className={`absolute inset-0 [clip-path:polygon(0_0,100%_0,100%_100%)] ${badge.cls}`} />
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-white translate-x-[19px] -translate-y-[19px] sm:translate-x-[24px] sm:-translate-y-[24px] transform rotate-45">
+            <div className="text-center text-white translate-x-[11px] -translate-y-[11px] sm:translate-x-[13px] sm:-translate-y-[13px] transform rotate-45">
               {badgeWords.map((w, i) => (
-                <div key={i} className="text-[8px] sm:text-[10px] font-extrabold tracking-wider leading-[10px] sm:leading-[12px] uppercase">
+                <div key={i} className="text-[7px] sm:text-[8px] font-extrabold tracking-wider leading-[9px] sm:leading-[10px] uppercase">
                   {w}
                 </div>
               ))}
@@ -116,24 +116,23 @@ export default function MealCard({
         </div>
       )}
 
-      {/* Header zone — the plate centers vertically against this block, not the macro bar */}
-      <div className="relative flex-1 flex flex-col">
-        {/* Plate/photo — big circle, bleeds off the card's left edge, vertically centered, tall enough to overflow the card top/bottom */}
-        <div className="absolute -left-[70px] sm:-left-[100px] top-1/2 -translate-y-1/2 w-[140px] h-[140px] sm:w-[200px] sm:h-[200px] rounded-full overflow-hidden shadow-lg bg-white z-10">
-          {meal.image && !imgError ? (
-            <img
-              src={meal.image}
-              alt={meal.name}
-              onError={() => setImgError(true)}
-              className="w-full h-full object-cover scale-105"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-              <span className="text-2xl">📸</span>
-            </div>
-          )}
-        </div>
+      {/* Plate/photo — big circle, bleeds off the card's left edge, centered on the WHOLE card (equal overflow top + bottom) */}
+      <div className="absolute -left-[70px] sm:-left-[100px] top-1/2 -translate-y-1/2 w-[140px] h-[140px] sm:w-[200px] sm:h-[200px] rounded-full overflow-hidden shadow-lg bg-white z-10">
+        {meal.image && !imgError ? (
+          <img
+            src={meal.image}
+            alt={meal.name}
+            onError={() => setImgError(true)}
+            className="w-full h-full object-cover scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+            <span className="text-2xl">📸</span>
+          </div>
+        )}
+      </div>
 
+      <div className="flex-1 flex flex-col">
         <div className="pl-[88px] sm:pl-[125px] pr-8 pt-3 flex-1 flex flex-col">
           <p className={`text-[10px] font-bold tracking-widest uppercase ${cat.text} leading-tight mb-0.5`}>
             {cat.label}
@@ -189,7 +188,7 @@ export default function MealCard({
       </div>
 
       {/* Macro bar */}
-      <div className="bg-brand-green rounded-b-2xl px-4 py-1 flex items-center justify-center gap-5">
+      <div className="bg-brand-green rounded-b-2xl pl-[88px] sm:pl-[125px] pr-4 py-1 flex items-center justify-center gap-5">
         <MacroStat value={meal.protein} unit="g" label="Protein" />
         <div className="w-px h-4 bg-green-300" />
         <MacroStat value={meal.calories} unit="" label="Cal" />
