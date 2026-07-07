@@ -108,6 +108,7 @@ export default function App() {
   const [breakfastSkipped, setBreakfastSkipped] = useState(false);
   const [allergySelected, setAllergySelected] = useState(new Set());
   const [allergyNotes, setAllergyNotes] = useState('');
+  const [discountCode, setDiscountCode] = useState('');
 
   const menu = useShopifyMenu(2);
   const usingFallback = !!menu.error;
@@ -278,6 +279,7 @@ export default function App() {
       doubleProteinCount,
       allergiesValue,
       allergyNotesValue,
+      discountCode: discountCode.trim(),
     });
   }
 
@@ -289,6 +291,7 @@ export default function App() {
     setMealMode(null);
     setBreakfastCount(null);
     setBreakfastSkipped(false);
+    setDiscountCode('');
     go('mealCount');
   }
 
@@ -418,6 +421,8 @@ export default function App() {
           breakfastCount={breakfastCount}
           breakfastItems={breakfastItems}
           snackItems={snackItems}
+          discountCode={discountCode}
+          setDiscountCode={setDiscountCode}
           onBack={() => go('allergies')}
           onConfirm={() => go('shopifyRedirect')}
         />

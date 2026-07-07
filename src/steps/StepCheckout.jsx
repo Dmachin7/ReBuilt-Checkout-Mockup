@@ -5,6 +5,7 @@ import { BREAKFAST_PRICING } from '../data/breakfastPricing';
 export default function StepCheckout({
   singles, doubles, mealCount, breakfastCount, weeks,
   breakfastItems: breakfastCatalog, snackItems: snackCatalog,
+  discountCode, setDiscountCode,
   onBack, onConfirm,
 }) {
   const [openSections, setOpenSections] = useState({ entrees: false, breakfast: false, snacks: false });
@@ -62,10 +63,6 @@ export default function StepCheckout({
   const snackSubtotal = snackItems.reduce((sum, i) => sum + i.price, 0);
 
   const subtotal = entreeBoxPrice + doubleProteinPrice + breakfastBoxPrice + snackSubtotal;
-  // The real discount is applied by Shopify at checkout via the
-  // /discount/[code] redirect (handoff doc section 6a), not validated or
-  // applied client-side here. This is shown for reference only.
-  const discountCode = shopifyConfig.discountCode;
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
 
@@ -185,12 +182,19 @@ export default function StepCheckout({
         </div>
       </div>
 
-      {/* Discount code — applied automatically by Shopify at checkout, not entered here */}
+      {/* Discount code — whatever's typed here is sent to Shopify's own
+          /discount/[code] endpoint at checkout, which validates and applies
+          it. Not validated client-side; Shopify is the source of truth. */}
       <div className="bg-white rounded-2xl shadow-sm p-4 mb-6">
-        <p className="text-sm font-semibold text-gray-900 mb-1">Discount Code</p>
-        <div className="flex items-center gap-2">
-          <span className="text-green-600 text-xs font-semibold">✓ {discountCode} will be applied automatically at checkout</span>
-        </div>
+        <p className="text-sm font-semibold text-gray-900 mb-2">Discount Code</p>
+        <input
+          type="text"
+          value={discountCode}
+          onChange={e => setDiscountCode(e.target.value)}
+          placeholder="Enter a discount code (optional)"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green"
+        />
+        <p className="text-gray-400 text-xs mt-1.5">Applied at Shopify checkout — invalid codes are simply ignored there.</p>
       </div>
 
       {/* Sticky CTA */}

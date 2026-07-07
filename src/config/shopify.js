@@ -26,7 +26,6 @@ export const shopifyConfig = {
     deliveryDate: '2026-07-13',
   },
 
-  discountCode: '50%offer',
   entreesSellingPlanId: '2086404148',
 
   // Double protein is a SEPARATE cart line item, not just a property.

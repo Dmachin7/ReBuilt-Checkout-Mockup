@@ -88,14 +88,21 @@ export function buildMetadataPayload({ setWeek, mealCount, defaultPlanKey, userS
 // The doc (section 5a) says not to send `_defaultData` -- the real capture
 // sends it, duplicating _metadata's defaultPlan at the top level. Following
 // the live capture here since it's a confirmed-working production order.
+//
+// discountCode is whatever the customer typed at checkout, not an
+// auto-applied default -- an empty code skips the /discount hop entirely
+// and goes straight to /checkout, so nothing is silently applied.
 export function buildCheckoutUrl({
   entreeVariantId, setWeek,
   metadataJson, defaultDataJson,
   doubleProteinCount,
   allergiesValue, allergyNotesValue,
+  discountCode,
   isNew = true,
 }) {
-  const discountChain = `/discount/${encodeURIComponent(shopifyConfig.discountCode)}?redirect=/checkout`;
+  const discountChain = discountCode
+    ? `/discount/${encodeURIComponent(discountCode)}?redirect=/checkout`
+    : '/checkout';
 
   let entreeReturnTo = discountChain;
   if (doubleProteinCount > 0) {
