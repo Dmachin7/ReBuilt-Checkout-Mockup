@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { shopifyConfig } from '../config/shopify';
-import { BREAKFAST_PRICING } from '../data/breakfastPricing';
+import { pickSnackVariant } from '../lib/shopifyCheckout';
 
 function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble, atLimit }) {
   const handler = item.isDouble
@@ -87,8 +87,13 @@ export default function CartSidebar({
 
   // Entrées and breakfast are flat box-rate priced in production (their
   // own basePrice is $0) -- price:0 here, real total computed below from
-  // the box-rate tables, same as StepCheckout. Snacks are individually
-  // priced real Shopify products.
+  // the box-rate tables, same as StepCheckout. Snacks are priced by
+  // matching to a shared tier variant (see pickSnackVariant), not their
+  // own basePrice, which is unreliably $0 in the live catalog.
+  function snackUnitPrice(meal) {
+    return pickSnackVariant(meal).variant.price;
+  }
+
   const allItems = [];
 
   Object.entries(singles).forEach(([id, qty]) => {
@@ -96,7 +101,8 @@ export default function CartSidebar({
       const meal = findMeal(Number(id));
       if (!meal) return;
       const isBoxPriced = entreeIdSet.has(meal.id) || breakfastIdSet.has(meal.id);
-      allItems.push({ meal, qty, isDouble: false, price: isBoxPriced ? 0 : meal.basePrice * qty });
+      const unitPrice = isBoxPriced ? 0 : (snackIdSet.has(meal.id) ? snackUnitPrice(meal) : meal.basePrice);
+      allItems.push({ meal, qty, isDouble: false, price: unitPrice * qty });
     }
   });
   Object.entries(doubles).forEach(([id, qty]) => {
@@ -104,10 +110,8 @@ export default function CartSidebar({
       const meal = findMeal(Number(id));
       if (!meal) return;
       const isBoxPriced = entreeIdSet.has(meal.id) || breakfastIdSet.has(meal.id);
-      allItems.push({
-        meal, qty, isDouble: true,
-        price: isBoxPriced ? 0 : (meal.basePrice + (meal.doubleProteinPrice || 0)) * qty,
-      });
+      const unitPrice = isBoxPriced ? 0 : (snackIdSet.has(meal.id) ? snackUnitPrice(meal) : meal.basePrice) + (meal.doubleProteinPrice || 0);
+      allItems.push({ meal, qty, isDouble: true, price: unitPrice * qty });
     }
   });
 
@@ -123,8 +127,8 @@ export default function CartSidebar({
     ? shopifyConfig.entreesVariants[mealCount].price
     : 0;
   const doubleProteinPrice = entreeDoubleQty * shopifyConfig.doubleProteinPerMeal;
-  const breakfastBoxPrice = breakfastCount && BREAKFAST_PRICING[breakfastCount]
-    ? BREAKFAST_PRICING[breakfastCount].perMeal * breakfastCount
+  const breakfastBoxPrice = breakfastCount && shopifyConfig.breakfastVariants[breakfastCount]
+    ? shopifyConfig.breakfastVariants[breakfastCount].price
     : 0;
   const snackSubtotal = snackItems.reduce((sum, item) => sum + item.price, 0);
 

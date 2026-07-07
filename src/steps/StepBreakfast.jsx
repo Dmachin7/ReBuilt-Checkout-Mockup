@@ -3,9 +3,12 @@ import MealCard from '../components/MealCard';
 import MealModal from '../components/MealModal';
 import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
-import { BREAKFAST_PRICING } from '../data/breakfastPricing';
+import { shopifyConfig } from '../config/shopify';
 
-const BREAKFAST_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+// Real breakfast box counts + prices (shopifyConfig.breakfastVariants) --
+// confirmed 2026-07-14 via a live captured order. No count of 9 exists in
+// the catalog.
+const BREAKFAST_COUNTS = Object.keys(shopifyConfig.breakfastVariants).map(Number).sort((a, b) => a - b);
 
 export default function StepBreakfast({
   singles, doubles,
@@ -69,7 +72,7 @@ export default function StepBreakfast({
         <section className="bg-white rounded-2xl p-5 shadow-sm">
           <div className="flex flex-wrap gap-2 mb-3">
             {BREAKFAST_COUNTS.map((n, idx) => {
-              const p = BREAKFAST_PRICING[n];
+              const perMeal = shopifyConfig.breakfastVariants[n].price / n;
               const isSelected = breakfastCount === n;
               return (
                 <button
@@ -83,7 +86,7 @@ export default function StepBreakfast({
                 >
                   <p className="font-bold text-sm">{n}</p>
                   <p className={`text-[10px] mt-0.5 ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
-                    ${p.perMeal}/ea
+                    ${perMeal.toFixed(2)}/ea
                   </p>
                 </button>
               );

@@ -95,6 +95,11 @@ export function transformProduct(node) {
   const variantTitles = (node.variants ? node.variants.edges : []).map(e => e.node.title.toLowerCase());
   const doubleProtein = variantTitles.includes('double protein');
 
+  // Snacks tagged "Doughnuts" are added to cart via a separate Shopify
+  // product (shopifyConfig.doughnutsProduct) from regular snacks
+  // (shopifyConfig.snacksProduct) -- confirmed via a real captured order.
+  const isDoughnuts = tags.some(t => t.toLowerCase() === 'doughnuts');
+
   // allergensList holds free-text warnings ("Contains Dairy & Egg") and
   // claims ("Vegan", "Spicy"), not a clean allergen-free taxonomy. We show
   // these as-is rather than inferring "X Free" claims from an *absence* of
@@ -121,10 +126,11 @@ export function transformProduct(node) {
     badge: null,
     doubleProtein,
     doubleProteinPrice: shopifyConfig.doubleProteinPerMeal,
-    // Real per-unit price from Shopify (breakfast/snacks are priced
-    // per-item; entrées variants are always $0 -- their real price is the
-    // flat box rate in shopifyConfig.entreesVariants, applied in
-    // StepCheckout, not this field).
+    isDoughnuts,
+    // Real per-unit price from Shopify. Snacks are priced per-item and
+    // this is their real cart price. Entrées/breakfast display variants
+    // are always $0 -- their real price is the flat box rate in
+    // shopifyConfig.entreesVariants/breakfastVariants, applied at checkout.
     basePrice: node.variants && node.variants.edges[0]
       ? Number(node.variants.edges[0].node.price.amount)
       : 0,

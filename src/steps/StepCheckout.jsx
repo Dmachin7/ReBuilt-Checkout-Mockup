@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { shopifyConfig } from '../config/shopify';
-import { BREAKFAST_PRICING } from '../data/breakfastPricing';
+import { pickSnackVariant } from '../lib/shopifyCheckout';
 
 export default function StepCheckout({
   singles, doubles, mealCount, breakfastCount, weeks,
@@ -21,19 +21,23 @@ export default function StepCheckout({
   }
 
   // Entrées and breakfast are each priced as a flat box rate by total count
-  // in production (shopifyConfig.entreesVariants; breakfast's real variant
-  // map isn't captured yet, so it still uses the mockup's placeholder
-  // per-count tiers from StepBreakfast) -- their line items below carry
-  // price:0 and are display-only. Snacks are individually priced real
-  // Shopify products, confirmed via a live query, so they keep per-item
-  // pricing.
+  // in production (shopifyConfig.entreesVariants/breakfastVariants) --
+  // their line items below carry price:0 and are display-only. Snacks are
+  // priced by matching to a shared Snacks/Doughnuts tier variant (see
+  // pickSnackVariant) rather than their own basePrice, which is
+  // unreliably $0 in the live catalog.
+  function snackUnitPrice(meal) {
+    return pickSnackVariant(meal).variant.price;
+  }
+
   const cartItems = [];
   Object.entries(singles).forEach(([id, qty]) => {
     if (qty > 0) {
       const meal = allMeals.find(m => m.id === Number(id));
       if (!meal) return;
       const isBoxPriced = entreeIds.has(meal.id) || BREAKFAST_IDS.has(meal.id);
-      cartItems.push({ meal, qty, isDouble: false, price: isBoxPriced ? 0 : meal.basePrice * qty });
+      const unitPrice = isBoxPriced ? 0 : (SNACK_IDS.has(meal.id) ? snackUnitPrice(meal) : meal.basePrice);
+      cartItems.push({ meal, qty, isDouble: false, price: unitPrice * qty });
     }
   });
   Object.entries(doubles).forEach(([id, qty]) => {
@@ -41,10 +45,8 @@ export default function StepCheckout({
       const meal = allMeals.find(m => m.id === Number(id));
       if (!meal) return;
       const isBoxPriced = entreeIds.has(meal.id) || BREAKFAST_IDS.has(meal.id);
-      cartItems.push({
-        meal, qty, isDouble: true,
-        price: isBoxPriced ? 0 : (meal.basePrice + (meal.doubleProteinPrice || 0)) * qty,
-      });
+      const unitPrice = isBoxPriced ? 0 : (SNACK_IDS.has(meal.id) ? snackUnitPrice(meal) : meal.basePrice) + (meal.doubleProteinPrice || 0);
+      cartItems.push({ meal, qty, isDouble: true, price: unitPrice * qty });
     }
   });
 
@@ -57,8 +59,8 @@ export default function StepCheckout({
     ? shopifyConfig.entreesVariants[mealCount].price
     : 0;
   const doubleProteinPrice = entreeDoubleQty * shopifyConfig.doubleProteinPerMeal;
-  const breakfastBoxPrice = breakfastCount && BREAKFAST_PRICING[breakfastCount]
-    ? BREAKFAST_PRICING[breakfastCount].perMeal * breakfastCount
+  const breakfastBoxPrice = breakfastCount && shopifyConfig.breakfastVariants[breakfastCount]
+    ? shopifyConfig.breakfastVariants[breakfastCount].price
     : 0;
   const snackSubtotal = snackItems.reduce((sum, i) => sum + i.price, 0);
 

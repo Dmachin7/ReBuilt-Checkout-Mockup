@@ -55,6 +55,46 @@ export const shopifyConfig = {
     25: { id: '45982833475636', price: 267.18 },
   },
 
+  // Breakfast is its own box product (handle "breakfast-1", title
+  // "Breakfast"), structured exactly like entrées: one shared selling plan,
+  // one variant per meal count. Found 2026-07-14 by looking up the sibling
+  // variants of a real captured order's breakfast line -- confirmed
+  // complete (no count above 10, no count of 9 exists in the catalog).
+  breakfastSellingPlanId: '2086436916',
+  breakfastVariants: {
+    1: { id: '46034579816500', price: 6.13 },
+    2: { id: '46034579849268', price: 12.26 },
+    3: { id: '46034579882036', price: 18.39 },
+    4: { id: '46034579914804', price: 24.51 },
+    5: { id: '45201487167540', price: 30.64 },
+    6: { id: '45201487200308', price: 36.77 },
+    7: { id: '45201487233076', price: 42.9 },
+    8: { id: '45201487265844', price: 49.03 },
+    10: { id: '45201487331380', price: 61.29 },
+  },
+
+  // Snacks are NOT separate products -- every snack is metadata riding on
+  // one of two shared price-tier variants of a single "Snacks" product
+  // (or, if tagged "Doughnuts", the separate "Doughnuts" product). Which
+  // variant to use is picked by matching the snack's own display price to
+  // one of these tiers. Confirmed 2026-07-14 via a real captured order
+  // (Brownie -> Snacks $3.24 tier, a Doughnuts item -> Doughnuts $8.12
+  // tier) plus looking up each product's full variant list.
+  snacksProduct: {
+    sellingPlanId: '2221572148',
+    variants: [
+      { price: 3.24, id: '47696906420276' },
+      { price: 8.24, id: '47696906584116' },
+    ],
+  },
+  doughnutsProduct: {
+    sellingPlanId: '2221604916',
+    variants: [
+      { price: 8.12, id: '47696937484340' },
+      { price: 10.24, id: '47696937517108' },
+    ],
+  },
+
   plans: {
     lifestyle: {
       name: 'Lifestyle',
@@ -83,6 +123,15 @@ export const shopifyConfig = {
       image: 'https://cdn.shopify.com/s/files/1/0273/5253/0996/files/Plant-Based_Meal_Plan_1.svg?v=1748283067',
       color: '#eaf5ee',
       photoUrl: 'https://welcome.rebuiltmeals.com/wp-content/uploads/2026/05/plant-based.jpg',
+    },
+    // Breakfast items aren't tagged into the 4 entrée categories, so a real
+    // captured breakfast order's _metadata used this as its defaultPlan /
+    // userSelections planName regardless of the customer's entrée plan.
+    chefsChoice: {
+      name: "Chef's Choice",
+      tag: null,
+      image: 'https://cdn.shopify.com/s/files/1/0273/5253/0996/files/chef_s-choice.svg?v=1726655454',
+      color: '#8ecafd',
     },
   },
 

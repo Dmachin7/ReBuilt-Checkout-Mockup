@@ -12,7 +12,7 @@ import ConfirmationScreen from './steps/ConfirmationScreen';
 import ShopifyRedirectScreen from './steps/ShopifyRedirectScreen';
 import { useShopifyMenu } from './hooks/useShopifyMenu';
 import { setWeekForSelection, earliestDeliverableMonday } from './lib/shopifyWeeks';
-import { buildEntreeSelections, buildMetadataPayload, buildCheckoutUrl } from './lib/shopifyCheckout';
+import { buildEntreeSelections, buildMetadataPayload, buildBreakfastMetadata, buildCheckoutUrl } from './lib/shopifyCheckout';
 import { shopifyConfig } from './config/shopify';
 import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS, ALLERGY_OPTIONS } from './data/meals';
 
@@ -256,7 +256,7 @@ export default function App() {
       : earliestDeliverableMonday(new Date());
 
     const defaultPlanKey = PLAN_TO_KEY[selectedPlan] || CATEGORY_TO_PLAN_KEY[userSelections[0].planName.toUpperCase()] || 'lifestyle';
-    const { metadataJson, defaultDataJson } = buildMetadataPayload({
+    const entreeMetadataJson = buildMetadataPayload({
       setWeek, mealCount, defaultPlanKey, userSelections, singleProteinCount, doubleProteinCount,
     });
 
@@ -270,13 +270,34 @@ export default function App() {
     const allergiesValue = allergyLabels.length ? allergyLabels.join(', ') : 'No Allergies';
     const allergyNotesValue = allergyNotes.trim() || 'No Allergies Notes';
 
+    // Breakfast: same flat box-rate model as entrées, its own variant map
+    // keyed by count (shopifyConfig.breakfastVariants).
+    let breakfastLine = null;
+    if (breakfastCount && shopifyConfig.breakfastVariants[breakfastCount]) {
+      const breakfastVariant = shopifyConfig.breakfastVariants[breakfastCount];
+      const breakfastMetadataJson = buildBreakfastMetadata({
+        setWeek, breakfastCount, singles: cart.singles, doubles: cart.doubles, breakfastMeals: breakfastItems,
+      });
+      breakfastLine = { variantId: breakfastVariant.id, metadataJson: breakfastMetadataJson };
+    }
+
+    // Snacks: each selected item is its own cart line (see shopifyCheckout.js).
+    const snackIdSet = new Set(snackItems.map(m => m.id));
+    const snackLines = [];
+    [cart.singles, cart.doubles].forEach(source => {
+      Object.entries(source).forEach(([id, qty]) => {
+        if (qty <= 0) return;
+        const meal = snackItems.find(m => m.id === Number(id));
+        if (meal && snackIdSet.has(meal.id)) snackLines.push({ meal, quantity: qty });
+      });
+    });
+
     return buildCheckoutUrl({
-      entreeVariantId: entreeVariant.id,
-      mealCount,
+      entree: { variantId: entreeVariant.id, mealCount, metadataJson: entreeMetadataJson },
+      doubleProtein: doubleProteinCount > 0 ? { quantity: doubleProteinCount } : null,
+      breakfast: breakfastLine,
+      snackLines,
       setWeek,
-      metadataJson,
-      defaultDataJson,
-      doubleProteinCount,
       allergiesValue,
       allergyNotesValue,
       discountCode: discountCode.trim(),
