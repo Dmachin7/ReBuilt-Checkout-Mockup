@@ -37,13 +37,19 @@ export function buildEntreeSelections({ singles, doubles, entreeMeals }) {
       if (!groups.has(planKey)) {
         groups.set(planKey, { planName: planCfg.name, planImage: planCfg.image, meals: [] });
       }
+      // mealPlanImage/mealPlanColor/productImage are dropped here even
+      // though the confirmed capture includes them per-meal -- see the URL
+      // length note on buildCheckoutUrl. mealPlanImage/Color are pure
+      // duplicates of this group's own planImage/(null); productImage is a
+      // full CDN URL repeated per meal that measurably contributed to real
+      // HTTP 414 failures (confirmed 2026-07-15). A broken checkout is
+      // worse than a kitchen ops sheet missing thumbnails -- if those
+      // images turn out to be load-bearing for the gsheets pipeline, this
+      // needs a non-GET-chain transport instead, not more trimming.
       groups.get(planKey).meals.push({
         productTitle: meal.name,
-        productImage: meal.image,
         proteinAmount: isDouble ? 'Double Protein' : 'Single Protein',
         quantity: qty,
-        mealPlanImage: planCfg.image,
-        mealPlanColor: null,
         mealRank: rank++,
       });
       if (isDouble) doubleProteinCount += qty;
@@ -95,14 +101,12 @@ export function buildBreakfastMetadata({ setWeek, breakfastCount, singles, doubl
       if (qty <= 0) return;
       const meal = byId.get(Number(id));
       if (!meal) return;
-      const chefCfg = shopifyConfig.plans.chefsChoice;
+      // mealPlanImage/mealPlanColor/productImage dropped per-meal -- same
+      // rationale as buildEntreeSelections above.
       meals.push({
         productTitle: meal.name,
-        productImage: meal.image,
         proteinAmount: 'Default Title',
         quantity: qty,
-        mealPlanImage: chefCfg.image,
-        mealPlanColor: null,
         mealRank: rank++,
       });
       totalQty += qty;
@@ -154,32 +158,56 @@ export function pickSnackVariant(meal) {
   return { product, variant };
 }
 
-// Builds one snack line's _metadata, matching the real captured shape
-// (structurally different from entrées/breakfast -- no gsheetsProcessing,
-// no userSelections; just the one selected item under `meals`).
-function buildSnackMetadata({ setWeek, meal, variant, sellingPlanId, quantity }) {
-  const metadata = {
-    [setWeek]: {
-      meals: {
-        selectedVariantId: `gid://shopify/ProductVariant/${variant.id}`,
-        selectedVariant: {
-          title: String(variant.price),
-          id: `gid://shopify/ProductVariant/${variant.id}`,
-          price: { amount: String(variant.price), currencyCode: 'USD' },
-          metafields: [null, null],
-          sellingPlanAllocations: { nodes: [{ sellingPlan: { id: `gid://shopify/SellingPlan/${sellingPlanId}`, name: '1 week subscription' } }] },
-          image: { url: meal.image },
-        },
-        sellingPlanId: `gid://shopify/SellingPlan/${sellingPlanId}`,
-        price: String(variant.price),
-        productImage: meal.image,
-        productTitle: meal.name,
-        isDoughnuts: !!meal.isDoughnuts,
-        quantity,
-      },
-      skipped: false,
-    },
-  };
+// Builds one snack-tier line's _metadata. The real captured shape (for a
+// single snack) also nests a full duplicate Shopify variant object
+// (id/price/metafields/sellingPlanAllocations/image, all already present
+// or derivable from fields kept here and from the cart line's own
+// id/selling_plan params) -- dropped deliberately, see note below.
+//
+// KNOWN GAP: the display product's own price (meal.basePrice) that
+// pickSnackVariant matches against is unreliable -- confirmed 2026-07-14
+// that it reads $0 for every snack in the currently active week, with no
+// metafield holding a real price either. With price=0, resolution always
+// falls back to the cheapest tier. The two real captured examples
+// (Brownie, a Doughnuts item) both happened to be the cheapest tier in
+// their product, so this hasn't been observed to pick wrong -- but it has
+// never been tested against a snack that should resolve to the *expensive*
+// tier. Get a real capture of one before trusting this fully.
+//
+// `items` holds every distinct snack sharing this tier variant (see the
+// grouping in buildCheckoutUrl) -- for the single-item case this matches
+// the confirmed capture shape exactly (`meals` as one object); for
+// multiple items sharing a tier, `meals` becomes an array instead, which
+// is an extrapolation beyond anything captured, done because the
+// alternative (one hop per distinct snack name) caused real HTTP 414
+// URI-Too-Long failures once a real order had breakfast + 2 snacks
+// (confirmed 2026-07-15) -- every hop in the GET-navigation chain gets
+// percent-re-encoded once per level of nesting it sits inside (see
+// buildCheckoutUrl), so hop *count* matters as much as hop size. The real
+// mealplan.com site never hits this because it POSTs a JSON body instead
+// of chaining GET redirects.
+function buildSnackTierMetadata({ setWeek, variant, sellingPlanId, items }) {
+  let meals;
+  if (items.length === 1) {
+    const item = items[0];
+    meals = {
+      selectedVariantId: `gid://shopify/ProductVariant/${variant.id}`,
+      sellingPlanId: `gid://shopify/SellingPlan/${sellingPlanId}`,
+      price: String(variant.price),
+      productTitle: item.meal.name,
+      isDoughnuts: !!item.meal.isDoughnuts,
+      quantity: item.quantity,
+    };
+  } else {
+    // Multiple distinct snacks sharing a price tier -- kept minimal to
+    // bound URL size regardless of how many are grouped here.
+    meals = items.map(item => ({
+      productTitle: item.meal.name,
+      isDoughnuts: !!item.meal.isDoughnuts,
+      quantity: item.quantity,
+    }));
+  }
+  const metadata = { [setWeek]: { meals, skipped: false } };
   return JSON.stringify(metadata);
 }
 
@@ -248,12 +276,29 @@ export function buildCheckoutUrl({
     ]));
   }
 
+  // Group snacks by their resolved tier variant so hop count stays capped
+  // at 4 (2 tiers x 2 products) no matter how many distinct snacks a
+  // customer picks -- see buildSnackTierMetadata for why this matters.
+  const snackGroups = new Map();
   (snackLines || []).forEach(({ meal, quantity }) => {
     const { product, variant } = pickSnackVariant(meal);
-    const metadataJson = buildSnackMetadata({ setWeek, meal, variant, sellingPlanId: product.sellingPlanId, quantity });
-    lines.push(buildLineParams(variant.id, product.sellingPlanId, quantity, [
-      ['_subscriptionType', meal.isDoughnuts ? 'doughnuts' : 'snacks'],
-      ['_productTitle', meal.name],
+    if (!snackGroups.has(variant.id)) {
+      snackGroups.set(variant.id, { product, variant, quantity: 0, items: [] });
+    }
+    const group = snackGroups.get(variant.id);
+    group.quantity += quantity;
+    group.items.push({ meal, quantity });
+  });
+
+  snackGroups.forEach(group => {
+    const metadataJson = buildSnackTierMetadata({ setWeek, variant: group.variant, sellingPlanId: group.product.sellingPlanId, items: group.items });
+    const isDoughnuts = group.items[0].meal.isDoughnuts;
+    const titleSummary = group.items.length === 1
+      ? group.items[0].meal.name
+      : `${group.items.length} ${isDoughnuts ? 'doughnuts' : 'snacks'} items`;
+    lines.push(buildLineParams(group.variant.id, group.product.sellingPlanId, group.quantity, [
+      ['_subscriptionType', isDoughnuts ? 'doughnuts' : 'snacks'],
+      ['_productTitle', titleSummary],
       ['_metadata', metadataJson],
       ...shared,
     ]));
@@ -264,5 +309,17 @@ export function buildCheckoutUrl({
     chain = `/cart/add?${qs([...lines[i], ['return_to', chain]])}`;
   }
 
-  return `https://${shopifyConfig.storefrontApiHost}${chain}`;
+  const url = `https://${shopifyConfig.storefrontApiHost}${chain}`;
+
+  // Shopify's edge returns a hard HTTP 414 somewhere between 10,100 and
+  // 10,200 total characters (binary-searched empirically against the real
+  // store 2026-07-15, well below any browser's own URL limit). Warn well
+  // before that cliff so a large real order doesn't fail silently the way
+  // this did in production testing -- there's no way to recover from a 414
+  // client-side once it's already been navigated to.
+  if (url.length > 8000) {
+    console.warn(`buildCheckoutUrl: URL is ${url.length} chars, approaching Shopify's ~10,200 char hard limit (confirmed via real testing). Large orders (many entrées + breakfast + several distinct snacks) risk a silent HTTP 414 at checkout.`);
+  }
+
+  return url;
 }
