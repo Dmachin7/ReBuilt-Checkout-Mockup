@@ -4,7 +4,21 @@ const CYCLE_LENGTH = 13;
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
 
 function mondayOf(dateLike) {
-  const d = new Date(dateLike);
+  let d;
+  if (typeof dateLike === 'string') {
+    // "YYYY-MM-DD" must be parsed as a LOCAL date, not handed to
+    // `new Date(string)` -- that parses date-only ISO strings as UTC
+    // midnight, which in any negative UTC-offset timezone (all of the US)
+    // rolls back to the previous local calendar day, and therefore the
+    // previous Monday once floored here. This silently added one extra
+    // week to every week-collection lookup (confirmed 2026-07-14: the
+    // config's weekCollectionAnchor.deliveryDate string was hitting this
+    // exact bug, making every computed week number 1 too high).
+    const [y, m, day] = dateLike.split('-').map(Number);
+    d = new Date(y, m - 1, day);
+  } else {
+    d = new Date(dateLike);
+  }
   d.setHours(0, 0, 0, 0);
   const day = d.getDay();
   const diff = day === 0 ? -6 : 1 - day;

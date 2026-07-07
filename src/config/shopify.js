@@ -9,12 +9,21 @@ export const shopifyConfig = {
   storefrontToken: 'e68f9724fb1f28fcc308f84d9d9cdf56',
 
   // Active menu collection rotates automatically based on delivery week.
-  // Anchor: week-8 corresponds to delivery week of 2026-05-18 (Monday).
-  // Collection handle increments by 1 for each Monday after the anchor.
+  // Anchor: week-3 corresponds to delivery week of 2026-07-13 (Monday).
+  // Collection handle increments by 1 for each Monday after the anchor,
+  // wrapping 13 -> 1 (see collectionNumberForOffset in shopifyWeeks.js).
+  //
+  // Corrected 2026-07-14 per direct confirmation against ReBuilt's actual
+  // cooking/plating schedule -- the value captured from the offer page's
+  // JS on 2026-07-07 (week-8 = 2026-05-18) had drifted one week off by
+  // the time this was checked against the kitchen's real schedule. If
+  // this drifts again, re-anchor to a fresh confirmed (week number,
+  // delivery Monday) pair rather than trusting the arithmetic across a
+  // long gap -- see handoff doc section 3c on skipped/staged weeks.
   weekCollectionAnchor: {
-    handle: 'week-8',
-    number: 8,
-    deliveryDate: '2026-05-18',
+    handle: 'week-3',
+    number: 3,
+    deliveryDate: '2026-07-13',
   },
 
   discountCode: '50%offer',
