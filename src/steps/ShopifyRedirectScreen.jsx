@@ -1,4 +1,34 @@
-export default function ShopifyRedirectScreen({ onBack }) {
+import { useEffect } from 'react';
+
+export default function ShopifyRedirectScreen({ checkoutUrl, onBack }) {
+  useEffect(() => {
+    if (!checkoutUrl) return;
+    const timer = setTimeout(() => {
+      window.location.href = checkoutUrl;
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [checkoutUrl]);
+
+  if (!checkoutUrl) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+        <div className="max-w-md w-full text-center">
+          <div className="text-4xl mb-4">⚠️</div>
+          <h1 className="font-display text-2xl text-gray-900 mb-2">Couldn't build your order</h1>
+          <p className="text-gray-500 text-sm mb-8">
+            Something's missing from your selections (meal count or meals). Go back and double-check your order.
+          </p>
+          <button
+            onClick={onBack}
+            className="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors"
+          >
+            ← Back to Allergies
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full text-center">

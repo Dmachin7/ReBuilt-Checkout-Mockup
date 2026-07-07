@@ -64,9 +64,10 @@ export default function MealModal({
   onAddSingle, onRemoveSingle,
   onAddDouble, onRemoveDouble,
   atLimit,
+  liveDetails,
 }) {
   const cat = CATEGORY_STYLES[meal.category] || CATEGORY_STYLES.LIFESTYLE;
-  const details = MEAL_DETAILS[meal.id] || DEFAULT_MEAL_DETAILS;
+  const details = (liveDetails && liveDetails[meal.id]) || MEAL_DETAILS[meal.id] || DEFAULT_MEAL_DETAILS;
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';

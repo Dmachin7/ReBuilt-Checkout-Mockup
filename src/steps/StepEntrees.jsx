@@ -3,15 +3,6 @@ import MealCard from '../components/MealCard';
 import MealModal from '../components/MealModal';
 import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
-import { MEALS_WEEK1, MEALS_WEEK2, MEALS_WEEK3, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/meals';
-
-const ENTREE_ALL_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3].map(m => m.id));
-
-const WEEKS = [
-  { id: 'w1', label: 'Week of Jun 29' },
-  { id: 'w2', label: 'Week of Jul 6' },
-  { id: 'w3', label: 'Week of Jul 13' },
-];
 
 const CATEGORIES = [
   { id: 'ALL',         label: 'All' },
@@ -27,6 +18,8 @@ export default function StepEntrees({
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
   entreeCount, mealCount, mealMode,
   onNext, onBack, onClear, selectedPlan, onClearEntrees, onRechefWeek,
+  weeks, menuLoading, menuError, mealDetails,
+  entreeMeals, breakfastItems, snackItems,
 }) {
   const [activeWeek, setActiveWeek] = useState('w1');
   const [activeCategory, setActiveCategory] = useState('ALL');
@@ -34,13 +27,15 @@ export default function StepEntrees({
   const [chefBannerDismissed, setChefBannerDismissed] = useState(false);
   const [pendingWeek, setPendingWeek] = useState(null);
 
-  const weekMeals = activeWeek === 'w1' ? MEALS_WEEK1 : activeWeek === 'w2' ? MEALS_WEEK2 : MEALS_WEEK3;
+  const entreeAllIds = new Set(weeks.flatMap(w => w.meals.map(m => m.id)));
+  const activeWeekData = weeks.find(w => w.id === activeWeek) || weeks[0];
+  const weekMeals = activeWeekData ? activeWeekData.meals : [];
 
   function handleWeekTabClick(weekId) {
     if (weekId === activeWeek) return;
     const hasEntrees =
-      Object.entries(singles).some(([id, qty]) => qty > 0 && ENTREE_ALL_IDS.has(Number(id))) ||
-      Object.entries(doubles).some(([id, qty]) => qty > 0 && ENTREE_ALL_IDS.has(Number(id)));
+      Object.entries(singles).some(([id, qty]) => qty > 0 && entreeAllIds.has(Number(id))) ||
+      Object.entries(doubles).some(([id, qty]) => qty > 0 && entreeAllIds.has(Number(id)));
     if (hasEntrees) {
       setPendingWeek(weekId);
     } else {
@@ -104,7 +99,7 @@ export default function StepEntrees({
 
         {/* Week selector — above filter */}
         <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
-          {WEEKS.map(w => (
+          {weeks.map(w => (
             <button
               key={w.id}
               onClick={() => handleWeekTabClick(w.id)}
@@ -141,7 +136,19 @@ export default function StepEntrees({
 
         {/* Meal grid */}
         <div className="pt-7 sm:pt-11 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 sm:gap-y-12">
-          {meals.length === 0 && (
+          {menuLoading && (
+            <div className="col-span-2 py-10 text-center text-gray-400">
+              <p className="text-3xl mb-2 animate-pulse">🍽️</p>
+              <p className="text-sm">Loading this week's menu…</p>
+            </div>
+          )}
+          {!menuLoading && menuError && (
+            <div className="col-span-2 py-10 text-center text-red-400">
+              <p className="text-3xl mb-2">⚠️</p>
+              <p className="text-sm">Couldn't load the live menu ({menuError}). Showing sample meals instead.</p>
+            </div>
+          )}
+          {!menuLoading && meals.length === 0 && (
             <div className="col-span-2 py-10 text-center text-gray-400">
               <p className="text-3xl mb-2">🍽️</p>
               <p className="text-sm">No meals found for this filter</p>
@@ -176,6 +183,9 @@ export default function StepEntrees({
         onRemoveSingle={onRemoveSingle}
         onAddDouble={onAddDouble}
         onRemoveDouble={onRemoveDouble}
+        entreeMeals={entreeMeals}
+        breakfastItems={breakfastItems}
+        snackItems={snackItems}
       />
 
       <MobileCartBar
@@ -187,6 +197,9 @@ export default function StepEntrees({
         continueDisabled={!isAtLimit}
         visible
         onClear={onClear}
+        entreeMeals={entreeMeals}
+        breakfastItems={breakfastItems}
+        snackItems={snackItems}
         onAddSingle={onAddSingle}
         onRemoveSingle={onRemoveSingle}
         onAddDouble={onAddDouble}
@@ -206,6 +219,7 @@ export default function StepEntrees({
           onAddDouble={onAddDouble}
           onRemoveDouble={onRemoveDouble}
           atLimit={isAtLimit}
+          liveDetails={mealDetails}
         />
       )}
 
@@ -217,9 +231,9 @@ export default function StepEntrees({
             <h3 className="font-display text-xl text-gray-900 mb-2 text-center">Switch weeks?</h3>
             <p className="text-gray-500 text-sm text-center mb-5">
               {mealMode === 'chef' ? (
-                <>Switching to <strong>{WEEKS.find(w => w.id === pendingWeek)?.label}</strong> will pick a fresh chef's mix for that week.</>
+                <>Switching to <strong>{weeks.find(w => w.id === pendingWeek)?.label}</strong> will pick a fresh chef's mix for that week.</>
               ) : (
-                <>Switching to <strong>{WEEKS.find(w => w.id === pendingWeek)?.label}</strong> will clear your current meal selections.</>
+                <>Switching to <strong>{weeks.find(w => w.id === pendingWeek)?.label}</strong> will clear your current meal selections.</>
               )}
             </p>
             <div className="flex flex-col gap-2.5">

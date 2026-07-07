@@ -3,24 +3,25 @@ import MealCard from '../components/MealCard';
 import MealModal from '../components/MealModal';
 import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
-import { SNACK_ITEMS } from '../data/meals';
-
-const SNACK_IDS = new Set(SNACK_ITEMS.map(m => m.id));
 
 export default function StepSnacks({
   singles, doubles,
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
   onNext, onSkipSnacks, onBack, mealCount, onClear, breakfastCount,
+  items, mealDetails,
+  entreeMeals, breakfastItems, snackItems,
 }) {
   const [modalMeal, setModalMeal] = useState(null);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
+
+  const SNACK_IDS = new Set(items.map(m => m.id));
 
   const selectedSnackCount = [
     ...Object.entries(singles),
     ...Object.entries(doubles),
   ].filter(([id]) => SNACK_IDS.has(Number(id))).reduce((sum, [, qty]) => sum + qty, 0);
 
-  const selectedSnackNames = SNACK_ITEMS
+  const selectedSnackNames = items
     .filter(m => (singles[m.id] || 0) + (doubles[m.id] || 0) > 0)
     .map(m => m.name);
 
@@ -56,7 +57,7 @@ export default function StepSnacks({
         </button>
 
         <div className="pt-7 sm:pt-11 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 sm:gap-y-12">
-          {SNACK_ITEMS.map(meal => (
+          {items.map(meal => (
             <MealCard
               key={meal.id}
               meal={meal}
@@ -87,6 +88,9 @@ export default function StepSnacks({
         onBackLabel="Back to Breakfast"
         breakfastCount={breakfastCount}
         lockEntrees
+        entreeMeals={entreeMeals}
+        breakfastItems={breakfastItems}
+        snackItems={snackItems}
       />
 
       <MobileCartBar
@@ -97,6 +101,9 @@ export default function StepSnacks({
         continueLabel="Continue →"
         visible
         onClear={onClear}
+        entreeMeals={entreeMeals}
+        breakfastItems={breakfastItems}
+        snackItems={snackItems}
         onAddSingle={onAddSingle}
         onRemoveSingle={onRemoveSingle}
         onAddDouble={onAddDouble}
@@ -118,6 +125,7 @@ export default function StepSnacks({
           onAddDouble={onAddDouble}
           onRemoveDouble={onRemoveDouble}
           atLimit={false}
+          liveDetails={mealDetails}
         />
       )}
 

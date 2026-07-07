@@ -3,24 +3,9 @@ import MealCard from '../components/MealCard';
 import MealModal from '../components/MealModal';
 import CartSidebar from '../components/CartSidebar';
 import MobileCartBar from '../components/MobileCartBar';
-import { BREAKFAST_ITEMS } from '../data/meals';
-
-const BREAKFAST_IDS = new Set(BREAKFAST_ITEMS.map(m => m.id));
+import { BREAKFAST_PRICING } from '../data/breakfastPricing';
 
 const BREAKFAST_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-const PRICING = {
-  1:  { perMeal: 9.99 },
-  2:  { perMeal: 9.49 },
-  3:  { perMeal: 9.49 },
-  4:  { perMeal: 8.99 },
-  5:  { perMeal: 8.99 },
-  6:  { perMeal: 8.49 },
-  7:  { perMeal: 8.49 },
-  8:  { perMeal: 7.99 },
-  9:  { perMeal: 7.99 },
-  10: { perMeal: 7.49 },
-};
 
 export default function StepBreakfast({
   singles, doubles,
@@ -28,6 +13,8 @@ export default function StepBreakfast({
   mealCount, mealMode, breakfastCount,
   onSetBreakfastCount, onSkipBreakfast,
   onNext, onBack, onClear,
+  items, mealDetails,
+  entreeMeals, breakfastItems, snackItems,
 }) {
   const [modalMeal, setModalMeal] = useState(null);
   const [chefBannerDismissed, setChefBannerDismissed] = useState(false);
@@ -41,11 +28,11 @@ export default function StepBreakfast({
     };
   }
 
-  const selectedBreakfastNames = BREAKFAST_ITEMS
+  const selectedBreakfastNames = items
     .filter(m => (singles[m.id] || 0) + (doubles[m.id] || 0) > 0)
     .map(m => m.name);
 
-  const breakfastSelected = BREAKFAST_ITEMS.reduce(
+  const breakfastSelected = items.reduce(
     (sum, m) => sum + (singles[m.id] || 0) + (doubles[m.id] || 0), 0
   );
   const breakfastComplete = !breakfastCount || breakfastSelected >= breakfastCount;
@@ -82,7 +69,7 @@ export default function StepBreakfast({
         <section className="bg-white rounded-2xl p-5 shadow-sm">
           <div className="flex flex-wrap gap-2 mb-3">
             {BREAKFAST_COUNTS.map((n, idx) => {
-              const p = PRICING[n];
+              const p = BREAKFAST_PRICING[n];
               const isSelected = breakfastCount === n;
               return (
                 <button
@@ -144,7 +131,7 @@ export default function StepBreakfast({
 
         {/* Breakfast grid */}
         <div className="pt-7 sm:pt-11 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 sm:gap-y-12">
-          {BREAKFAST_ITEMS.map(meal => (
+          {items.map(meal => (
             <MealCard
               key={meal.id}
               meal={meal}
@@ -175,6 +162,9 @@ export default function StepBreakfast({
         onBackLabel="Back to Entrées"
         breakfastCount={breakfastCount}
         lockEntrees
+        entreeMeals={entreeMeals}
+        breakfastItems={breakfastItems}
+        snackItems={snackItems}
       />
 
       <MobileCartBar
@@ -186,6 +176,9 @@ export default function StepBreakfast({
         continueDisabled={!breakfastComplete}
         visible
         onClear={onClear}
+        entreeMeals={entreeMeals}
+        breakfastItems={breakfastItems}
+        snackItems={snackItems}
         onAddSingle={onAddSingle}
         onRemoveSingle={onRemoveSingle}
         onAddDouble={onAddDouble}
@@ -207,6 +200,7 @@ export default function StepBreakfast({
           onAddDouble={guardCount(onAddDouble)}
           onRemoveDouble={onRemoveDouble}
           atLimit={breakfastAtLimit}
+          liveDetails={mealDetails}
         />
       )}
 

@@ -1,12 +1,6 @@
 import { useState } from 'react';
-import { MEALS_WEEK1, MEALS_WEEK2, MEALS_WEEK3, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/meals';
-
-const ALL_MEALS = [...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3, ...BREAKFAST_ITEMS, ...SNACK_ITEMS];
-const ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3].map(m => m.id));
-const BREAKFAST_IDS = new Set(BREAKFAST_ITEMS.map(m => m.id));
-const SNACK_IDS = new Set(SNACK_ITEMS.map(m => m.id));
-
-function findMeal(id) { return ALL_MEALS.find(m => m.id === id); }
+import { shopifyConfig } from '../config/shopify';
+import { BREAKFAST_PRICING } from '../data/breakfastPricing';
 
 function QtyControl({ item, onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble, atLimit }) {
   const handler = item.isDouble
@@ -81,30 +75,60 @@ export default function CartSidebar({
   singles, doubles, mealCount, onClear,
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
   onBack, onBackLabel, breakfastCount, lockEntrees = false,
+  entreeMeals = [], breakfastItems: breakfastCatalog = [], snackItems: snackCatalog = [],
 }) {
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
+
+  const allMeals = [...entreeMeals, ...breakfastCatalog, ...snackCatalog];
+  const entreeIdSet = new Set(entreeMeals.map(m => m.id));
+  const breakfastIdSet = new Set(breakfastCatalog.map(m => m.id));
+  const snackIdSet = new Set(snackCatalog.map(m => m.id));
+  function findMeal(id) { return allMeals.find(m => m.id === id); }
+
+  // Entrées and breakfast are flat box-rate priced in production (their
+  // own basePrice is $0) -- price:0 here, real total computed below from
+  // the box-rate tables, same as StepCheckout. Snacks are individually
+  // priced real Shopify products.
   const allItems = [];
 
   Object.entries(singles).forEach(([id, qty]) => {
     if (qty > 0) {
       const meal = findMeal(Number(id));
-      if (meal) allItems.push({ meal, qty, isDouble: false, price: meal.basePrice * qty });
+      if (!meal) return;
+      const isBoxPriced = entreeIdSet.has(meal.id) || breakfastIdSet.has(meal.id);
+      allItems.push({ meal, qty, isDouble: false, price: isBoxPriced ? 0 : meal.basePrice * qty });
     }
   });
   Object.entries(doubles).forEach(([id, qty]) => {
     if (qty > 0) {
       const meal = findMeal(Number(id));
-      if (meal) allItems.push({ meal, qty, isDouble: true, price: (meal.basePrice + (meal.doubleProteinPrice || 0)) * qty });
+      if (!meal) return;
+      const isBoxPriced = entreeIdSet.has(meal.id) || breakfastIdSet.has(meal.id);
+      allItems.push({
+        meal, qty, isDouble: true,
+        price: isBoxPriced ? 0 : (meal.basePrice + (meal.doubleProteinPrice || 0)) * qty,
+      });
     }
   });
 
-  const entreeItems    = allItems.filter(item => ENTREE_IDS.has(item.meal.id));
-  const breakfastItems = allItems.filter(item => BREAKFAST_IDS.has(item.meal.id));
-  const snackItems     = allItems.filter(item => SNACK_IDS.has(item.meal.id));
+  const entreeItems    = allItems.filter(item => entreeIdSet.has(item.meal.id));
+  const breakfastItems = allItems.filter(item => breakfastIdSet.has(item.meal.id));
+  const snackItems     = allItems.filter(item => snackIdSet.has(item.meal.id));
 
   const entreeCount    = entreeItems.reduce((sum, item) => sum + item.qty, 0);
+  const entreeDoubleQty = entreeItems.filter(i => i.isDouble).reduce((sum, i) => sum + i.qty, 0);
   const breakfastSelected = breakfastItems.reduce((sum, item) => sum + item.qty, 0);
-  const subtotal = allItems.reduce((sum, item) => sum + item.price, 0);
+
+  const entreeBoxPrice = mealCount && shopifyConfig.entreesVariants[mealCount]
+    ? shopifyConfig.entreesVariants[mealCount].price
+    : 0;
+  const doubleProteinPrice = entreeDoubleQty * shopifyConfig.doubleProteinPerMeal;
+  const breakfastBoxPrice = breakfastCount && BREAKFAST_PRICING[breakfastCount]
+    ? BREAKFAST_PRICING[breakfastCount].perMeal * breakfastCount
+    : 0;
+  const snackSubtotal = snackItems.reduce((sum, item) => sum + item.price, 0);
+
+  const subtotal = entreeBoxPrice + doubleProteinPrice + breakfastBoxPrice + snackSubtotal;
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
 

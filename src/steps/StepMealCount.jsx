@@ -1,20 +1,26 @@
 import { useState } from 'react';
-import { MEAL_COUNTS } from '../data/meals';
+import { shopifyConfig } from '../config/shopify';
 
-const PRICING = {
-  5:  { perMeal: 13.99 },
-  7:  { perMeal: 13.49 },
-  9:  { perMeal: 12.99 },
-  10: { perMeal: 12.99 },
-  12: { perMeal: 12.49 },
-  14: { perMeal: 11.99 },
-  16: { perMeal: 11.49 },
-  18: { perMeal: 10.99 },
-};
+// Available counts + prices come straight from the live entrées variant
+// map (shopifyConfig.entreesVariants), not an invented per-meal rate --
+// this is a flat price per box size in production, not sum-of-meals.
+const MEAL_COUNTS = Object.keys(shopifyConfig.entreesVariants).map(Number).sort((a, b) => a - b);
+const MOST_POPULAR_COUNT = 10;
+
+// Initial 4 tiles shown before "More" -- always includes the "Most
+// Popular" badge count so it's visible without an extra click, even
+// though the real variant map's counts run consecutively (5,6,7,8...)
+// rather than the old mock's curated spread (5,7,9,10...) that happened
+// to include 10 in a plain first-4 slice.
+function initialVisibleCounts() {
+  if (!MEAL_COUNTS.includes(MOST_POPULAR_COUNT)) return MEAL_COUNTS.slice(0, 4);
+  const rest = MEAL_COUNTS.filter(n => n !== MOST_POPULAR_COUNT).slice(0, 3);
+  return [...rest, MOST_POPULAR_COUNT].sort((a, b) => a - b);
+}
 
 export default function StepMealCount({ mealCount, setMealCount, onNext }) {
   const [showMore, setShowMore] = useState(false);
-  const visibleCounts = showMore ? MEAL_COUNTS : MEAL_COUNTS.slice(0, 4);
+  const visibleCounts = showMore ? MEAL_COUNTS : initialVisibleCounts();
 
   return (
     <div className={`flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full sm:pb-10 ${showMore ? 'pb-40' : 'pb-28'}`}>
@@ -27,8 +33,8 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         {visibleCounts.map(n => {
-          const p = PRICING[n];
-          const weekly = (p.perMeal * n).toFixed(2);
+          const weekly = shopifyConfig.entreesVariants[n].price;
+          const perMeal = weekly / n;
           const isSelected = mealCount === n;
           const isMostPopular = n === 10;
           return (
@@ -54,10 +60,10 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
               >
                 <p className="font-bold text-lg leading-tight">{n} meals</p>
                 <p className={`text-sm mt-1 leading-tight ${isSelected ? 'text-green-100' : 'text-gray-400'}`}>
-                  ${p.perMeal}/meal
+                  ${perMeal.toFixed(2)}/meal
                 </p>
                 <p className={`text-xs leading-tight font-semibold mt-0.5 ${isSelected ? 'text-white/70' : 'text-gray-300'}`}>
-                  ${weekly}/wk
+                  ${weekly.toFixed(2)}/wk
                 </p>
               </button>
             </div>

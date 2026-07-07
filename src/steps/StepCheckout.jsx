@@ -1,62 +1,73 @@
 import { useState } from 'react';
-import { MEALS_WEEK1, MEALS_WEEK2, MEALS_WEEK3, BREAKFAST_ITEMS, SNACK_ITEMS } from '../data/meals';
+import { shopifyConfig } from '../config/shopify';
+import { BREAKFAST_PRICING } from '../data/breakfastPricing';
 
-const ALL_MEALS = [...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3, ...BREAKFAST_ITEMS, ...SNACK_ITEMS];
-const ENTREE_IDS = new Set([...MEALS_WEEK1, ...MEALS_WEEK2, ...MEALS_WEEK3].map(m => m.id));
-const BREAKFAST_IDS = new Set(BREAKFAST_ITEMS.map(m => m.id));
-const SNACK_IDS = new Set(SNACK_ITEMS.map(m => m.id));
-
-const MOCK_DISCOUNTS = {
-  REBUILT10: 0.10,
-  REBUILT20: 0.20,
-  NEWMEMBER: 0.15,
-};
-
-export default function StepCheckout({ singles, doubles, onBack, onConfirm }) {
+export default function StepCheckout({
+  singles, doubles, mealCount, breakfastCount, weeks,
+  breakfastItems: breakfastCatalog, snackItems: snackCatalog,
+  onBack, onConfirm,
+}) {
   const [openSections, setOpenSections] = useState({ entrees: false, breakfast: false, snacks: false });
-  const [discountCode, setDiscountCode] = useState('');
-  const [appliedDiscount, setAppliedDiscount] = useState(null);
-  const [discountError, setDiscountError] = useState('');
+
+  const allEntreeMeals = weeks.flatMap(w => w.meals);
+  const entreeIds = new Set(allEntreeMeals.map(m => m.id));
+  const BREAKFAST_IDS = new Set(breakfastCatalog.map(m => m.id));
+  const SNACK_IDS = new Set(snackCatalog.map(m => m.id));
+  const allMeals = [...allEntreeMeals, ...breakfastCatalog, ...snackCatalog];
 
   function toggleSection(key) {
     setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
   }
 
+  // Entrées and breakfast are each priced as a flat box rate by total count
+  // in production (shopifyConfig.entreesVariants; breakfast's real variant
+  // map isn't captured yet, so it still uses the mockup's placeholder
+  // per-count tiers from StepBreakfast) -- their line items below carry
+  // price:0 and are display-only. Snacks are individually priced real
+  // Shopify products, confirmed via a live query, so they keep per-item
+  // pricing.
   const cartItems = [];
   Object.entries(singles).forEach(([id, qty]) => {
     if (qty > 0) {
-      const meal = ALL_MEALS.find(m => m.id === Number(id));
-      if (meal) cartItems.push({ meal, qty, isDouble: false, price: meal.basePrice * qty });
+      const meal = allMeals.find(m => m.id === Number(id));
+      if (!meal) return;
+      const isBoxPriced = entreeIds.has(meal.id) || BREAKFAST_IDS.has(meal.id);
+      cartItems.push({ meal, qty, isDouble: false, price: isBoxPriced ? 0 : meal.basePrice * qty });
     }
   });
   Object.entries(doubles).forEach(([id, qty]) => {
     if (qty > 0) {
-      const meal = ALL_MEALS.find(m => m.id === Number(id));
-      if (meal) cartItems.push({ meal, qty, isDouble: true, price: (meal.basePrice + (meal.doubleProteinPrice || 0)) * qty });
+      const meal = allMeals.find(m => m.id === Number(id));
+      if (!meal) return;
+      const isBoxPriced = entreeIds.has(meal.id) || BREAKFAST_IDS.has(meal.id);
+      cartItems.push({
+        meal, qty, isDouble: true,
+        price: isBoxPriced ? 0 : (meal.basePrice + (meal.doubleProteinPrice || 0)) * qty,
+      });
     }
   });
 
-  const entreeItems    = cartItems.filter(item => ENTREE_IDS.has(item.meal.id));
+  const entreeItems    = cartItems.filter(item => entreeIds.has(item.meal.id));
   const breakfastItems = cartItems.filter(item => BREAKFAST_IDS.has(item.meal.id));
   const snackItems     = cartItems.filter(item => SNACK_IDS.has(item.meal.id));
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0);
-  const discountRate = appliedDiscount ? MOCK_DISCOUNTS[appliedDiscount] : 0;
-  const discountAmount = subtotal * discountRate;
-  const discountedSubtotal = subtotal - discountAmount;
-  const tax = discountedSubtotal * 0.08;
-  const total = discountedSubtotal + tax;
+  const entreeDoubleQty = entreeItems.filter(i => i.isDouble).reduce((sum, i) => sum + i.qty, 0);
+  const entreeBoxPrice = mealCount && shopifyConfig.entreesVariants[mealCount]
+    ? shopifyConfig.entreesVariants[mealCount].price
+    : 0;
+  const doubleProteinPrice = entreeDoubleQty * shopifyConfig.doubleProteinPerMeal;
+  const breakfastBoxPrice = breakfastCount && BREAKFAST_PRICING[breakfastCount]
+    ? BREAKFAST_PRICING[breakfastCount].perMeal * breakfastCount
+    : 0;
+  const snackSubtotal = snackItems.reduce((sum, i) => sum + i.price, 0);
 
-  function applyDiscount() {
-    const code = discountCode.trim().toUpperCase();
-    if (MOCK_DISCOUNTS[code]) {
-      setAppliedDiscount(code);
-      setDiscountError('');
-    } else {
-      setAppliedDiscount(null);
-      setDiscountError('Invalid discount code. Try REBUILT10 or REBUILT20.');
-    }
-  }
+  const subtotal = entreeBoxPrice + doubleProteinPrice + breakfastBoxPrice + snackSubtotal;
+  // The real discount is applied by Shopify at checkout via the
+  // /discount/[code] redirect (handoff doc section 6a), not validated or
+  // applied client-side here. This is shown for reference only.
+  const discountCode = shopifyConfig.discountCode;
+  const tax = subtotal * 0.08;
+  const total = subtotal + tax;
 
   function handleCheckout() {
     onConfirm({ total });
@@ -161,12 +172,6 @@ export default function StepCheckout({ singles, doubles, onBack, onConfirm }) {
           <div className="flex justify-between text-sm text-gray-600">
             <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
           </div>
-          {appliedDiscount && (
-            <div className="flex justify-between text-sm text-green-700 font-medium">
-              <span>Discount ({appliedDiscount} −{Math.round(discountRate * 100)}%)</span>
-              <span>−${discountAmount.toFixed(2)}</span>
-            </div>
-          )}
           <div className="flex justify-between text-sm text-gray-600">
             <span>Delivery</span>
             <span className="text-green-600 font-medium">Calculated at checkout</span>
@@ -180,32 +185,12 @@ export default function StepCheckout({ singles, doubles, onBack, onConfirm }) {
         </div>
       </div>
 
-      {/* Discount code */}
+      {/* Discount code — applied automatically by Shopify at checkout, not entered here */}
       <div className="bg-white rounded-2xl shadow-sm p-4 mb-6">
-        <p className="text-sm font-semibold text-gray-900 mb-2">Discount Code</p>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={discountCode}
-            onChange={e => setDiscountCode(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && applyDiscount()}
-            placeholder="Enter code (e.g. REBUILT10)"
-            className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green"
-          />
-          <button
-            onClick={applyDiscount}
-            className="bg-brand-charcoal hover:bg-gray-800 text-white font-semibold text-sm px-4 rounded-xl transition-colors"
-          >
-            Apply
-          </button>
+        <p className="text-sm font-semibold text-gray-900 mb-1">Discount Code</p>
+        <div className="flex items-center gap-2">
+          <span className="text-green-600 text-xs font-semibold">✓ {discountCode} will be applied automatically at checkout</span>
         </div>
-        {discountError && <p className="text-red-500 text-xs mt-1.5">{discountError}</p>}
-        {appliedDiscount && (
-          <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-green-600 text-xs font-semibold">✓ {appliedDiscount} applied — {Math.round(discountRate * 100)}% off</span>
-            <button onClick={() => { setAppliedDiscount(null); setDiscountCode(''); }} className="text-gray-400 text-xs hover:text-gray-600">Remove</button>
-          </div>
-        )}
       </div>
 
       {/* Sticky CTA */}

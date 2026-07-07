@@ -3,9 +3,7 @@ import { ALLERGY_OPTIONS } from '../data/meals';
 
 const ALLERGY_REST = ALLERGY_OPTIONS.filter(o => o.id !== 'none');
 
-export default function StepAllergies({ onViewSummary, onCheckout, onBack }) {
-  const [selected, setSelected] = useState(new Set());
-  const [customText, setCustomText] = useState('');
+export default function StepAllergies({ onViewSummary, onCheckout, onBack, selected, setSelected, customText, setCustomText }) {
   const [showCustom, setShowCustom] = useState(false);
   const customBoxRef = useRef(null);
 
