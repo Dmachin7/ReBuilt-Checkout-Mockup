@@ -7,6 +7,11 @@ import { shopifyConfig } from '../config/shopify';
 const MEAL_COUNTS = Object.keys(shopifyConfig.entreesVariants).map(Number).sort((a, b) => a - b);
 const MOST_POPULAR_COUNT = 10;
 
+// Only call out savings on the big-box tiles -- showing "Save X%" on
+// nearly every tile diluted the signal, so it's now reserved for the
+// counts that actually represent a meaningful step up in value.
+const SAVINGS_BADGE_COUNTS = new Set([15, 20, 25]);
+
 // Initial 4 tiles shown before "More" -- always includes the "Most
 // Popular" badge count so it's visible without an extra click, even
 // though the real variant map's counts run consecutively (5,6,7,8...)
@@ -49,7 +54,7 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
           const perMeal = weekly / n;
           const isSelected = mealCount === n;
           const isMostPopular = n === 10;
-          const savingsPct = n === baseCount ? 0 : Math.max(0, Math.round((1 - perMeal / basePerMeal) * 100));
+          const savingsPct = SAVINGS_BADGE_COUNTS.has(n) ? Math.max(0, Math.round((1 - perMeal / basePerMeal) * 100)) : 0;
           return (
             <div key={n} className="relative">
               {isMostPopular && (
