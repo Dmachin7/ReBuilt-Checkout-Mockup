@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { shopifyConfig } from '../config/shopify';
 import { pickSnackVariant } from '../lib/shopifyCheckout';
+import { ALLERGY_OPTIONS } from '../data/meals';
 
 export default function StepCheckout({
   singles, doubles, mealCount, breakfastCount, weeks,
   breakfastItems: breakfastCatalog, snackItems: snackCatalog,
   discountCode, setDiscountCode,
+  allergySelected, allergyNotes,
   onBack, onConfirm,
 }) {
   const [openSections, setOpenSections] = useState({ entrees: false, breakfast: false, snacks: false });
@@ -67,6 +69,12 @@ export default function StepCheckout({
   const subtotal = entreeBoxPrice + doubleProteinPrice + breakfastBoxPrice + snackSubtotal;
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
+
+  const allergyLabels = [...(allergySelected || [])]
+    .filter(id => id !== 'none')
+    .map(id => ALLERGY_OPTIONS.find(o => o.id === id)?.label)
+    .filter(Boolean);
+  const allergiesDisplay = allergyLabels.length ? allergyLabels.join(', ') : 'No Allergies';
 
   function handleCheckout() {
     onConfirm({ total });
@@ -184,9 +192,18 @@ export default function StepCheckout({
         </div>
       </div>
 
-      {/* Discount code — whatever's typed here is sent to Shopify's own
-          /discount/[code] endpoint at checkout, which validates and applies
-          it. Not validated client-side; Shopify is the source of truth. */}
+      {/* Allergies */}
+      <div className="bg-white rounded-2xl shadow-sm p-4 mb-6">
+        <p className="text-sm font-semibold text-gray-900 mb-1.5">Allergies & Dietary Notes</p>
+        <p className="text-sm text-gray-700">{allergiesDisplay}</p>
+        {allergyNotes && allergyNotes.trim() && (
+          <p className="text-xs text-gray-500 mt-1.5">{allergyNotes.trim()}</p>
+        )}
+      </div>
+
+      {/* Discount code — whatever's typed here is sent through checkout's
+          own discount endpoint, which validates and applies it. Not
+          validated client-side. */}
       <div className="bg-white rounded-2xl shadow-sm p-4 mb-6">
         <p className="text-sm font-semibold text-gray-900 mb-2">Discount Code</p>
         <input
@@ -196,7 +213,7 @@ export default function StepCheckout({
           placeholder="Enter a discount code (optional)"
           className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green"
         />
-        <p className="text-gray-400 text-xs mt-1.5">Applied at Shopify checkout — invalid codes are simply ignored there.</p>
+        <p className="text-gray-400 text-xs mt-1.5">Applied at checkout — invalid codes are simply ignored there.</p>
       </div>
 
       {/* Sticky CTA */}

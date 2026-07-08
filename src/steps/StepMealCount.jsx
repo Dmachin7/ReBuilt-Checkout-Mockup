@@ -22,6 +22,18 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
   const [showMore, setShowMore] = useState(false);
   const visibleCounts = showMore ? MEAL_COUNTS : initialVisibleCounts();
 
+  // Savings vs. the smallest box's per-meal rate, so bigger boxes can show
+  // how much cheaper per meal they actually are.
+  const baseCount = MEAL_COUNTS[0];
+  const basePerMeal = shopifyConfig.entreesVariants[baseCount].price / baseCount;
+  const bestHiddenSavings = Math.max(
+    0,
+    ...MEAL_COUNTS.filter(n => !initialVisibleCounts().includes(n)).map(n => {
+      const perMeal = shopifyConfig.entreesVariants[n].price / n;
+      return Math.round((1 - perMeal / basePerMeal) * 100);
+    })
+  );
+
   return (
     <div className={`flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full sm:pb-10 ${showMore ? 'pb-40' : 'pb-28'}`}>
       <div className="mb-6 text-center">
@@ -37,6 +49,7 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
           const perMeal = weekly / n;
           const isSelected = mealCount === n;
           const isMostPopular = n === 10;
+          const savingsPct = n === baseCount ? 0 : Math.max(0, Math.round((1 - perMeal / basePerMeal) * 100));
           return (
             <div key={n} className="relative">
               {isMostPopular && (
@@ -59,8 +72,15 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
                 }`}
               >
                 <p className="font-bold text-lg leading-tight">{n} meals</p>
-                <p className={`text-sm mt-1 leading-tight ${isSelected ? 'text-green-100' : 'text-gray-400'}`}>
+                <p className={`text-sm mt-1 leading-tight flex items-center gap-1.5 ${isSelected ? 'text-green-100' : 'text-gray-400'}`}>
                   ${perMeal.toFixed(2)}/meal
+                  {savingsPct > 0 && (
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap ${
+                      isSelected ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'
+                    }`}>
+                      Save {savingsPct}%
+                    </span>
+                  )}
                 </p>
                 <p className={`text-xs leading-tight font-semibold mt-0.5 ${isSelected ? 'text-white/70' : 'text-gray-300'}`}>
                   ${weekly.toFixed(2)}/wk
@@ -73,9 +93,12 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
         {!showMore && (
           <button
             onClick={() => setShowMore(true)}
-            className="px-4 py-5 rounded-2xl text-sm font-semibold text-gray-400 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:text-gray-500 transition-colors w-full"
+            className="px-4 py-5 rounded-2xl text-sm font-semibold text-gray-400 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:text-gray-500 transition-colors w-full flex flex-col items-center justify-center gap-0.5"
           >
-            More ↓
+            <span>Better Value ↓</span>
+            {bestHiddenSavings > 0 && (
+              <span className="text-xs text-green-600 font-bold">Save up to {bestHiddenSavings}%</span>
+            )}
           </button>
         )}
         {showMore && (

@@ -1,4 +1,4 @@
-import { useReducer, useState, useMemo } from 'react';
+import { useReducer, useState, useMemo, useEffect } from 'react';
 import ProgressBar from './components/ProgressBar';
 import StepMealCount from './steps/StepMealCount';
 import StepPlan from './steps/StepPlan';
@@ -14,7 +14,10 @@ import { useShopifyMenu } from './hooks/useShopifyMenu';
 import { setWeekForSelection, earliestDeliverableMonday } from './lib/shopifyWeeks';
 import { buildEntreeSelections, buildMetadataPayload, buildBreakfastMetadata, buildCheckoutUrl } from './lib/shopifyCheckout';
 import { shopifyConfig } from './config/shopify';
+import { loadPersistedState, savePersistedState, clearPersistedState } from './lib/persistence';
 import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS, ALLERGY_OPTIONS } from './data/meals';
+
+const persisted = loadPersistedState();
 
 const PLAN_TO_KEY = { lifestyle: 'lifestyle', performance: 'performance', keto: 'keto', plant_based: 'plant' };
 const CATEGORY_TO_PLAN_KEY = { LIFESTYLE: 'lifestyle', PERFORMANCE: 'performance', KETO: 'keto', 'PLANT-BASED': 'plant' };
@@ -98,17 +101,24 @@ function computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, br
 }
 
 export default function App() {
-  const [step, setStep] = useState('mealCount');
-  const [cart, dispatch] = useReducer(cartReducer, { singles: {}, doubles: {} });
+  const [step, setStep] = useState(persisted?.step || 'mealCount');
+  const [cart, dispatch] = useReducer(cartReducer, persisted?.cart || { singles: {}, doubles: {} });
   const [orderDetails, setOrderDetails] = useState(null);
-  const [mealCount, setMealCount] = useState(null);
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [mealMode, setMealMode] = useState(null);
-  const [breakfastCount, setBreakfastCount] = useState(null);
-  const [breakfastSkipped, setBreakfastSkipped] = useState(false);
-  const [allergySelected, setAllergySelected] = useState(new Set());
-  const [allergyNotes, setAllergyNotes] = useState('');
-  const [discountCode, setDiscountCode] = useState('');
+  const [mealCount, setMealCount] = useState(persisted?.mealCount ?? null);
+  const [selectedPlan, setSelectedPlan] = useState(persisted?.selectedPlan ?? null);
+  const [mealMode, setMealMode] = useState(persisted?.mealMode ?? null);
+  const [breakfastCount, setBreakfastCount] = useState(persisted?.breakfastCount ?? null);
+  const [breakfastSkipped, setBreakfastSkipped] = useState(persisted?.breakfastSkipped ?? false);
+  const [allergySelected, setAllergySelected] = useState(persisted?.allergySelected || new Set());
+  const [allergyNotes, setAllergyNotes] = useState(persisted?.allergyNotes || '');
+  const [discountCode, setDiscountCode] = useState(persisted?.discountCode || '');
+
+  useEffect(() => {
+    savePersistedState({
+      step, cart, mealCount, selectedPlan, mealMode,
+      breakfastCount, breakfastSkipped, allergySelected, allergyNotes, discountCode,
+    });
+  }, [step, cart, mealCount, selectedPlan, mealMode, breakfastCount, breakfastSkipped, allergySelected, allergyNotes, discountCode]);
 
   const menu = useShopifyMenu(2);
   const usingFallback = !!menu.error;
@@ -313,6 +323,9 @@ export default function App() {
     setBreakfastCount(null);
     setBreakfastSkipped(false);
     setDiscountCode('');
+    setAllergySelected(new Set());
+    setAllergyNotes('');
+    clearPersistedState();
     go('mealCount');
   }
 
@@ -444,6 +457,8 @@ export default function App() {
           snackItems={snackItems}
           discountCode={discountCode}
           setDiscountCode={setDiscountCode}
+          allergySelected={allergySelected}
+          allergyNotes={allergyNotes}
           onBack={() => go('allergies')}
           onConfirm={() => go('shopifyRedirect')}
         />

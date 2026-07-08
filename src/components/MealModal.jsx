@@ -106,7 +106,7 @@ export default function MealModal({
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
           <button
             onClick={onClose}
-            className="absolute top-3 left-3 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors text-sm font-bold"
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors text-sm font-bold"
           >
             ✕
           </button>

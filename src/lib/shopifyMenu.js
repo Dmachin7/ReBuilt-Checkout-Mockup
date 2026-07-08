@@ -77,6 +77,20 @@ function parseAllergenNotes(mf) {
   }
 }
 
+// ingredientsList is also a JSON array string, e.g.
+// '["Brown Rice & Bell Pepper Pilaf","Roasted Butternut Squash",...]' --
+// rendering the raw value showed literal ["...","..."] JSON in the UI.
+// Falls back to the raw string if it's ever plain text instead of JSON.
+function parseIngredientsList(mf) {
+  if (!mf || !mf.value) return '';
+  try {
+    const arr = JSON.parse(mf.value);
+    return Array.isArray(arr) ? arr.join(', ') : mf.value;
+  } catch {
+    return mf.value;
+  }
+}
+
 // gid://shopify/Product/1234567890 -> 1234567890 (numeric id our UI keys on)
 function numericIdFromGid(gid) {
   const match = /(\d+)$/.exec(gid || '');
@@ -138,7 +152,7 @@ export function transformProduct(node) {
 
   const details = {
     mainIngredients: '',
-    ingredients: node.ingredientsList ? node.ingredientsList.value : '',
+    ingredients: parseIngredientsList(node.ingredientsList),
     allergenNotes,
     fat: numFromMetafield(node.fat),
     fiber: numFromMetafield(node.dietaryFiber),
