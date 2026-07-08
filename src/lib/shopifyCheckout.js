@@ -23,7 +23,7 @@ function qs(pairs) {
 export function buildEntreeSelections({ singles, doubles, entreeMeals }) {
   const byId = new Map(entreeMeals.map(m => [m.id, m]));
   const groups = new Map();
-  let rank = 0;
+  let fallbackRank = 0;
   let singleProteinCount = 0;
   let doubleProteinCount = 0;
 
@@ -46,11 +46,20 @@ export function buildEntreeSelections({ singles, doubles, entreeMeals }) {
       // worse than a kitchen ops sheet missing thumbnails -- if those
       // images turn out to be load-bearing for the gsheets pipeline, this
       // needs a non-GET-chain transport instead, not more trimming.
+      //
+      // mealRank MUST be the meal's real Shopify meal_rank (1-5 within its
+      // category), not a sequential counter -- confirmed 2026-07-16 via a
+      // real ops-sheet row that scrambled Meal 1-5 columns when this was
+      // just an incrementing index (0-9 across singles then doubles). The
+      // sheet-population script evidently uses this value to place each
+      // entry in the right Meal-N column, independently per protein-type
+      // row. Falls back to a continuing counter only if a product is ever
+      // missing the metafield, so nothing is silently dropped.
       groups.get(planKey).meals.push({
         productTitle: meal.name,
         proteinAmount: isDouble ? 'Double Protein' : 'Single Protein',
         quantity: qty,
-        mealRank: rank++,
+        mealRank: meal.mealRank != null ? meal.mealRank : fallbackRank++,
       });
       if (isDouble) doubleProteinCount += qty;
       else singleProteinCount += qty;
@@ -102,7 +111,7 @@ export function buildMetadataPayload({ setWeek, mealCount, defaultPlanKey, userS
 export function buildBreakfastMetadata({ setWeek, breakfastCount, singles, doubles, breakfastMeals, isKetoPlan }) {
   const byId = new Map(breakfastMeals.map(m => [m.id, m]));
   const meals = [];
-  let rank = 0;
+  let fallbackRank = 0;
   let totalQty = 0;
 
   function addEntries(source) {
@@ -111,12 +120,14 @@ export function buildBreakfastMetadata({ setWeek, breakfastCount, singles, doubl
       const meal = byId.get(Number(id));
       if (!meal) return;
       // mealPlanImage/mealPlanColor/productImage dropped per-meal -- same
-      // rationale as buildEntreeSelections above.
+      // rationale as buildEntreeSelections above. mealRank uses the real
+      // Shopify meal_rank (1-4 within breakfast) -- same fix and rationale
+      // as buildEntreeSelections.
       meals.push({
         productTitle: meal.name,
         proteinAmount: 'Default Title',
         quantity: qty,
-        mealRank: rank++,
+        mealRank: meal.mealRank != null ? meal.mealRank : fallbackRank++,
       });
       totalQty += qty;
     });
