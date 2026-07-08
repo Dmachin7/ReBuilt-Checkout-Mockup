@@ -13,6 +13,7 @@ import ShopifyRedirectScreen from './steps/ShopifyRedirectScreen';
 import { useShopifyMenu } from './hooks/useShopifyMenu';
 import { setWeekForSelection, earliestDeliverableMonday } from './lib/shopifyWeeks';
 import { buildEntreeSelections, buildMetadataPayload, buildBreakfastMetadata, buildCheckoutUrl } from './lib/shopifyCheckout';
+import { defaultEntreeSelection, chefsChoiceEntreeSelection, defaultBreakfastSelection } from './lib/defaultSelections';
 import { shopifyConfig } from './config/shopify';
 import { loadPersistedState, savePersistedState, clearPersistedState } from './lib/persistence';
 import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS, ALLERGY_OPTIONS } from './data/meals';
@@ -165,26 +166,27 @@ export default function App() {
     go('entrees');
   }
 
+  // Follows ReBuilt's confirmed default-fill algorithm (see
+  // src/lib/defaultSelections.js) rather than a naive round-robin -- the
+  // old `index % pool.length` approach could double up on one meal while
+  // never selecting another (e.g. 5 Performance meals producing
+  // [2,1,1,1,0] instead of the correct [1,1,1,1,1]).
   function rechefMeals(weekMeals) {
-    let ordered;
+    let selections;
     if (selectedPlan === 'chefs_choice') {
-      const life = weekMeals.filter(m => m.category === 'LIFESTYLE');
-      const perf = weekMeals.filter(m => m.category === 'PERFORMANCE');
-      ordered = [];
-      const maxLen = Math.max(life.length, perf.length);
-      for (let i = 0; i < maxLen; i++) {
-        if (i < life.length) ordered.push(life[i]);
-        if (i < perf.length) ordered.push(perf[i]);
-      }
+      const perfPool = weekMeals.filter(m => m.category === 'PERFORMANCE');
+      const lifePool = weekMeals.filter(m => m.category === 'LIFESTYLE');
+      selections = chefsChoiceEntreeSelection(perfPool, lifePool, mealCount);
     } else {
       const planCategoryMap = { lifestyle: 'LIFESTYLE', performance: 'PERFORMANCE', keto: 'KETO', plant_based: 'PLANT-BASED' };
       const category = planCategoryMap[selectedPlan] || null;
       const pool = category ? weekMeals.filter(m => m.category === category) : weekMeals;
-      const supplement = category ? weekMeals.filter(m => m.category !== category) : [];
-      ordered = [...pool, ...supplement];
+      selections = defaultEntreeSelection(pool, mealCount);
     }
     const ids = [];
-    for (let i = 0; i < mealCount; i++) ids.push(ordered[i % ordered.length].id);
+    selections.forEach(({ meal, quantity }) => {
+      for (let i = 0; i < quantity; i++) ids.push(meal.id);
+    });
     dispatch({ type: 'SET_BULK_SINGLES', ids });
   }
 
@@ -215,9 +217,17 @@ export default function App() {
     if (mealMode === 'chef') {
       const clearIds = breakfastItems.map(m => m.id);
       if (count) {
-        const shuffled = [...breakfastItems].sort(() => Math.random() - 0.5);
+        // Keto-plan customers default to Keto-only breakfast items;
+        // everyone else draws from the full lineup -- see
+        // defaultBreakfastSelection in lib/defaultSelections.js. Replaces
+        // a random shuffle that didn't match ReBuilt's real default logic
+        // at all.
+        const isKetoPlan = selectedPlan === 'keto';
+        const selections = defaultBreakfastSelection(breakfastItems, count, isKetoPlan);
         const ids = [];
-        for (let i = 0; i < count; i++) ids.push(shuffled[i % shuffled.length].id);
+        selections.forEach(({ meal, quantity }) => {
+          for (let i = 0; i < quantity; i++) ids.push(meal.id);
+        });
         dispatch({ type: 'SET_BULK_BREAKFAST', ids, clearIds });
       } else {
         dispatch({ type: 'SET_BULK_BREAKFAST', ids: [], clearIds });
@@ -287,6 +297,7 @@ export default function App() {
       const breakfastVariant = shopifyConfig.breakfastVariants[breakfastCount];
       const breakfastMetadataJson = buildBreakfastMetadata({
         setWeek, breakfastCount, singles: cart.singles, doubles: cart.doubles, breakfastMeals: breakfastItems,
+        isKetoPlan: selectedPlan === 'keto',
       });
       breakfastLine = { variantId: breakfastVariant.id, metadataJson: breakfastMetadataJson };
     }

@@ -114,6 +114,10 @@ export function transformProduct(node) {
   // (shopifyConfig.snacksProduct) -- confirmed via a real captured order.
   const isDoughnuts = tags.some(t => t.toLowerCase() === 'doughnuts');
 
+  // Breakfast items tagged "Keto Only" are the pool Keto-plan customers'
+  // default breakfast selection draws from (see defaultSelections.js).
+  const isKetoOnly = tags.some(t => t.toLowerCase() === 'keto only');
+
   // allergensList holds free-text warnings ("Contains Dairy & Egg") and
   // claims ("Vegan", "Spicy"), not a clean allergen-free taxonomy. We show
   // these as-is rather than inferring "X Free" claims from an *absence* of
@@ -141,6 +145,7 @@ export function transformProduct(node) {
     doubleProtein,
     doubleProteinPrice: shopifyConfig.doubleProteinPerMeal,
     isDoughnuts,
+    isKetoOnly,
     // Real per-unit price from Shopify. Snacks are priced per-item and
     // this is their real cart price. Entrées/breakfast display variants
     // are always $0 -- their real price is the flat box rate in

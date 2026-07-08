@@ -90,7 +90,16 @@ export function buildMetadataPayload({ setWeek, mealCount, defaultPlanKey, userS
 // Choice" userSelections entry regardless of the customer's entrée plan.
 // proteinAmount is always "Default Title" -- breakfast has no protein
 // variants, confirmed via the same capture.
-export function buildBreakfastMetadata({ setWeek, breakfastCount, singles, doubles, breakfastMeals }) {
+//
+// isKetoPlan reflects ReBuilt's confirmed default-fill spreadsheet, which
+// has a distinct "Keto Only" breakfast default (drawing only from
+// Keto-tagged items) separate from the general "Chef's Choice" default --
+// see defaultBreakfastSelection in defaultSelections.js. There's no real
+// captured *order* confirming what defaultPlan.name should read for a
+// Keto customer specifically, so this reuses the confirmed real
+// shopifyConfig.plans.keto branding rather than inventing an unconfirmed
+// "Keto Only" plan entry. Worth a real capture to verify if possible.
+export function buildBreakfastMetadata({ setWeek, breakfastCount, singles, doubles, breakfastMeals, isKetoPlan }) {
   const byId = new Map(breakfastMeals.map(m => [m.id, m]));
   const meals = [];
   let rank = 0;
@@ -115,8 +124,8 @@ export function buildBreakfastMetadata({ setWeek, breakfastCount, singles, doubl
   addEntries(singles);
   addEntries(doubles);
 
-  const chefCfg = shopifyConfig.plans.chefsChoice;
-  const defaultPlan = { name: chefCfg.name, image: chefCfg.image, color: chefCfg.color };
+  const planCfg = isKetoPlan ? shopifyConfig.plans.keto : shopifyConfig.plans.chefsChoice;
+  const defaultPlan = { name: planCfg.name, image: planCfg.image, color: planCfg.color };
   const metadata = {
     [setWeek]: {
       gsheetsProcessing: 'pending',
@@ -125,7 +134,7 @@ export function buildBreakfastMetadata({ setWeek, breakfastCount, singles, doubl
       singleProteinCount: totalQty,
       defaultPlan,
       mealsCount: String(breakfastCount),
-      userSelections: meals.length ? [{ planName: chefCfg.name, planImage: chefCfg.image, meals }] : [],
+      userSelections: meals.length ? [{ planName: planCfg.name, planImage: planCfg.image, meals }] : [],
     },
   };
   return JSON.stringify(metadata);
