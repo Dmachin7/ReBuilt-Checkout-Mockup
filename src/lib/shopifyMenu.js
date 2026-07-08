@@ -4,7 +4,7 @@ import { shopifyConfig } from '../config/shopify';
 // handle, with metafields for nutrition/ingredients/allergens). Handle is
 // always a value we generate ourselves (`week-N`), never user input.
 function buildWeekQuery(handle) {
-  return `{ collection(handle: "${handle}") { title products(first: 100) { edges { node { id handle title description tags featuredImage { url } variants(first: 5) { edges { node { id title price { amount } } } } calories: metafield(namespace: "product", key: "calories"){value} protein: metafield(namespace: "product", key: "protein"){value} fat: metafield(namespace: "product", key: "fat"){value} satFat: metafield(namespace: "product", key: "saturated_fat"){value} carbohydrate: metafield(namespace: "product", key: "carbohydrate"){value} sugar: metafield(namespace: "product", key: "sugar"){value} dietaryFiber: metafield(namespace: "product", key: "dietary_fiber"){value} cholesterol: metafield(namespace: "product", key: "cholesterol"){value} sodium: metafield(namespace: "product", key: "sodium"){value} ingredientsList: metafield(namespace: "product", key: "gradient_list"){value} allergensList: metafield(namespace: "product", key: "allergens"){value} fullNutrition: metafield(namespace: "custom", key: "full_nutritional_information"){value} } } } } }`;
+  return `{ collection(handle: "${handle}") { title products(first: 100) { edges { node { id handle title description tags featuredImage { url } variants(first: 5) { edges { node { id title price { amount } } } } calories: metafield(namespace: "product", key: "calories"){value} protein: metafield(namespace: "product", key: "protein"){value} fat: metafield(namespace: "product", key: "fat"){value} satFat: metafield(namespace: "product", key: "saturated_fat"){value} carbohydrate: metafield(namespace: "product", key: "carbohydrate"){value} sugar: metafield(namespace: "product", key: "sugar"){value} dietaryFiber: metafield(namespace: "product", key: "dietary_fiber"){value} cholesterol: metafield(namespace: "product", key: "cholesterol"){value} sodium: metafield(namespace: "product", key: "sodium"){value} ingredientsList: metafield(namespace: "product", key: "gradient_list"){value} allergensList: metafield(namespace: "product", key: "allergens"){value} fullNutrition: metafield(namespace: "custom", key: "full_nutritional_information"){value} mealRank: metafield(namespace: "product", key: "meal_rank"){value} } } } } }`;
 }
 
 export async function fetchWeekCollection(handle) {
@@ -128,6 +128,15 @@ export function transformProduct(node) {
   const allergenNotes = parseAllergenNotes(node.allergensList);
   const dietary = allergenNotes.filter(n => n.toLowerCase() !== 'spicy');
 
+  // The authoritative "Meal 1..Meal 5" (or "Breakfast 1..4") slot for
+  // ReBuilt's default-fill algorithm (see defaultSelections.js) --
+  // confirmed 2026-07-16 against a real customer's stated correct order.
+  // The Storefront API's own product order (even with sortKey:
+  // COLLECTION_DEFAULT) is just alphabetical and has nothing to do with
+  // this ranking. Snacks don't carry this metafield (null) since they
+  // aren't part of the ranked-slot system.
+  const mealRank = node.mealRank && node.mealRank.value !== '' ? Number(node.mealRank.value) : null;
+
   const meal = {
     id: numericIdFromGid(node.id),
     shopifyProductId: node.id,
@@ -135,6 +144,7 @@ export function transformProduct(node) {
     name: node.title,
     category,
     productType,
+    mealRank,
     description: node.description,
     image: node.featuredImage ? node.featuredImage.url : null,
     protein: numFromMetafield(node.protein),
@@ -176,5 +186,12 @@ export function transformCollection(nodes) {
     meals.push(meal);
     details[meal.id] = d;
   });
+  // Sort by the real meal_rank (nulls -- e.g. snacks -- last). Ranks are
+  // scoped per category/type (Performance 1-5, Lifestyle 1-5, ...), but
+  // since a global ascending sort preserves relative order within any
+  // later `.filter(category === X)`, this one sort correctly orders every
+  // category- or type-filtered view downstream, including both display
+  // grids and the default-fill algorithm's slot assignment.
+  meals.sort((a, b) => (a.mealRank ?? Infinity) - (b.mealRank ?? Infinity));
   return { meals, details };
 }
