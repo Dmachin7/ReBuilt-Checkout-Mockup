@@ -40,7 +40,7 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
   );
 
   return (
-    <div className="flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full sm:pb-10 pb-28">
+    <div className="flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full pb-28">
       <div className="mb-6 text-center">
         <h1 className="font-display text-3xl sm:text-4xl text-gray-900 mb-2">
           How many meals per week?
@@ -116,9 +116,9 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
         )}
       </div>
 
-      {/* Sticky bar on mobile (solid background so it never blends into
-          content behind it as the tile grid scrolls), inline on sm+ */}
-      <div className="fixed sm:static bottom-0 inset-x-0 sm:inset-auto z-20 mt-6 sm:mt-8 p-4 sm:p-0 bg-white sm:bg-transparent border-t border-gray-100 sm:border-0 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] sm:shadow-none">
+      {/* Sticky bar at every breakpoint (solid background so it never
+          blends into content behind it as the tile grid scrolls) */}
+      <div className="fixed bottom-0 inset-x-0 z-20 p-4 bg-white border-t border-gray-100 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
         <div className="max-w-2xl mx-auto">
           <button
             onClick={onNext}
