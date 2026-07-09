@@ -455,7 +455,7 @@ export default function App() {
       )}
 
       {step === 'shopifyRedirect' && (
-        <ShopifyRedirectScreen checkoutUrl={buildRealCheckoutUrl()} onBack={() => go('allergies')} />
+        <ShopifyRedirectScreen checkoutUrl={buildRealCheckoutUrl()} onBack={() => go('checkout')} />
       )}
 
       {step === 'checkout' && (

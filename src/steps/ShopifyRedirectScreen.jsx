@@ -11,6 +11,20 @@ export default function ShopifyRedirectScreen({ checkoutUrl, onBack }) {
     return () => clearTimeout(timer);
   }, [checkoutUrl]);
 
+  // When a customer hits the browser's physical back button from Shopify's
+  // real checkout page, the browser restores this exact frozen screen from
+  // bfcache (pageshow fires with persisted:true) rather than reloading the
+  // app fresh -- left alone, that strands them on a static "Heading to
+  // checkout..." spinner that looks like it's mid-navigation. Forward them
+  // straight into an editable step instead.
+  useEffect(() => {
+    function handlePageShow(e) {
+      if (e.persisted) onBack();
+    }
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, [onBack]);
+
   if (!checkoutUrl) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -24,7 +38,7 @@ export default function ShopifyRedirectScreen({ checkoutUrl, onBack }) {
             onClick={onBack}
             className="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors"
           >
-            ← Back to Allergies
+            ← Back to Order Summary
           </button>
         </div>
       </div>
@@ -80,7 +94,7 @@ export default function ShopifyRedirectScreen({ checkoutUrl, onBack }) {
           onClick={onBack}
           className="text-gray-400 hover:text-gray-600 text-sm transition-colors"
         >
-          ← Back to Allergies
+          ← Back to Order Summary
         </button>
       </div>
     </div>

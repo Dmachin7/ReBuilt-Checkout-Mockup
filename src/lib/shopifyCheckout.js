@@ -457,6 +457,17 @@ export function buildCheckoutUrl({
     chain = `/cart/add?${qs([...lines[i], ['return_to', chain]])}`;
   }
 
+  // Clear any stale cart left over from a previous checkout attempt (e.g.
+  // the customer reached Shopify, hit browser back, and re-ran checkout)
+  // before adding this order's lines -- Shopify's cart is additive, not
+  // replace-on-add, so a repeat attempt without this doubles every line
+  // item (confirmed against the real store 2026-07-09: two /cart/add
+  // navigations for the same variant left item quantity at 2, not 1).
+  // /cart/clear supports the same return_to redirect-chain convention as
+  // /cart/add (confirmed working end-to-end against the real store the
+  // same day), so this just becomes one more outer hop.
+  chain = `/cart/clear?${qs([['return_to', chain]])}`;
+
   const url = `https://${shopifyConfig.storefrontApiHost}${chain}`;
 
   // Shopify's edge returns a hard HTTP 414 somewhere between 10,100 and
