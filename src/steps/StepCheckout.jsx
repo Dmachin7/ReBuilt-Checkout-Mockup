@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { shopifyConfig } from '../config/shopify';
-import { pickSnackVariant } from '../lib/shopifyCheckout';
+import { pickSnackVariant, previewDiscountCode } from '../lib/shopifyCheckout';
 import { ALLERGY_OPTIONS } from '../data/meals';
 
 export default function StepCheckout({
@@ -67,8 +67,51 @@ export default function StepCheckout({
   const snackSubtotal = snackItems.reduce((sum, i) => sum + i.price, 0);
 
   const subtotal = entreeBoxPrice + doubleProteinPrice + breakfastBoxPrice + snackSubtotal;
-  const tax = subtotal * 0.08;
-  const total = subtotal + tax;
+
+  // Live discount-code preview -- creates a real (anonymous) Shopify cart
+  // mirroring this order's box-rate lines and asks Shopify itself what the
+  // typed code actually does, rather than guessing client-side. Debounced
+  // so we're not hitting the Storefront API on every keystroke.
+  const [discountPreview, setDiscountPreview] = useState(null); // { applicable, savings } | null
+  const [discountStatus, setDiscountStatus] = useState('idle'); // idle | checking | done | error
+
+  const snackLines = snackItems.map(item => ({ meal: item.meal, quantity: item.qty }));
+  const cartKey = JSON.stringify([
+    mealCount, entreeDoubleQty, breakfastCount,
+    snackLines.map(l => [l.meal.id, l.quantity]).sort(),
+  ]);
+
+  useEffect(() => {
+    const trimmed = (discountCode || '').trim();
+    if (!trimmed) {
+      setDiscountPreview(null);
+      setDiscountStatus('idle');
+      return undefined;
+    }
+    setDiscountStatus('checking');
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const result = await previewDiscountCode({
+          mealCount, doubleProteinQty: entreeDoubleQty, breakfastCount, snackLines, discountCode: trimmed,
+        });
+        if (cancelled) return;
+        setDiscountPreview(result);
+        setDiscountStatus('done');
+      } catch {
+        if (cancelled) return;
+        setDiscountPreview(null);
+        setDiscountStatus('error');
+      }
+    }, 600);
+    return () => { cancelled = true; clearTimeout(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [discountCode, cartKey]);
+
+  const discountSavings = discountPreview && discountPreview.applicable ? discountPreview.savings : 0;
+  const discountedSubtotal = Math.max(0, subtotal - discountSavings);
+  const tax = discountedSubtotal * 0.08;
+  const total = discountedSubtotal + tax;
 
   const allergyLabels = [...(allergySelected || [])]
     .filter(id => id !== 'none')
@@ -115,7 +158,7 @@ export default function StepCheckout({
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">{item.meal.name}</p>
-                  <p className="text-xs text-gray-500">{item.isDouble ? 'Double Protein' : 'Single'} · qty {item.qty}</p>
+                  <p className="text-xs text-gray-500">{item.isDouble ? 'Double Protein' : 'Single Protein'} · qty {item.qty}</p>
                 </div>
               </div>
             ))}
@@ -126,12 +169,12 @@ export default function StepCheckout({
   }
 
   return (
-    <div className="px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full pb-32">
-      {/* Header with back button */}
+    <div className="px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full pb-32 sm:pb-10">
+      {/* Header with back button (mobile only — desktop has Back/Continue under the summary) */}
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={onBack}
-          className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors flex-shrink-0"
+          className="sm:hidden w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors flex-shrink-0"
         >
           ←
         </button>
@@ -170,7 +213,7 @@ export default function StepCheckout({
           <>
             <ItemSection title="Entrées"   items={entreeItems}    sectionKey="entrees" />
             <ItemSection title="Breakfast" items={breakfastItems} sectionKey="breakfast" />
-            <ItemSection title="Snacks"    items={snackItems}     sectionKey="snacks" />
+            <ItemSection title="Sweet Treats" items={snackItems}  sectionKey="snacks" />
           </>
         )}
 
@@ -179,6 +222,11 @@ export default function StepCheckout({
           <div className="flex justify-between text-sm text-gray-600">
             <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
           </div>
+          {discountSavings > 0 && (
+            <div className="flex justify-between text-sm text-green-600 font-semibold">
+              <span>Discount ({discountCode.trim()})</span><span>-${discountSavings.toFixed(2)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-sm text-gray-600">
             <span>Delivery</span>
             <span className="text-green-600 font-medium">Calculated at checkout</span>
@@ -201,9 +249,9 @@ export default function StepCheckout({
         )}
       </div>
 
-      {/* Discount code — whatever's typed here is sent through checkout's
-          own discount endpoint, which validates and applies it. Not
-          validated client-side. */}
+      {/* Discount code — previewed live against a real Shopify cart as you
+          type (see previewDiscountCode), then actually applied through
+          checkout's own discount endpoint at handoff. */}
       <div className="bg-white rounded-2xl shadow-sm p-4 mb-6">
         <p className="text-sm font-semibold text-gray-900 mb-2">Discount Code</p>
         <input
@@ -213,11 +261,42 @@ export default function StepCheckout({
           placeholder="Enter a discount code (optional)"
           className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green"
         />
-        <p className="text-gray-400 text-xs mt-1.5">Applied at checkout — invalid codes are simply ignored there.</p>
+        {discountStatus === 'checking' && (
+          <p className="text-gray-400 text-xs mt-1.5">Checking code…</p>
+        )}
+        {discountStatus === 'done' && discountPreview && discountPreview.applicable && (
+          <p className="text-green-600 text-xs mt-1.5 font-semibold">🎉 Code applied — saves ${discountPreview.savings.toFixed(2)}</p>
+        )}
+        {discountStatus === 'done' && discountPreview && !discountPreview.applicable && (
+          <p className="text-red-500 text-xs mt-1.5">This code isn't valid or doesn't apply to your order.</p>
+        )}
+        {discountStatus === 'error' && (
+          <p className="text-gray-400 text-xs mt-1.5">Couldn't check this code right now — it'll still be validated at checkout.</p>
+        )}
+        {discountStatus === 'idle' && (
+          <p className="text-gray-400 text-xs mt-1.5">We'll check this against Shopify as you type.</p>
+        )}
       </div>
 
-      {/* Sticky CTA */}
-      <div className="fixed bottom-0 inset-x-0 z-20 p-4 bg-white border-t border-gray-100 shadow-lg">
+      {/* Desktop: Back + Continue live under the summary instead of a floating bar */}
+      <div className="hidden sm:flex gap-3">
+        <button
+          onClick={onBack}
+          className="flex-1 py-4 rounded-2xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+        >
+          ← Back
+        </button>
+        <button
+          onClick={handleCheckout}
+          className="flex-[2] bg-brand-green hover:bg-brand-green-dark text-white font-bold py-4 rounded-2xl text-base transition-colors shadow-sm flex items-center justify-center gap-2"
+        >
+          Continue to Checkout
+          <span className="text-xl">→</span>
+        </button>
+      </div>
+
+      {/* Mobile: sticky CTA bar */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-20 p-4 bg-white border-t border-gray-100 shadow-lg">
         <div className="max-w-2xl mx-auto">
           <button
             onClick={handleCheckout}

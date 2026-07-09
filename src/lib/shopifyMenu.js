@@ -100,11 +100,24 @@ function numericIdFromGid(gid) {
 export function transformProduct(node) {
   const tags = node.tags || [];
 
-  const categoryTag = tags.find(t => CATEGORY_BY_TAG[t.toLowerCase()]);
-  const category = categoryTag ? CATEGORY_BY_TAG[categoryTag.toLowerCase()] : 'LIFESTYLE';
-
   const typeTag = tags.find(t => PRODUCT_TYPE_TAGS[t.toLowerCase()]);
   const productType = typeTag ? PRODUCT_TYPE_TAGS[typeTag.toLowerCase()] : 'entrees';
+
+  // Breakfast/snack products never carry a diet-plan tag (Lifestyle,
+  // Performance, etc.) -- they aren't part of that plan system, so falling
+  // back to 'LIFESTYLE' mislabeled them. Use productType-derived categories
+  // for those instead.
+  const categoryTag = tags.find(t => CATEGORY_BY_TAG[t.toLowerCase()]);
+  let category;
+  if (categoryTag) {
+    category = CATEGORY_BY_TAG[categoryTag.toLowerCase()];
+  } else if (productType === 'breakfast') {
+    category = 'BREAKFAST';
+  } else if (productType === 'snacks') {
+    category = 'SWEET_TREAT';
+  } else {
+    category = 'LIFESTYLE';
+  }
 
   const variantTitles = (node.variants ? node.variants.edges : []).map(e => e.node.title.toLowerCase());
   const doubleProtein = variantTitles.includes('double protein');

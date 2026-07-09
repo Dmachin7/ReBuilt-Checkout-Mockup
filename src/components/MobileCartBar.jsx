@@ -51,7 +51,7 @@ function MobileCartSection({ title, items, onAddSingle, onRemoveSingle, onAddDou
           )}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-900 truncate">{item.meal.name}</p>
-            <p className="text-xs text-gray-500">{item.isDouble ? 'Double Protein' : 'Single'}</p>
+            <p className="text-xs text-gray-500">{item.isDouble ? 'Double Protein' : 'Single Protein'}</p>
           </div>
           {locked ? (
             <span className="text-xs text-gray-400 font-semibold flex-shrink-0">×{item.qty}</span>
@@ -191,7 +191,7 @@ export default function MobileCartBar({
                   atLimit={breakfastCount > 0 && breakfastSelected >= breakfastCount}
                 />
                 <MobileCartSection
-                  title="Snacks"
+                  title="Sweet Treats"
                   items={snackItems}
                   onAddSingle={onAddSingle}
                   onRemoveSingle={onRemoveSingle}

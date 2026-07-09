@@ -38,17 +38,17 @@ export default function StepSnacks({
       <div className="flex-1 min-w-0 pb-32 space-y-5">
 
         <div>
-          <h2 className="font-display text-2xl sm:text-3xl text-gray-900 mb-1">Snack Add-ons</h2>
+          <h2 className="font-display text-2xl sm:text-3xl text-gray-900 mb-1">Sweet Treat Add-ons</h2>
           <p className="text-gray-500 text-sm">Keep momentum between meals. Completely optional.</p>
         </div>
 
-        {/* No snacks — outlined, not dark */}
+        {/* No sweet treats — outlined, not dark */}
         <button
           onClick={handleSkipClick}
           className="w-full flex items-center justify-between gap-4 bg-white border-2 border-gray-200 hover:border-gray-400 text-gray-700 rounded-2xl px-6 py-5 transition-colors group"
         >
           <div className="text-left">
-            <p className="font-bold text-lg leading-tight">No snacks for me</p>
+            <p className="font-bold text-lg leading-tight">No sweet treats for me</p>
             <p className="text-gray-400 text-sm mt-0.5">Jump to Allergies → your selections are safe</p>
           </div>
           <div className="w-11 h-11 rounded-full border-2 border-gray-300 group-hover:border-brand-green group-hover:bg-brand-green group-hover:text-white flex items-center justify-center text-gray-400 text-xl transition-all flex-shrink-0">
@@ -133,9 +133,9 @@ export default function StepSnacks({
       {skipConfirmOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full animate-reveal">
-            <h3 className="font-display text-xl text-gray-900 mb-1">Skip snacks?</h3>
+            <h3 className="font-display text-xl text-gray-900 mb-1">Skip sweet treats?</h3>
             <p className="text-gray-600 text-sm mb-3">
-              You added {selectedSnackCount} snack{selectedSnackCount > 1 ? 's' : ''}:
+              You added {selectedSnackCount} sweet treat{selectedSnackCount > 1 ? 's' : ''}:
             </p>
             <ul className="mb-4 space-y-1">
               {selectedSnackNames.map(name => (
@@ -149,13 +149,13 @@ export default function StepSnacks({
                 onClick={() => { onSkipSnacks(); setSkipConfirmOpen(false); }}
                 className="w-full py-3 rounded-xl bg-brand-charcoal text-white font-bold text-sm hover:bg-gray-800 transition-colors"
               >
-                Yes, skip snacks
+                Yes, skip sweet treats
               </button>
               <button
                 onClick={() => setSkipConfirmOpen(false)}
                 className="w-full py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-colors"
               >
-                Keep my snacks
+                Keep my sweet treats
               </button>
             </div>
           </div>

@@ -231,6 +231,134 @@ function buildSnackTierMetadata({ setWeek, variant, sellingPlanId, items }) {
   return JSON.stringify(metadata);
 }
 
+// Live discount-code preview: builds a real (anonymous) Shopify Storefront
+// Cart with the same box-rate variants/selling plans the real checkout will
+// use, applies the typed code via cartDiscountCodesUpdate, and reads back
+// the actual saving Shopify computes -- confirmed working against this
+// store's selling-plan products 2026-07-08 (cartCreate returned the correct
+// live $126.92 10-meal price; cartDiscountCodesUpdate correctly reported
+// applicable:false for a bogus code with cost unchanged). This intentionally
+// doesn't include tax/shipping (Storefront carts don't compute those without
+// a checkout session) -- callers should treat the result as a merchandise-
+// level discount to apply against their own subtotal before tax, not a
+// final total.
+async function shopifyGraphQL(query, variables) {
+  const res = await fetch(
+    `https://${shopifyConfig.storefrontApiHost}/api/${shopifyConfig.storefrontApiVersion}/graphql.json`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': shopifyConfig.storefrontToken,
+      },
+      body: JSON.stringify({ query, variables }),
+    }
+  );
+  const json = await res.json();
+  if (json.errors) throw new Error(json.errors.map(e => e.message).join('; '));
+  return json.data;
+}
+
+const CART_CREATE_MUTATION = `mutation CartCreate($lines: [CartLineInput!]!) {
+  cartCreate(input: { lines: $lines }) {
+    cart { id cost { totalAmount { amount } } }
+    userErrors { field message }
+  }
+}`;
+
+const CART_DISCOUNT_MUTATION = `mutation CartDiscountUpdate($cartId: ID!, $codes: [String!]!) {
+  cartDiscountCodesUpdate(cartId: $cartId, discountCodes: $codes) {
+    cart { id cost { totalAmount { amount } } discountCodes { code applicable } }
+    userErrors { field message }
+  }
+}`;
+
+// Mirrors buildCheckoutUrl's line composition (box-rate entrées/breakfast
+// variants + qty, double-protein line, snack lines grouped by resolved
+// price-tier variant) but in Storefront Cart line-input shape instead of
+// /cart/add query params.
+function buildPreviewCartLines({ mealCount, doubleProteinQty, breakfastCount, snackLines }) {
+  const lines = [];
+
+  const entreeVariant = mealCount && shopifyConfig.entreesVariants[mealCount];
+  if (entreeVariant) {
+    lines.push({
+      merchandiseId: `gid://shopify/ProductVariant/${entreeVariant.id}`,
+      quantity: 1,
+      sellingPlanId: `gid://shopify/SellingPlan/${shopifyConfig.entreesSellingPlanId}`,
+    });
+  }
+
+  if (doubleProteinQty > 0) {
+    lines.push({
+      merchandiseId: `gid://shopify/ProductVariant/${shopifyConfig.doubleProteinVariantId}`,
+      quantity: doubleProteinQty,
+      sellingPlanId: `gid://shopify/SellingPlan/${shopifyConfig.doubleProteinSellingPlanId}`,
+    });
+  }
+
+  const breakfastVariant = breakfastCount && shopifyConfig.breakfastVariants[breakfastCount];
+  if (breakfastVariant) {
+    lines.push({
+      merchandiseId: `gid://shopify/ProductVariant/${breakfastVariant.id}`,
+      quantity: 1,
+      sellingPlanId: `gid://shopify/SellingPlan/${shopifyConfig.breakfastSellingPlanId}`,
+    });
+  }
+
+  const snackGroups = new Map();
+  (snackLines || []).forEach(({ meal, quantity }) => {
+    const { product, variant } = pickSnackVariant(meal);
+    if (!snackGroups.has(variant.id)) snackGroups.set(variant.id, { product, variant, quantity: 0 });
+    snackGroups.get(variant.id).quantity += quantity;
+  });
+  snackGroups.forEach(group => {
+    lines.push({
+      merchandiseId: `gid://shopify/ProductVariant/${group.variant.id}`,
+      quantity: group.quantity,
+      sellingPlanId: `gid://shopify/SellingPlan/${group.product.sellingPlanId}`,
+    });
+  });
+
+  return lines;
+}
+
+// Returns null if there's nothing to price yet (no code typed, or an empty
+// cart). Throws on a genuine API/network failure so the caller can show an
+// error rather than silently reporting "not applicable".
+export async function previewDiscountCode({ mealCount, doubleProteinQty = 0, breakfastCount, snackLines, discountCode }) {
+  const trimmedCode = (discountCode || '').trim();
+  if (!trimmedCode) return null;
+
+  const lines = buildPreviewCartLines({ mealCount, doubleProteinQty, breakfastCount, snackLines });
+  if (lines.length === 0) return null;
+
+  const createData = await shopifyGraphQL(CART_CREATE_MUTATION, { lines });
+  const createResult = createData.cartCreate;
+  if (!createResult.cart || createResult.userErrors.length > 0) {
+    throw new Error(createResult.userErrors.map(e => e.message).join('; ') || 'Could not price this order');
+  }
+  const baseTotal = Number(createResult.cart.cost.totalAmount.amount);
+
+  const discountData = await shopifyGraphQL(CART_DISCOUNT_MUTATION, {
+    cartId: createResult.cart.id,
+    codes: [trimmedCode],
+  });
+  const discountResult = discountData.cartDiscountCodesUpdate;
+  if (!discountResult.cart || discountResult.userErrors.length > 0) {
+    throw new Error(discountResult.userErrors.map(e => e.message).join('; ') || 'Could not check this code');
+  }
+
+  const codeInfo = discountResult.cart.discountCodes.find(
+    d => d.code.toLowerCase() === trimmedCode.toLowerCase()
+  );
+  const applicable = !!(codeInfo && codeInfo.applicable);
+  const discountedTotal = Number(discountResult.cart.cost.totalAmount.amount);
+  const savings = applicable ? Math.max(0, baseTotal - discountedTotal) : 0;
+
+  return { applicable, savings };
+}
+
 function buildLineParams(variantId, sellingPlanId, quantity, properties) {
   const params = [['id', variantId], ['quantity', String(quantity)]];
   if (sellingPlanId) params.push(['selling_plan', sellingPlanId]);

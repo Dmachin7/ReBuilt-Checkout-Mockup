@@ -4,7 +4,7 @@ const MAJOR_STEPS = [
   { id: 1, label: 'Meal Count', short: 'Count',    route: 'mealCount'  },
   { id: 2, label: 'Entrées',    short: 'Entrées',  route: 'entrees'    },
   { id: 3, label: 'Breakfast',  short: 'Bfast',    route: 'breakfast'  },
-  { id: 4, label: 'Snacks',     short: 'Snacks',   route: 'snacks'     },
+  { id: 4, label: 'Sweet Treats', short: 'Treats', route: 'snacks'     },
   { id: 5, label: 'Allergies',  short: 'Allrgy',   route: 'allergies'  },
   { id: 6, label: 'Checkout',   short: 'Checkout', route: 'checkout'   },
 ];

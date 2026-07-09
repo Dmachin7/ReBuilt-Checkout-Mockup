@@ -408,7 +408,7 @@ export const BREAKFAST_ITEMS = [
   {
     id: 201,
     name: "Protein Overnight Oats",
-    category: "LIFESTYLE",
+    category: "BREAKFAST",
     description: "Rolled oats, whey protein, chia seeds, fresh berries and a drizzle of almond butter.",
     image: "https://images.unsplash.com/photo-1571748982800-fa51082c2224?w=400&q=80",
     protein: 32, calories: 380, carbs: 48,
@@ -419,7 +419,7 @@ export const BREAKFAST_ITEMS = [
   {
     id: 202,
     name: "Egg White Veggie Scramble",
-    category: "PERFORMANCE",
+    category: "BREAKFAST",
     description: "Eight egg whites, spinach, roasted peppers, mushrooms and goat cheese with a side of turkey sausage.",
     image: "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&q=80",
     protein: 38, calories: 310, carbs: 12,
@@ -430,7 +430,7 @@ export const BREAKFAST_ITEMS = [
   {
     id: 203,
     name: "Keto Smoked Salmon Frittata",
-    category: "KETO",
+    category: "BREAKFAST",
     description: "Baked egg frittata with smoked salmon, cream cheese, capers, and fresh dill.",
     image: null,
     protein: 36, calories: 340, carbs: 4,
@@ -441,7 +441,7 @@ export const BREAKFAST_ITEMS = [
   {
     id: 204,
     name: "Acai Power Bowl",
-    category: "PLANT-BASED",
+    category: "BREAKFAST",
     description: "Blended organic acai, banana, and mixed berries topped with granola, coconut flakes, and hemp seeds.",
     image: "https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400&q=80",
     protein: 18, calories: 420, carbs: 62,
@@ -455,7 +455,7 @@ export const SNACK_ITEMS = [
   {
     id: 301,
     name: "Protein Energy Bites",
-    category: "LIFESTYLE",
+    category: "SWEET_TREAT",
     description: "Oat-based bites with peanut butter, dark chocolate chips, and a honey drizzle. 3-pack.",
     image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80",
     protein: 18, calories: 220, carbs: 24,
@@ -466,7 +466,7 @@ export const SNACK_ITEMS = [
   {
     id: 302,
     name: "Greek Yogurt Parfait",
-    category: "PERFORMANCE",
+    category: "SWEET_TREAT",
     description: "Thick Greek yogurt layered with house-made granola, seasonal fruit compote, and raw honey.",
     image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&q=80",
     protein: 22, calories: 280, carbs: 32,
@@ -477,7 +477,7 @@ export const SNACK_ITEMS = [
   {
     id: 303,
     name: "Keto Cheese Crisps & Guacamole",
-    category: "KETO",
+    category: "SWEET_TREAT",
     description: "Baked parmesan crisps served with freshly made guacamole and pico de gallo.",
     image: null,
     protein: 14, calories: 180, carbs: 4,
@@ -488,7 +488,7 @@ export const SNACK_ITEMS = [
   {
     id: 304,
     name: "Almond & Date Bliss Bar",
-    category: "PLANT-BASED",
+    category: "SWEET_TREAT",
     description: "Medjool dates, raw almonds, cashews, and cacao nibs pressed into a single-serving bar.",
     image: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=400&q=80",
     protein: 12, calories: 240, carbs: 28,

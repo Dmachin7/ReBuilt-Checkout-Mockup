@@ -17,7 +17,7 @@ export default function StepEntrees({
   singles, doubles,
   onAddSingle, onRemoveSingle, onAddDouble, onRemoveDouble,
   entreeCount, mealCount, mealMode,
-  onNext, onBack, onClear, selectedPlan, onClearEntrees, onRechefWeek,
+  onNext, onBack, onClear, onClearEntrees, onRechefWeek,
   weeks, menuLoading, menuError, mealDetails,
   entreeMeals, breakfastItems, snackItems,
 }) {
@@ -55,13 +55,10 @@ export default function StepEntrees({
 
   function getMeals() {
     if (activeCategory === 'ALL') return weekMeals;
+    // Chef's Choice always draws from both Performance and Lifestyle,
+    // regardless of the customer's own selected plan.
     if (activeCategory === 'CHEF') {
-      if (selectedPlan === 'chefs_choice') {
-        return weekMeals.filter(m => m.category === 'PERFORMANCE' || m.category === 'LIFESTYLE');
-      }
-      const planCategoryMap = { lifestyle: 'LIFESTYLE', performance: 'PERFORMANCE', keto: 'KETO', plant_based: 'PLANT-BASED' };
-      const planCat = selectedPlan ? planCategoryMap[selectedPlan] : null;
-      return weekMeals.filter(m => m.badge === 'Best Seller' || (planCat && m.category === planCat));
+      return weekMeals.filter(m => m.category === 'PERFORMANCE' || m.category === 'LIFESTYLE');
     }
     return weekMeals.filter(m => m.category === activeCategory);
   }

@@ -6,6 +6,8 @@ const CATEGORY_STYLES = {
   KETO:          { text: 'text-pink-600',   label: 'Keto' },
   PERFORMANCE:   { text: 'text-blue-600',   label: 'Performance' },
   'PLANT-BASED': { text: 'text-orange-500', label: 'Plant-Based' },
+  BREAKFAST:     { text: 'text-amber-600',  label: 'Breakfast' },
+  SWEET_TREAT:   { text: 'text-rose-500',   label: 'Sweet Treat' },
 };
 
 const DIETARY = {
@@ -154,7 +156,7 @@ export default function MealModal({
                     <div className="flex justify-between"><span className="text-gray-500">Calories</span><span className="font-semibold">{meal.calories}</span></div>
                   </div>
                 </div>
-                <div className="p-4 rounded-2xl border border-brand-green bg-green-50">
+                <div className="p-4 rounded-2xl border border-gray-200 bg-gray-50">
                   <p className="font-bold text-gray-900 text-sm mb-2">Double Protein</p>
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between"><span className="text-gray-500">Protein</span><span className="font-semibold text-green-700">{doubleProteinVal}g ↑</span></div>
@@ -189,7 +191,7 @@ export default function MealModal({
         {/* Footer: add controls */}
         <div className="flex-shrink-0 px-5 py-4 bg-white border-t border-gray-100 space-y-3">
           <QtyRow
-            label="Single"
+            label="Single Protein"
             price={meal.basePrice}
             qty={singleQty}
             onAdd={() => onAddSingle(meal.id)}

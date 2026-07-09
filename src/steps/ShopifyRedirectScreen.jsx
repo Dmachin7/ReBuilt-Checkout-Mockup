@@ -3,9 +3,11 @@ import { useEffect } from 'react';
 export default function ShopifyRedirectScreen({ checkoutUrl, onBack }) {
   useEffect(() => {
     if (!checkoutUrl) return;
+    // Purely cosmetic pause (lets the spinner render a beat before the tab
+    // navigates away) -- not a real loading wait, so keep it short.
     const timer = setTimeout(() => {
       window.location.href = checkoutUrl;
-    }, 1200);
+    }, 300);
     return () => clearTimeout(timer);
   }, [checkoutUrl]);
 

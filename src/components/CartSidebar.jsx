@@ -206,7 +206,7 @@ export default function CartSidebar({
                 atLimit={breakfastCount > 0 && breakfastSelected >= breakfastCount}
               />
               <CartSection
-                title="Snacks"
+                title="Sweet Treats"
                 items={snackItems}
                 onAddSingle={onAddSingle}
                 onRemoveSingle={onRemoveSingle}

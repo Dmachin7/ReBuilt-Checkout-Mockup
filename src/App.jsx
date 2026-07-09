@@ -403,7 +403,6 @@ export default function App() {
           mealDetails={menu.mealDetails}
           entreeCount={entreeCount}
           mealMode={mealMode}
-          selectedPlan={selectedPlan}
           onNext={() => go('breakfast')}
           onBack={() => go('mealMode')}
           onClearEntrees={handleClearEntrees}

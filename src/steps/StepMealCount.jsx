@@ -40,7 +40,7 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
   );
 
   return (
-    <div className={`flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full sm:pb-10 ${showMore ? 'pb-40' : 'pb-28'}`}>
+    <div className="flex-1 px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full sm:pb-10 pb-28">
       <div className="mb-6 text-center">
         <h1 className="font-display text-3xl sm:text-4xl text-gray-900 mb-2">
           How many meals per week?
@@ -116,19 +116,22 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
         )}
       </div>
 
-      {/* Floating on mobile, inline on sm+ */}
-      <div className="fixed sm:static bottom-4 inset-x-4 sm:inset-auto z-20 mt-6 sm:mt-8">
-        <button
-          onClick={onNext}
-          disabled={!mealCount}
-          className={`w-full py-4 rounded-2xl font-bold text-base transition-all shadow-md ${
-            mealCount
-              ? 'bg-brand-green hover:bg-brand-green-dark text-white'
-              : 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none'
-          }`}
-        >
-          Continue →
-        </button>
+      {/* Sticky bar on mobile (solid background so it never blends into
+          content behind it as the tile grid scrolls), inline on sm+ */}
+      <div className="fixed sm:static bottom-0 inset-x-0 sm:inset-auto z-20 mt-6 sm:mt-8 p-4 sm:p-0 bg-white sm:bg-transparent border-t border-gray-100 sm:border-0 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] sm:shadow-none">
+        <div className="max-w-2xl mx-auto">
+          <button
+            onClick={onNext}
+            disabled={!mealCount}
+            className={`w-full py-4 rounded-2xl font-bold text-base transition-all shadow-md ${
+              mealCount
+                ? 'bg-brand-green hover:bg-brand-green-dark text-white'
+                : 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none'
+            }`}
+          >
+            Continue →
+          </button>
+        </div>
       </div>
     </div>
   );

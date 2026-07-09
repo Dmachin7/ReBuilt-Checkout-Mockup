@@ -5,6 +5,8 @@ const CATEGORY_STYLES = {
   KETO:          { text: 'text-pink-600',   label: 'Keto' },
   PERFORMANCE:   { text: 'text-blue-600',   label: 'Performance' },
   'PLANT-BASED': { text: 'text-orange-500', label: 'Plant-Based' },
+  BREAKFAST:     { text: 'text-amber-600',  label: 'Breakfast' },
+  SWEET_TREAT:   { text: 'text-rose-500',   label: 'Sweet Treat' },
 };
 
 const BADGE_STYLES = {
@@ -79,7 +81,7 @@ export default function MealCard({
   onRemoveDouble,
   atLimit,
   onCardClick,
-  singleLabel = 'Single',
+  singleLabel = 'Single Protein',
 }) {
   const [imgError, setImgError] = useState(false);
   const cat = CATEGORY_STYLES[meal.category] || CATEGORY_STYLES.LIFESTYLE;
