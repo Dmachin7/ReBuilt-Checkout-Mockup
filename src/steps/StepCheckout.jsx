@@ -274,7 +274,7 @@ export default function StepCheckout({
           <p className="text-gray-400 text-xs mt-1.5">Couldn't check this code right now — it'll still be validated at checkout.</p>
         )}
         {discountStatus === 'idle' && (
-          <p className="text-gray-400 text-xs mt-1.5">We'll check this against Shopify as you type.</p>
+          <p className="text-gray-400 text-xs mt-1.5">We'll check this code as you type.</p>
         )}
       </div>
 
