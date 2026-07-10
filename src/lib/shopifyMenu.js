@@ -1,10 +1,13 @@
 import { shopifyConfig } from '../config/shopify';
 
 // Matches the exact query captured from the live offer page (collection by
-// handle, with metafields for nutrition/ingredients/allergens). Handle is
-// always a value we generate ourselves (`week-N`), never user input.
+// handle, with metafields for nutrition/ingredients/allergens), except
+// featuredImage requests a CDN-resized WebP instead of the merchant's
+// full-res upload -- cards/modals only ever display these at up to ~700px,
+// so there's no reason to ship multi-MB originals over the wire.
+// Handle is always a value we generate ourselves (`week-N`), never user input.
 function buildWeekQuery(handle) {
-  return `{ collection(handle: "${handle}") { title products(first: 100) { edges { node { id handle title description tags featuredImage { url } variants(first: 5) { edges { node { id title price { amount } } } } calories: metafield(namespace: "product", key: "calories"){value} protein: metafield(namespace: "product", key: "protein"){value} fat: metafield(namespace: "product", key: "fat"){value} satFat: metafield(namespace: "product", key: "saturated_fat"){value} carbohydrate: metafield(namespace: "product", key: "carbohydrate"){value} sugar: metafield(namespace: "product", key: "sugar"){value} dietaryFiber: metafield(namespace: "product", key: "dietary_fiber"){value} cholesterol: metafield(namespace: "product", key: "cholesterol"){value} sodium: metafield(namespace: "product", key: "sodium"){value} ingredientsList: metafield(namespace: "product", key: "gradient_list"){value} allergensList: metafield(namespace: "product", key: "allergens"){value} fullNutrition: metafield(namespace: "custom", key: "full_nutritional_information"){value} mealRank: metafield(namespace: "product", key: "meal_rank"){value} } } } } }`;
+  return `{ collection(handle: "${handle}") { title products(first: 100) { edges { node { id handle title description tags featuredImage { url(transform: {maxWidth: 900, preferredContentType: WEBP}) } variants(first: 5) { edges { node { id title price { amount } } } } calories: metafield(namespace: "product", key: "calories"){value} protein: metafield(namespace: "product", key: "protein"){value} fat: metafield(namespace: "product", key: "fat"){value} satFat: metafield(namespace: "product", key: "saturated_fat"){value} carbohydrate: metafield(namespace: "product", key: "carbohydrate"){value} sugar: metafield(namespace: "product", key: "sugar"){value} dietaryFiber: metafield(namespace: "product", key: "dietary_fiber"){value} cholesterol: metafield(namespace: "product", key: "cholesterol"){value} sodium: metafield(namespace: "product", key: "sodium"){value} ingredientsList: metafield(namespace: "product", key: "gradient_list"){value} allergensList: metafield(namespace: "product", key: "allergens"){value} fullNutrition: metafield(namespace: "custom", key: "full_nutritional_information"){value} mealRank: metafield(namespace: "product", key: "meal_rank"){value} } } } } }`;
 }
 
 export async function fetchWeekCollection(handle) {
