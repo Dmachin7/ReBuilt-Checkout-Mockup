@@ -17,6 +17,7 @@ import { defaultEntreeSelection, chefsChoiceEntreeSelection, defaultBreakfastSel
 import { shopifyConfig } from './config/shopify';
 import { loadPersistedState, savePersistedState, clearPersistedState } from './lib/persistence';
 import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS, ALLERGY_OPTIONS } from './data/meals';
+import { PLAN_IMAGES } from './data/planImages';
 
 const persisted = loadPersistedState();
 
@@ -151,6 +152,29 @@ export default function App() {
     () => new Set(entreeMealsFlat.map(m => m.id)),
     [entreeMealsFlat]
   );
+
+  // Breakfast/snacks for every week, not just the active one -- used only
+  // to warm the image cache below, so switching weeks later doesn't hit
+  // the same load-in delay for the week that wasn't active yet.
+  const allBreakfastSnackImages = useMemo(() => {
+    if (usingFallback) return [...BREAKFAST_ITEMS, ...SNACK_ITEMS].map(m => m.image);
+    return rawWeeks
+      .flatMap(w => w.meals.filter(m => m.productType === 'breakfast' || m.productType === 'snacks'))
+      .map(m => m.image);
+  }, [rawWeeks, usingFallback]);
+
+  // Warm the browser's HTTP cache for every meal/plan photo as soon as the
+  // menu loads, instead of waiting for each step to mount its <img> tags --
+  // by the time a customer reaches Entrées/Breakfast/Snacks/Plan, the
+  // images are already fetched and paint instantly instead of loading in.
+  useEffect(() => {
+    const urls = new Set([
+      ...Object.values(PLAN_IMAGES),
+      ...entreeMealsFlat.map(m => m.image),
+      ...allBreakfastSnackImages,
+    ].filter(Boolean));
+    urls.forEach(url => { const img = new Image(); img.src = url; });
+  }, [entreeMealsFlat, allBreakfastSnackImages]);
 
   function go(target) {
     setStep(target);

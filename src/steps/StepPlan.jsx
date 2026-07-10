@@ -1,13 +1,6 @@
 import { useState } from 'react';
 import { PLANS } from '../data/meals';
-
-const PLAN_IMAGES = {
-  lifestyle:    '/lifestyle.jpg',
-  performance:  '/performance.jpg',
-  keto:         '/keto.jpg',
-  chefs_choice: '/chef-choice.jpg',
-  plant_based:  '/plant.jpg',
-};
+import { PLAN_IMAGES } from '../data/planImages';
 
 export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack }) {
   const [expandedPlan, setExpandedPlan] = useState(null);
