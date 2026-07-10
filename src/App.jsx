@@ -128,7 +128,8 @@ export default function App() {
 
   // `weeks` stays entrées-only (a live collection bundles all product
   // types together, see meal.productType). Breakfast/snacks are pulled
-  // from the active (first) week only -- they aren't week-tabbed in the UI.
+  // from whichever week is active in the Entrées week tabs, since each
+  // week's collection has its own breakfast/snacks products.
   const weeks = useMemo(
     () => rawWeeks.map(w => ({
       ...w,
@@ -136,12 +137,14 @@ export default function App() {
     })),
     [rawWeeks, usingFallback]
   );
+  const [activeWeekId, setActiveWeekId] = useState('w1');
+  const activeRawWeek = rawWeeks.find(w => w.id === activeWeekId) || rawWeeks[0];
   const breakfastItems = usingFallback
     ? BREAKFAST_ITEMS
-    : (rawWeeks[0] ? rawWeeks[0].meals.filter(m => m.productType === 'breakfast') : []);
+    : (activeRawWeek ? activeRawWeek.meals.filter(m => m.productType === 'breakfast') : []);
   const snackItems = usingFallback
     ? SNACK_ITEMS
-    : (rawWeeks[0] ? rawWeeks[0].meals.filter(m => m.productType === 'snacks') : []);
+    : (activeRawWeek ? activeRawWeek.meals.filter(m => m.productType === 'snacks') : []);
 
   const entreeMealsFlat = useMemo(() => weeks.flatMap(w => w.meals), [weeks]);
   const allEntreeIds = useMemo(
@@ -196,13 +199,29 @@ export default function App() {
     go('entrees');
   }
 
+  // Breakfast/snacks are week-specific products, so switching the active
+  // entrées week invalidates whatever breakfast/snack items were already
+  // in the cart -- they belonged to the previous week's collection.
+  function changeActiveWeek(weekId) {
+    if (weekId === activeWeekId) return;
+    dispatch({ type: 'SET_BULK_BREAKFAST', ids: [], clearIds: breakfastItems.map(m => m.id) });
+    dispatch({ type: 'CLEAR_SNACKS', ids: snackItems.map(m => m.id) });
+    setActiveWeekId(weekId);
+  }
+
+  function handleSelectWeek(weekId) {
+    changeActiveWeek(weekId);
+  }
+
   function handleRechefWeek(weekId) {
     const week = weeks.find(w => w.id === weekId);
     rechefMeals(week ? week.meals : []);
+    changeActiveWeek(weekId);
   }
 
-  function handleClearEntrees() {
+  function handleClearEntrees(weekId) {
     dispatch({ type: 'CLEAR_ENTREES', ids: [...allEntreeIds] });
+    if (weekId) changeActiveWeek(weekId);
   }
 
   function handleOwnMeals() {
@@ -395,6 +414,8 @@ export default function App() {
         <StepEntrees
           {...sharedCartProps}
           weeks={weeks}
+          activeWeek={activeWeekId}
+          onSelectWeek={handleSelectWeek}
           entreeMeals={entreeMealsFlat}
           breakfastItems={breakfastItems}
           snackItems={snackItems}

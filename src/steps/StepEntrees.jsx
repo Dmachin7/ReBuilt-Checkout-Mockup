@@ -20,8 +20,8 @@ export default function StepEntrees({
   onNext, onBack, onClear, onClearEntrees, onRechefWeek,
   weeks, menuLoading, menuError, mealDetails,
   entreeMeals, breakfastItems, snackItems,
+  activeWeek, onSelectWeek,
 }) {
-  const [activeWeek, setActiveWeek] = useState('w1');
   const [activeCategory, setActiveCategory] = useState('ALL');
   const [modalMeal, setModalMeal] = useState(null);
   const [chefBannerDismissed, setChefBannerDismissed] = useState(false);
@@ -39,7 +39,7 @@ export default function StepEntrees({
     if (hasEntrees) {
       setPendingWeek(weekId);
     } else {
-      setActiveWeek(weekId);
+      onSelectWeek?.(weekId);
     }
   }
 
@@ -47,9 +47,8 @@ export default function StepEntrees({
     if (mealMode === 'chef') {
       onRechefWeek?.(pendingWeek);
     } else {
-      onClearEntrees?.();
+      onClearEntrees?.(pendingWeek);
     }
-    setActiveWeek(pendingWeek);
     setPendingWeek(null);
   }
 
