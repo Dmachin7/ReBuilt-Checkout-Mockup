@@ -78,14 +78,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
 
                 {isExpanded && (
                   <div className="mt-1.5 pt-1.5 border-t border-gray-100 animate-reveal">
-                    <p className="text-[10px] text-gray-600 leading-relaxed mb-1.5">{plan.description}</p>
-                    <ul className="space-y-0.5">
-                      {plan.highlights.map(h => (
-                        <li key={h} className="text-[10px] text-gray-600">
-                          {h}
-                        </li>
-                      ))}
-                    </ul>
+                    <p className="text-[10px] text-gray-600 leading-relaxed">{plan.description}</p>
                   </div>
                 )}
               </div>
