@@ -55,7 +55,7 @@ export default function StepBreakfast({
       <div className="flex-1 min-w-0 pb-32 space-y-6">
 
         {/* Header */}
-        <div>
+        <div className="text-center">
           <h2 className="font-display text-2xl sm:text-3xl text-gray-900 mb-1">Choose your breakfast</h2>
           {breakfastCount && !breakfastComplete ? (
             <p className="text-sm text-amber-600 font-medium">

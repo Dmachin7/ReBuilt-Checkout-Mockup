@@ -70,7 +70,7 @@ export default function StepEntrees({
       <div className="flex-1 min-w-0 pb-32 space-y-4">
 
         {/* Header */}
-        <div>
+        <div className="text-center">
           <h2 className="font-display text-2xl sm:text-3xl text-gray-900 leading-tight">
             Choose your {mealCount} entrées
           </h2>

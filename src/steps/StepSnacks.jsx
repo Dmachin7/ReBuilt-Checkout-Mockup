@@ -37,7 +37,7 @@ export default function StepSnacks({
     <div className="flex gap-6 px-3 sm:px-6 lg:px-10 py-6 max-w-[1800px] mx-auto w-full">
       <div className="flex-1 min-w-0 pb-32 space-y-5">
 
-        <div>
+        <div className="text-center">
           <h2 className="font-display text-2xl sm:text-3xl text-gray-900 mb-1">Sweet Treat Add-ons</h2>
           <p className="text-gray-500 text-sm">Keep momentum between meals. Completely optional.</p>
         </div>

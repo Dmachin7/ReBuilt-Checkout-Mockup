@@ -37,7 +37,7 @@ export default function StepAllergies({ onViewSummary, onCheckout, onBack, selec
   return (
     <div className={`px-4 sm:px-6 py-6 max-w-2xl lg:max-w-3xl mx-auto w-full ${showCustom ? 'pb-96' : 'pb-64'} sm:pb-16`}>
 
-      <div className="mb-5">
+      <div className="mb-5 text-center">
         <h2 className="font-display text-2xl sm:text-3xl text-gray-900 mb-1">Any dietary restrictions?</h2>
         <p className="text-gray-500 text-sm">We'll flag incompatible meals on your menu. Select all that apply.</p>
       </div>
