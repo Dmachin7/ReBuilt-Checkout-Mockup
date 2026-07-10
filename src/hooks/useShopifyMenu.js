@@ -11,6 +11,16 @@ import { fetchWeekCollection, transformCollection } from '../lib/shopifyMenu';
 // Each week's `meals` array is unfiltered -- a collection bundles entrées,
 // breakfast, and snacks together (see meal.productType). Callers filter by
 // productType for the step they're feeding.
+//
+// The date-computed `plan` (see shopifyWeeks.js) decides which two weeks
+// *should* be orderable. Staff's `week.is_weekly` metafield sits on top of
+// that as a manual kill switch -- e.g. pulling a week early for a supply
+// issue -- so a week is only dropped here when that flag is explicitly
+// "false". Null/missing (not yet set by staff) leaves the date math as-is,
+// since treating "not configured" as "off" would silently hide a week
+// nobody meant to take down. When staff have set `delivery_week`/
+// `week_title`, those override the computed date/label -- their authored
+// values are the source of truth over our formula-derived guesses.
 export function useShopifyMenu(lookaheadWeeks = 3) {
   const [state, setState] = useState({ loading: true, error: null, weeks: [], mealDetails: {} });
 
@@ -23,11 +33,20 @@ export function useShopifyMenu(lookaheadWeeks = 3) {
         const results = await Promise.all(plan.map(w => fetchWeekCollection(w.handle)));
         if (cancelled) return;
         const mealDetails = {};
-        const weeks = plan.map((w, i) => {
-          const { meals, details } = transformCollection(results[i]);
-          Object.assign(mealDetails, details);
-          return { ...w, meals };
-        });
+        const weeks = plan
+          .map((w, i) => {
+            const result = results[i];
+            const { meals, details } = transformCollection(result.products);
+            Object.assign(mealDetails, details);
+            return {
+              ...w,
+              deliveryDate: result.deliveryWeek || w.deliveryDate,
+              label: result.weekTitle || w.label,
+              isWeekly: result.isWeekly,
+              meals,
+            };
+          })
+          .filter(w => w.isWeekly !== 'false');
         setState({ loading: false, error: null, weeks, mealDetails });
       } catch (err) {
         if (!cancelled) {

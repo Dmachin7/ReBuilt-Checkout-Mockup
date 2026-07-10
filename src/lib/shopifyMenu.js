@@ -6,10 +6,19 @@ import { shopifyConfig } from '../config/shopify';
 // full-res upload -- cards/modals only ever display these at up to ~700px,
 // so there's no reason to ship multi-MB originals over the wire.
 // Handle is always a value we generate ourselves (`week-N`), never user input.
+//
+// The three `week.*` metafields are staff-authored per collection (Admin ->
+// Settings -> Custom data -> Collections) and are the real source of truth
+// for what's live, layered on top of (not replacing) the date-computed
+// lookahead in shopifyWeeks.js -- see fetchWeekCollection below.
 function buildWeekQuery(handle) {
-  return `{ collection(handle: "${handle}") { title products(first: 100) { edges { node { id handle title description tags featuredImage { url(transform: {maxWidth: 900, preferredContentType: WEBP}) } variants(first: 5) { edges { node { id title price { amount } } } } calories: metafield(namespace: "product", key: "calories"){value} protein: metafield(namespace: "product", key: "protein"){value} fat: metafield(namespace: "product", key: "fat"){value} satFat: metafield(namespace: "product", key: "saturated_fat"){value} carbohydrate: metafield(namespace: "product", key: "carbohydrate"){value} sugar: metafield(namespace: "product", key: "sugar"){value} dietaryFiber: metafield(namespace: "product", key: "dietary_fiber"){value} cholesterol: metafield(namespace: "product", key: "cholesterol"){value} sodium: metafield(namespace: "product", key: "sodium"){value} ingredientsList: metafield(namespace: "product", key: "gradient_list"){value} allergensList: metafield(namespace: "product", key: "allergens"){value} fullNutrition: metafield(namespace: "custom", key: "full_nutritional_information"){value} mealRank: metafield(namespace: "product", key: "meal_rank"){value} } } } } }`;
+  return `{ collection(handle: "${handle}") { title isWeekly: metafield(namespace: "week", key: "is_weekly"){value} deliveryWeek: metafield(namespace: "week", key: "delivery_week"){value} weekTitle: metafield(namespace: "week", key: "week_title"){value} products(first: 100) { edges { node { id handle title description tags featuredImage { url(transform: {maxWidth: 900, preferredContentType: WEBP}) } variants(first: 5) { edges { node { id title price { amount } } } } calories: metafield(namespace: "product", key: "calories"){value} protein: metafield(namespace: "product", key: "protein"){value} fat: metafield(namespace: "product", key: "fat"){value} satFat: metafield(namespace: "product", key: "saturated_fat"){value} carbohydrate: metafield(namespace: "product", key: "carbohydrate"){value} sugar: metafield(namespace: "product", key: "sugar"){value} dietaryFiber: metafield(namespace: "product", key: "dietary_fiber"){value} cholesterol: metafield(namespace: "product", key: "cholesterol"){value} sodium: metafield(namespace: "product", key: "sodium"){value} ingredientsList: metafield(namespace: "product", key: "gradient_list"){value} allergensList: metafield(namespace: "product", key: "allergens"){value} fullNutrition: metafield(namespace: "custom", key: "full_nutritional_information"){value} mealRank: metafield(namespace: "product", key: "meal_rank"){value} } } } } }`;
 }
 
+// Returns the collection's products plus its staff-authored week metadata.
+// `isWeekly`/`deliveryWeek`/`weekTitle` are null whenever staff haven't set
+// them for this collection (e.g. a week that's archived or not yet queued
+// up) -- callers should treat null as "no override", not as "off".
 export async function fetchWeekCollection(handle) {
   const res = await fetch(
     `https://${shopifyConfig.storefrontApiHost}/api/${shopifyConfig.storefrontApiVersion}/graphql.json`,
@@ -26,7 +35,13 @@ export async function fetchWeekCollection(handle) {
   const json = await res.json();
   if (json.errors) throw new Error(json.errors.map(e => e.message).join('; '));
   const collection = json.data && json.data.collection;
-  return collection ? collection.products.edges.map(e => e.node) : [];
+  if (!collection) return { products: [], isWeekly: null, deliveryWeek: null, weekTitle: null };
+  return {
+    products: collection.products.edges.map(e => e.node),
+    isWeekly: collection.isWeekly ? collection.isWeekly.value : null,
+    deliveryWeek: collection.deliveryWeek ? collection.deliveryWeek.value : null,
+    weekTitle: collection.weekTitle ? collection.weekTitle.value : null,
+  };
 }
 
 // Confirmed against a live query of the week-8 collection (2026-07-07):
