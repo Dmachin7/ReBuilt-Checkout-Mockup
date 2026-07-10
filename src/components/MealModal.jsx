@@ -100,7 +100,7 @@ export default function MealModal({
         {/* Hero */}
         <div className="relative h-36 sm:h-44 bg-brand-mint flex-shrink-0 overflow-hidden">
           {meal.image ? (
-            <img src={meal.image} alt={meal.name} className={`w-full h-full object-cover ${isSoldOut ? 'grayscale opacity-60' : ''}`} />
+            <img src={meal.image} alt={meal.name} className={`w-full h-full object-cover ${isSoldOut ? 'opacity-40' : ''}`} />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100">
               <span className="text-5xl">📸</span>

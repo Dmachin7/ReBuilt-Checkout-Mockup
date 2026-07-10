@@ -120,7 +120,7 @@ export default function MealCard({
             src={meal.image}
             alt={meal.name}
             onError={() => setImgError(true)}
-            className={`w-full h-full object-cover scale-105 ${isSoldOut ? 'grayscale opacity-50' : ''}`}
+            className={`w-full h-full object-cover scale-105 ${isSoldOut ? 'opacity-40' : ''}`}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
