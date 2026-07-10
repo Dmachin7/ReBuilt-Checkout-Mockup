@@ -81,8 +81,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
                     <p className="text-[10px] text-gray-600 leading-relaxed mb-1.5">{plan.description}</p>
                     <ul className="space-y-0.5">
                       {plan.highlights.map(h => (
-                        <li key={h} className="flex items-start gap-1 text-[10px] text-gray-600">
-                          <span className="text-brand-green flex-shrink-0 mt-0.5">✓</span>
+                        <li key={h} className="text-[10px] text-gray-600">
                           {h}
                         </li>
                       ))}
