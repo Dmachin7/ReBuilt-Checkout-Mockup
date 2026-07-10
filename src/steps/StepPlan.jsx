@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { PLANS } from '../data/meals';
 
 const PLAN_IMAGES = {
-  lifestyle:    'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&q=80',
-  performance:  'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400&q=80',
-  keto:         'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80',
-  chefs_choice: 'https://images.unsplash.com/photo-1543339494-b4cd4f7ba686?w=400&q=80',
-  plant_based:  'https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&q=80',
+  lifestyle:    '/lifestyle-meal.jpg',
+  performance:  'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400&q=80', // TODO: swap once a real Performance photo is available
+  keto:         '/keto-meal.jpg',
+  chefs_choice: '/chef-choice.jpg',
+  plant_based:  '/plant-based.jpg',
 };
 
 export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack }) {
