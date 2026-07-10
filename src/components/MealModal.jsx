@@ -26,8 +26,9 @@ function NutritionRow({ label, value, unit, bold }) {
   );
 }
 
-function QtyRow({ label, price, qty, onAdd, onRemove, atLimit }) {
+function QtyRow({ label, price, qty, onAdd, onRemove, atLimit, unavailable }) {
   const stop = e => e.stopPropagation();
+  const disabled = atLimit || unavailable;
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex-1 min-w-0">
@@ -35,24 +36,24 @@ function QtyRow({ label, price, qty, onAdd, onRemove, atLimit }) {
       </div>
       {qty === 0 ? (
         <button
-          onClick={e => { stop(e); if (!atLimit) onAdd(); }}
-          disabled={atLimit}
+          onClick={e => { stop(e); if (!disabled) onAdd(); }}
+          disabled={disabled}
           className={`flex-shrink-0 font-bold px-5 py-2.5 rounded-xl text-sm transition-colors ${
-            atLimit
+            disabled
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : 'bg-brand-green hover:bg-brand-green-dark text-white shadow-sm'
           }`}
         >
-          {atLimit ? 'Plan full' : 'Add'}
+          {unavailable ? 'Sold out' : atLimit ? 'Plan full' : 'Add'}
         </button>
       ) : (
         <div className="flex-shrink-0 flex items-center gap-2 bg-brand-charcoal rounded-xl px-2 py-1.5 shadow-sm" onClick={stop}>
           <button onClick={e => { stop(e); onRemove(); }} className="w-7 h-7 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-bold flex items-center justify-center transition-colors">−</button>
           <span className="text-white font-bold text-sm min-w-[18px] text-center">{qty}</span>
           <button
-            onClick={e => { stop(e); if (!atLimit) onAdd(); }}
-            disabled={atLimit}
-            className={`w-7 h-7 rounded-lg font-bold flex items-center justify-center transition-colors ${atLimit ? 'bg-gray-600 opacity-40 cursor-not-allowed text-white' : 'bg-brand-green hover:bg-brand-green-dark text-white'}`}
+            onClick={e => { stop(e); if (!disabled) onAdd(); }}
+            disabled={disabled}
+            className={`w-7 h-7 rounded-lg font-bold flex items-center justify-center transition-colors ${disabled ? 'bg-gray-600 opacity-40 cursor-not-allowed text-white' : 'bg-brand-green hover:bg-brand-green-dark text-white'}`}
           >+</button>
         </div>
       )}
@@ -70,6 +71,7 @@ export default function MealModal({
 }) {
   const cat = CATEGORY_STYLES[meal.category] || CATEGORY_STYLES.LIFESTYLE;
   const details = (liveDetails && liveDetails[meal.id]) || MEAL_DETAILS[meal.id] || DEFAULT_MEAL_DETAILS;
+  const isSoldOut = meal.available === false;
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -98,7 +100,7 @@ export default function MealModal({
         {/* Hero */}
         <div className="relative h-36 sm:h-44 bg-brand-mint flex-shrink-0 overflow-hidden">
           {meal.image ? (
-            <img src={meal.image} alt={meal.name} className="w-full h-full object-cover" />
+            <img src={meal.image} alt={meal.name} className={`w-full h-full object-cover ${isSoldOut ? 'grayscale opacity-60' : ''}`} />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100">
               <span className="text-5xl">📸</span>
@@ -112,7 +114,14 @@ export default function MealModal({
           >
             ✕
           </button>
-          {meal.badge && (
+          {isSoldOut && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold shadow bg-gray-900/90 text-white uppercase tracking-wide">
+                Sold Out
+              </span>
+            </div>
+          )}
+          {!isSoldOut && meal.badge && (
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
               <span className={`px-3 py-1 rounded-full text-xs font-bold shadow ${
                 meal.badge === 'Best Seller' ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white' :
@@ -197,6 +206,7 @@ export default function MealModal({
             onAdd={() => onAddSingle(meal.id)}
             onRemove={() => onRemoveSingle(meal.id)}
             atLimit={atLimit}
+            unavailable={isSoldOut}
           />
           {meal.doubleProtein && (
             <QtyRow
@@ -206,6 +216,7 @@ export default function MealModal({
               onAdd={() => onAddDouble(meal.id)}
               onRemove={() => onRemoveDouble(meal.id)}
               atLimit={atLimit}
+              unavailable={isSoldOut}
             />
           )}
         </div>

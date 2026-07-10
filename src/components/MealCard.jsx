@@ -87,6 +87,10 @@ export default function MealCard({
   const cat = CATEGORY_STYLES[meal.category] || CATEGORY_STYLES.LIFESTYLE;
   const badge = meal.badge ? BADGE_STYLES[meal.badge] : null;
   const badgeWords = meal.badge ? meal.badge.split(' ') : [];
+  // Shopify's computed availability (inventory tracking + oversell policy +
+  // stock) -- undefined for fallback/local data, which should read as
+  // available, so this only trips on an explicit false.
+  const isSoldOut = meal.available === false;
 
   return (
     <div
@@ -116,11 +120,18 @@ export default function MealCard({
             src={meal.image}
             alt={meal.name}
             onError={() => setImgError(true)}
-            className="w-full h-full object-cover scale-105"
+            className={`w-full h-full object-cover scale-105 ${isSoldOut ? 'grayscale opacity-50' : ''}`}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
             <span className="text-2xl">📸</span>
+          </div>
+        )}
+        {isSoldOut && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <span className="px-2.5 py-1 rounded-full bg-gray-900/90 text-white text-[9px] sm:text-[10px] font-bold tracking-wide uppercase">
+              Sold Out
+            </span>
           </div>
         )}
       </div>
@@ -163,7 +174,7 @@ export default function MealCard({
             qty={singleQty}
             onAdd={() => onAddSingle(meal.id)}
             onRemove={() => onRemoveSingle(meal.id)}
-            atLimit={atLimit}
+            atLimit={atLimit || isSoldOut}
           />
           {meal.doubleProtein && (
             <PortionBtn
@@ -172,7 +183,7 @@ export default function MealCard({
               qty={doubleQty}
               onAdd={() => onAddDouble(meal.id)}
               onRemove={() => onRemoveDouble(meal.id)}
-              atLimit={atLimit}
+              atLimit={atLimit || isSoldOut}
               isDouble
             />
           )}
