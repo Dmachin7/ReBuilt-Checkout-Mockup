@@ -1,14 +1,83 @@
 import { useEffect } from 'react';
 
+// Purely cosmetic pause (lets the spinner render a beat before the tab
+// navigates away) -- not a real loading wait, so keep it short.
+const HANDOFF_DELAY_MS = 300;
+
+// How long to wait for the embedding storefront to take over the navigation
+// before giving up and trying it from in here. Comfortably inside the browser's
+// transient-activation window (~5s in Chrome) from the customer's Checkout
+// click, which the top-level navigation below depends on.
+const EMBED_FALLBACK_MS = 3000;
+
+// This app runs in two places: standalone at rebuiltcheckout.netlify.app, and
+// framed into the ReBuilt storefront's /mealplan page. The hand-off has to work
+// differently in each, so detect which one we're in.
+function isEmbedded() {
+  try {
+    return window.parent !== window;
+  } catch {
+    // A cross-origin parent that won't even answer the comparison means we're
+    // definitely framed.
+    return true;
+  }
+}
+
+// The storefront origin that framed us. The embedding page sends
+// strict-origin-when-cross-origin, so the referrer is the bare origin -- exactly
+// what postMessage needs, without hardcoding a list of storefront URLs that
+// differ across localhost, Oxygen previews, and production.
+function embedderOrigin() {
+  try {
+    return document.referrer ? new URL(document.referrer).origin : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function ShopifyRedirectScreen({ checkoutUrl, onBack }) {
   useEffect(() => {
     if (!checkoutUrl) return;
-    // Purely cosmetic pause (lets the spinner render a beat before the tab
-    // navigates away) -- not a real loading wait, so keep it short.
-    const timer = setTimeout(() => {
-      window.location.href = checkoutUrl;
-    }, 300);
-    return () => clearTimeout(timer);
+
+    if (!isEmbedded()) {
+      const timer = setTimeout(() => {
+        window.location.href = checkoutUrl;
+      }, HANDOFF_DELAY_MS);
+      return () => clearTimeout(timer);
+    }
+
+    // Shopify serves the cart and checkout with `frame-ancestors 'none'` (and
+    // X-Frame-Options: DENY), so navigating this frame to the hand-off URL just
+    // gets refused and strands the customer on this spinner. Hand the URL up to
+    // the storefront page instead and let it navigate at the top level -- see
+    // the 'rebuilt:checkout' listener in the storefront's mealplan route. The
+    // URL carries no secrets (it's built from public Storefront API data plus a
+    // discount code the customer typed), so falling back to '*' when the
+    // referrer is unavailable is acceptable.
+    const handoff = setTimeout(() => {
+      window.parent.postMessage(
+        { type: 'rebuilt:checkout', url: checkoutUrl },
+        embedderOrigin() || '*',
+      );
+    }, HANDOFF_DELAY_MS);
+
+    // If the embedder is an older build with no listener for that message,
+    // nothing happens and the customer waits here forever. Escape the frame
+    // ourselves as a last resort. Best-effort: browsers may refuse a
+    // cross-origin top-level navigation without throwing, in which case the
+    // frame-level navigation below is the final (visibly failing) attempt.
+    const fallback = setTimeout(() => {
+      try {
+        window.top.location.href = checkoutUrl;
+      } catch {
+        window.location.href = checkoutUrl;
+      }
+    }, EMBED_FALLBACK_MS);
+
+    return () => {
+      clearTimeout(handoff);
+      clearTimeout(fallback);
+    };
   }, [checkoutUrl]);
 
   // When a customer hits the browser's physical back button from Shopify's
