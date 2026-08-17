@@ -9,7 +9,7 @@ const MAJOR_STEPS = [
   { id: 6, label: 'Checkout',   short: 'Checkout', route: 'checkout'   },
 ];
 
-export default function ProgressBar({ currentRoute, unlockedUntil = 'mealCount', onNavigate }) {
+export default function ProgressBar({ currentRoute, unlockedUntil = 'mealCount', onNavigate, barRef }) {
   const currentIdx  = FULL_STEPS.indexOf(currentRoute);
   const unlockedIdx = FULL_STEPS.indexOf(unlockedUntil);
   const maxUnlocked = Math.max(unlockedIdx, currentIdx);
@@ -21,7 +21,7 @@ export default function ProgressBar({ currentRoute, unlockedUntil = 'mealCount',
   function isActive(route)   { return route === currentRoute; }
 
   return (
-    <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+    <div ref={barRef} className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
 
       {/* Header: logo only */}
       <div className="flex items-center justify-center px-3 sm:px-6 py-2 sm:py-3 border-b border-gray-100">

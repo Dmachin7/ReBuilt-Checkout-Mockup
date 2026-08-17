@@ -133,12 +133,18 @@ export default function CartSidebar({
   const snackSubtotal = snackItems.reduce((sum, item) => sum + item.price, 0);
 
   const subtotal = entreeBoxPrice + doubleProteinPrice + breakfastBoxPrice + snackSubtotal;
-  const tax = subtotal * 0.08;
+  const tax = subtotal * 0.075;
   const total = subtotal + tax;
 
   return (
     <div className="hidden lg:flex flex-col w-96 xl:w-[28rem] flex-shrink-0">
-      <div className="sticky top-32 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 9rem)' }}>
+      <div
+        className="sticky bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col"
+        style={{
+          top: 'calc(var(--progress-bar-height, 8rem) + 1rem)',
+          maxHeight: 'calc(100vh - var(--progress-bar-height, 8rem) - 2rem)',
+        }}
+      >
         {/* Header */}
         <div className="bg-brand-charcoal px-5 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -228,7 +234,7 @@ export default function CartSidebar({
               <span className="text-green-600 font-medium">Calculated at checkout</span>
             </div>
             <div className="flex justify-between text-sm text-gray-600">
-              <span>Est. Tax (8%)</span><span>${tax.toFixed(2)}</span>
+              <span>Est. Tax (7.5%)</span><span>${tax.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-200">
               <span>Total / week</span><span>${total.toFixed(2)}</span>

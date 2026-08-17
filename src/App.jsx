@@ -1,4 +1,4 @@
-import { useReducer, useState, useMemo, useEffect } from 'react';
+import { useReducer, useState, useMemo, useEffect, useRef } from 'react';
 import ProgressBar from './components/ProgressBar';
 import StepMealCount from './steps/StepMealCount';
 import StepPlan from './steps/StepPlan';
@@ -114,6 +114,19 @@ export default function App() {
   const [allergySelected, setAllergySelected] = useState(persisted?.allergySelected || new Set());
   const [allergyNotes, setAllergyNotes] = useState(persisted?.allergyNotes || '');
   const [discountCode, setDiscountCode] = useState(persisted?.discountCode || '');
+
+  const progressBarRef = useRef(null);
+  useEffect(() => {
+    const el = progressBarRef.current;
+    if (!el) return;
+    const setHeightVar = () => {
+      document.documentElement.style.setProperty('--progress-bar-height', `${el.offsetHeight}px`);
+    };
+    setHeightVar();
+    const observer = new ResizeObserver(setHeightVar);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     savePersistedState({
@@ -397,7 +410,7 @@ export default function App() {
   if (step === 'confirmation') {
     return (
       <div className="min-h-svh bg-brand-mint flex flex-col">
-        <ProgressBar currentRoute="checkout" unlockedUntil="checkout" onNavigate={go} />
+        <ProgressBar barRef={progressBarRef} currentRoute="checkout" unlockedUntil="checkout" onNavigate={go} />
         <ConfirmationScreen orderDetails={orderDetails} onReset={handleReset} />
       </div>
     );
@@ -405,7 +418,7 @@ export default function App() {
 
   return (
     <div className="min-h-svh bg-brand-mint flex flex-col">
-      <ProgressBar currentRoute={step} unlockedUntil={unlockedUntil} onNavigate={go} />
+      <ProgressBar barRef={progressBarRef} currentRoute={step} unlockedUntil={unlockedUntil} onNavigate={go} />
 
       {step === 'mealCount' && (
         <StepMealCount
