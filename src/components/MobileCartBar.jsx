@@ -135,7 +135,7 @@ export default function MobileCartBar({
   const snackSubtotal = snackItems.reduce((sum, item) => sum + item.price, 0);
 
   const subtotal = entreeBoxPrice + doubleProteinPrice + breakfastBoxPrice + snackSubtotal;
-  const tax = subtotal * 0.08;
+  const tax = subtotal * 0.075;
   const total = subtotal + tax;
 
   return (
@@ -213,7 +213,7 @@ export default function MobileCartBar({
                 <span className="text-green-600 font-medium text-xs">Calculated at checkout</span>
               </div>
               <div className="flex justify-between">
-                <span>Est. Tax (8%)</span><span>${tax.toFixed(2)}</span>
+                <span>Est. Tax (7.5%)</span><span>${tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-bold text-gray-900 pt-1.5 border-t border-gray-200 text-base">
                 <span>Total / week</span><span>${total.toFixed(2)}</span>

@@ -110,7 +110,7 @@ export default function StepCheckout({
 
   const discountSavings = discountPreview && discountPreview.applicable ? discountPreview.savings : 0;
   const discountedSubtotal = Math.max(0, subtotal - discountSavings);
-  const tax = discountedSubtotal * 0.08;
+  const tax = discountedSubtotal * 0.075;
   const total = discountedSubtotal + tax;
 
   const allergyLabels = [...(allergySelected || [])]
@@ -232,7 +232,7 @@ export default function StepCheckout({
             <span className="text-green-600 font-medium">Calculated at checkout</span>
           </div>
           <div className="flex justify-between text-sm text-gray-600">
-            <span>Est. Tax (8%)</span><span>${tax.toFixed(2)}</span>
+            <span>Est. Tax (7.5%)</span><span>${tax.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
             <span>Weekly total</span><span>${total.toFixed(2)}</span>
