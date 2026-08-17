@@ -83,6 +83,22 @@ function numFromMetafield(mf, fallback = 0) {
   return mf && mf.value != null && mf.value !== '' ? parseNumeric(mf.value, fallback) : fallback;
 }
 
+// Pulls the double-protein half of a "single | double" compound metafield
+// value (see the comment above parseNumeric). Returns null when the
+// product has no double-protein value at all -- e.g. Plant-Based items,
+// which only ever carry the single-protein number -- so callers can fall
+// back to an estimate rather than silently treating "no data" as 0.
+function doubleFromMetafield(mf) {
+  if (!mf || mf.value == null || mf.value === '') return null;
+  const raw = String(mf.value);
+  if (!raw.includes('|')) return null;
+  const secondHalf = raw.split('|')[1];
+  const match = secondHalf.match(/-?\d+(\.\d+)?/);
+  if (!match) return null;
+  const n = Number(match[0]);
+  return Number.isFinite(n) ? n : null;
+}
+
 // allergensList is a JSON array string of free-text notes, e.g.
 // '["Contains Dairy & Egg","Spicy"]' or '["Vegan"]' or null.
 function parseAllergenNotes(mf) {
@@ -190,6 +206,12 @@ export function transformProduct(node) {
     badge: null,
     doubleProtein,
     doubleProteinPrice: shopifyConfig.doubleProteinPerMeal,
+    // Real double-protein macros from Shopify's "single | double" metafield
+    // values, not an estimate -- null when the product doesn't carry one
+    // (e.g. no "Double Protein" variant), so the UI can fall back cleanly.
+    doubleProteinProtein: doubleProtein ? doubleFromMetafield(node.protein) : null,
+    doubleProteinCalories: doubleProtein ? doubleFromMetafield(node.calories) : null,
+    doubleProteinCarbs: doubleProtein ? doubleFromMetafield(node.carbohydrate) : null,
     isDoughnuts,
     isKetoOnly,
     // Real per-unit price from Shopify. Snacks are priced per-item and

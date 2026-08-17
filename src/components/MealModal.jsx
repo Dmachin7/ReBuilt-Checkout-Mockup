@@ -84,8 +84,11 @@ export default function MealModal({
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  const doubleProteinVal = Math.round(meal.protein * 1.9);
-  const doubleCals = meal.calories + Math.round(meal.protein * 1.5);
+  // Real values come from Shopify (see doubleFromMetafield in
+  // shopifyMenu.js); only estimate when a product genuinely has none
+  // (e.g. the offline fallback meal data in src/data/meals.js).
+  const doubleProteinVal = meal.doubleProteinProtein ?? Math.round(meal.protein * 1.9);
+  const doubleCals = meal.doubleProteinCalories ?? (meal.calories + Math.round(meal.protein * 1.5));
 
   return (
     <div
