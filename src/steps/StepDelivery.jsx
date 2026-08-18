@@ -104,7 +104,7 @@ export default function StepDelivery({
           <p className="font-bold text-gray-900 text-base">Ship to my door</p>
           <p className="text-gray-500 text-xs mt-0.5">Delivered via UPS or FedEx — ${SHIP_COST.toFixed(2)}/week</p>
           {deliveryMode === 'ship' && (
-            <p className="text-gray-400 text-[11px] mt-2 italic">Your shipping address will be requested at checkout, right after this.</p>
+            <p className="text-gray-400 text-[11px] mt-2 italic">Your shipping address will be entered at checkout</p>
           )}
         </button>
 
