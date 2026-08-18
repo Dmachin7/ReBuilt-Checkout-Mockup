@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useShopifyLocations } from '../hooks/useShopifyLocations';
+import { geocodeZip, haversineMiles } from '../lib/geocode';
 
 const SHIP_COST = 20;
+const ZIP_RE = /^\d{5}$/;
 
 function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -16,7 +18,45 @@ export default function StepDelivery({
   const { loading, error, locations } = useShopifyLocations();
   const [locationFilter, setLocationFilter] = useState('');
 
-  const filteredLocations = useMemo(() => {
+  // A 5-digit ZIP gets geocoded to real coordinates (Zippopotam -- see
+  // lib/geocode.js) and every location gets sorted by actual distance from
+  // it, same as typing a ZIP into Shopify's own pickup picker. Anything
+  // else (a name, city, partial address) falls back to a plain substring
+  // match -- there's no free CORS-enabled full-address geocoder this
+  // client-only app can call directly (confirmed against the Census
+  // geocoder and Nominatim, both CORS-blocked from a browser).
+  const [geoStatus, setGeoStatus] = useState('idle'); // idle | searching | found | notfound
+  const [origin, setOrigin] = useState(null); // { lat, lng } | null
+
+  useEffect(() => {
+    const zip = locationFilter.trim();
+    if (!ZIP_RE.test(zip)) {
+      setGeoStatus('idle');
+      setOrigin(null);
+      return undefined;
+    }
+    setGeoStatus('searching');
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const coords = await geocodeZip(zip);
+        if (cancelled) return;
+        if (coords) { setOrigin(coords); setGeoStatus('found'); }
+        else { setOrigin(null); setGeoStatus('notfound'); }
+      } catch {
+        if (!cancelled) { setOrigin(null); setGeoStatus('notfound'); }
+      }
+    }, 500);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [locationFilter]);
+
+  const displayLocations = useMemo(() => {
+    if (origin) {
+      return locations
+        .filter(loc => loc.latitude != null && loc.longitude != null)
+        .map(loc => ({ ...loc, distanceMiles: haversineMiles(origin.lat, origin.lng, loc.latitude, loc.longitude) }))
+        .sort((a, b) => a.distanceMiles - b.distanceMiles);
+    }
     const q = locationFilter.trim().toLowerCase();
     if (!q) return locations;
     return locations.filter(loc =>
@@ -24,7 +64,7 @@ export default function StepDelivery({
       loc.city.toLowerCase().includes(q) ||
       loc.zip.includes(q)
     );
-  }, [locations, locationFilter]);
+  }, [locations, locationFilter, origin]);
 
   function chooseMode(mode) {
     setDeliveryMode(mode);
@@ -91,19 +131,22 @@ export default function StepDelivery({
             type="text"
             value={locationFilter}
             onChange={e => setLocationFilter(e.target.value)}
-            placeholder="Search by name, city, or ZIP"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green mb-3"
+            placeholder="Enter your ZIP to find the closest, or search by name"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green"
           />
+          {geoStatus === 'searching' && <p className="text-gray-400 text-xs mt-1.5">Finding locations near {locationFilter.trim()}…</p>}
+          {geoStatus === 'notfound' && <p className="text-gray-400 text-xs mt-1.5">Couldn't find that ZIP — showing all locations instead.</p>}
+          {geoStatus === 'found' && <p className="text-brand-green text-xs mt-1.5 font-medium">Sorted by distance from {locationFilter.trim()}</p>}
 
           {loading && <p className="text-gray-400 text-sm py-4 text-center">Loading pickup locations…</p>}
           {error && <p className="text-red-500 text-sm py-2">Couldn't load pickup locations right now. Try again shortly.</p>}
 
           {!loading && !error && (
-            <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
-              {filteredLocations.length === 0 && (
+            <div className="max-h-72 overflow-y-auto space-y-2 pr-1 mt-3">
+              {displayLocations.length === 0 && (
                 <p className="text-gray-400 text-sm py-4 text-center">No locations match that search.</p>
               )}
-              {filteredLocations.map(loc => {
+              {displayLocations.map(loc => {
                 const selected = pickupLocationId === loc.id;
                 return (
                   <button
@@ -115,7 +158,12 @@ export default function StepDelivery({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm truncate">{loc.name}</p>
+                        <p className="font-semibold text-gray-900 text-sm truncate">
+                          {loc.name}
+                          {loc.distanceMiles != null && (
+                            <span className="text-gray-400 font-normal"> ({loc.distanceMiles.toFixed(1)} mi)</span>
+                          )}
+                        </p>
                         <p className="text-gray-500 text-xs mt-0.5">
                           {loc.address1}{loc.address2 ? `, ${loc.address2}` : ''}, {loc.city}, {loc.province} {loc.zip}
                         </p>
@@ -140,7 +188,6 @@ export default function StepDelivery({
           placeholder="you@example.com"
           className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green"
         />
-        <p className="text-gray-400 text-xs mt-1.5">We'll carry this into checkout so you don't have to retype it.</p>
       </div>
 
       {/* Desktop: Back + Continue */}

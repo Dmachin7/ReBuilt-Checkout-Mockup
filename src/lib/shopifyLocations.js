@@ -13,7 +13,7 @@ const LOCATIONS_QUERY = `query Locations($first: Int!) {
       node {
         id
         name
-        address { address1 address2 city province zip }
+        address { address1 address2 city province zip latitude longitude }
       }
     }
   }
@@ -29,5 +29,7 @@ export async function fetchPickupLocations() {
     city: node.address.city,
     province: node.address.province,
     zip: node.address.zip,
+    latitude: node.address.latitude,
+    longitude: node.address.longitude,
   }));
 }
