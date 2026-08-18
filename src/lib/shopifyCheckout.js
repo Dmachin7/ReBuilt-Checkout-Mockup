@@ -470,8 +470,14 @@ export async function buildCartCheckoutUrl({
   const buyerIdentity = {};
   if (email) buyerIdentity.email = email;
   if (deliveryMode === 'pickup' && pickupLocationId) {
+    // Confirmed against Shopify's own cartBuyerIdentityUpdate docs example
+    // (2026-08-18) -- pickupHandle takes the bare numeric Location id, not
+    // the full gid://shopify/Location/... string. Passing the full gid was
+    // silently ignored (no error, but checkout fell back to its default
+    // location instead of the one picked here).
+    const pickupHandle = pickupLocationId.split('/').pop();
     buyerIdentity.preferences = {
-      delivery: { deliveryMethod: ['PICK_UP'], pickupHandle: [pickupLocationId] },
+      delivery: { deliveryMethod: ['PICK_UP'], pickupHandle: [pickupHandle] },
     };
   }
   if (Object.keys(buyerIdentity).length > 0) {
