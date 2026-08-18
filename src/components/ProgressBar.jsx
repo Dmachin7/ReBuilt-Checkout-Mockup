@@ -1,4 +1,4 @@
-const FULL_STEPS = ['mealCount', 'plan', 'mealMode', 'entrees', 'breakfast', 'snacks', 'allergies', 'checkout'];
+const FULL_STEPS = ['mealCount', 'plan', 'mealMode', 'entrees', 'breakfast', 'snacks', 'allergies', 'delivery', 'checkout'];
 
 const MAJOR_STEPS = [
   { id: 1, label: 'Meal Count', short: 'Count',    route: 'mealCount'  },

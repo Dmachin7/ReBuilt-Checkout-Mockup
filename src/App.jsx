@@ -7,12 +7,13 @@ import StepEntrees from './steps/StepEntrees';
 import StepBreakfast from './steps/StepBreakfast';
 import StepSnacks from './steps/StepSnacks';
 import StepAllergies from './steps/StepAllergies';
+import StepDelivery from './steps/StepDelivery';
 import StepCheckout from './steps/StepCheckout';
 import ConfirmationScreen from './steps/ConfirmationScreen';
 import ShopifyRedirectScreen from './steps/ShopifyRedirectScreen';
 import { useShopifyMenu } from './hooks/useShopifyMenu';
 import { setWeekForSelection, earliestDeliverableMonday } from './lib/shopifyWeeks';
-import { buildEntreeSelections, buildMetadataPayload, buildBreakfastMetadata, buildCheckoutUrl } from './lib/shopifyCheckout';
+import { buildEntreeSelections, buildMetadataPayload, buildBreakfastMetadata, buildCartCheckoutUrl } from './lib/shopifyCheckout';
 import { defaultEntreeSelection, chefsChoiceEntreeSelection, defaultBreakfastSelection } from './lib/defaultSelections';
 import { shopifyConfig } from './config/shopify';
 import { loadPersistedState, savePersistedState, clearPersistedState } from './lib/persistence';
@@ -106,12 +107,18 @@ function computeEntreeCount(singles, doubles, allEntreeIds) {
   return count;
 }
 
-function computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, breakfastCount, breakfastSkipped) {
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((value || '').trim());
+}
+
+function computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, breakfastCount, breakfastSkipped, deliveryMode, pickupLocationId, customerEmail) {
   if (!mealCount) return 'mealCount';
   if (!selectedPlan) return 'plan';
   if (!mealMode) return 'mealMode';
   if (entreeCount < mealCount) return 'entrees';
   if (!breakfastCount && !breakfastSkipped) return 'breakfast';
+  if (!isValidEmail(customerEmail)) return 'delivery';
+  if (!deliveryMode || (deliveryMode === 'pickup' && !pickupLocationId)) return 'delivery';
   return 'checkout';
 }
 
@@ -127,6 +134,9 @@ export default function App() {
   const [allergySelected, setAllergySelected] = useState(persisted?.allergySelected || new Set());
   const [allergyNotes, setAllergyNotes] = useState(persisted?.allergyNotes || '');
   const [discountCode, setDiscountCode] = useState(discountCodeFromUrl() || persisted?.discountCode || '');
+  const [deliveryMode, setDeliveryMode] = useState(persisted?.deliveryMode || null);
+  const [pickupLocationId, setPickupLocationId] = useState(persisted?.pickupLocationId || null);
+  const [customerEmail, setCustomerEmail] = useState(persisted?.customerEmail || '');
 
   const progressBarRef = useRef(null);
   useEffect(() => {
@@ -145,8 +155,9 @@ export default function App() {
     savePersistedState({
       step, cart, mealCount, selectedPlan, mealMode,
       breakfastCount, breakfastSkipped, allergySelected, allergyNotes, discountCode,
+      deliveryMode, pickupLocationId, customerEmail,
     });
-  }, [step, cart, mealCount, selectedPlan, mealMode, breakfastCount, breakfastSkipped, allergySelected, allergyNotes, discountCode]);
+  }, [step, cart, mealCount, selectedPlan, mealMode, breakfastCount, breakfastSkipped, allergySelected, allergyNotes, discountCode, deliveryMode, pickupLocationId, customerEmail]);
 
   const menu = useShopifyMenu(2);
   const usingFallback = !!menu.error;
@@ -208,7 +219,7 @@ export default function App() {
   }
 
   const entreeCount   = computeEntreeCount(cart.singles, cart.doubles, allEntreeIds);
-  const unlockedUntil = computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, breakfastCount, breakfastSkipped);
+  const unlockedUntil = computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, breakfastCount, breakfastSkipped, deliveryMode, pickupLocationId, customerEmail);
 
   function handleAddSingle(id)    { dispatch({ type: 'ADD_SINGLE', id }); }
   function handleRemoveSingle(id) { dispatch({ type: 'REMOVE_SINGLE', id }); }
@@ -323,8 +334,10 @@ export default function App() {
   // Builds the real Shopify checkout URL from current cart state -- see
   // src/lib/shopifyCheckout.js. Returns null if there's nothing orderable
   // yet (e.g. no meal count picked), so ShopifyRedirectScreen can show an
-  // error instead of navigating with a broken/empty cart.
-  function buildRealCheckoutUrl() {
+  // error instead of navigating with a broken/empty cart. Async: building
+  // now creates a real Storefront Cart (see buildCartCheckoutUrl) rather
+  // than just assembling a URL string.
+  async function buildRealCheckoutUrl() {
     if (!mealCount) return null;
     const entreeMeals = weeks.flatMap(w => w.meals);
     const entreeIdSet = new Set(entreeMeals.map(m => m.id));
@@ -382,7 +395,7 @@ export default function App() {
       });
     });
 
-    return buildCheckoutUrl({
+    return buildCartCheckoutUrl({
       entree: { variantId: entreeVariant.id, mealCount, metadataJson: entreeMetadataJson },
       doubleProtein: doubleProteinCount > 0 ? { quantity: doubleProteinCount } : null,
       breakfast: breakfastLine,
@@ -391,6 +404,9 @@ export default function App() {
       allergiesValue,
       allergyNotesValue,
       discountCode: discountCode.trim(),
+      email: customerEmail.trim(),
+      deliveryMode,
+      pickupLocationId,
     });
   }
 
@@ -405,6 +421,9 @@ export default function App() {
     setDiscountCode('');
     setAllergySelected(new Set());
     setAllergyNotes('');
+    setDeliveryMode(null);
+    setPickupLocationId(null);
+    setCustomerEmail('');
     clearPersistedState();
     go('mealCount');
   }
@@ -519,14 +538,27 @@ export default function App() {
           setSelected={setAllergySelected}
           customText={allergyNotes}
           setCustomText={setAllergyNotes}
-          onViewSummary={() => go('checkout')}
+          onViewSummary={() => go('delivery')}
           onCheckout={() => go('shopifyRedirect')}
           onBack={() => go('snacks')}
         />
       )}
 
+      {step === 'delivery' && (
+        <StepDelivery
+          deliveryMode={deliveryMode}
+          setDeliveryMode={setDeliveryMode}
+          pickupLocationId={pickupLocationId}
+          setPickupLocationId={setPickupLocationId}
+          customerEmail={customerEmail}
+          setCustomerEmail={setCustomerEmail}
+          onNext={() => go('checkout')}
+          onBack={() => go('allergies')}
+        />
+      )}
+
       {step === 'shopifyRedirect' && (
-        <ShopifyRedirectScreen checkoutUrl={buildRealCheckoutUrl()} onBack={() => go('checkout')} />
+        <ShopifyRedirectScreen onBuildCheckoutUrl={buildRealCheckoutUrl} onBack={() => go('checkout')} />
       )}
 
       {step === 'checkout' && (
@@ -540,7 +572,8 @@ export default function App() {
           setDiscountCode={setDiscountCode}
           allergySelected={allergySelected}
           allergyNotes={allergyNotes}
-          onBack={() => go('allergies')}
+          deliveryMode={deliveryMode}
+          onBack={() => go('delivery')}
           onConfirm={() => go('shopifyRedirect')}
         />
       )}

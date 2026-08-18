@@ -1,4 +1,5 @@
 import { shopifyConfig } from '../config/shopify';
+import { shopifyGraphQL } from './shopifyClient';
 
 const CATEGORY_TO_PLAN_KEY = {
   LIFESTYLE: 'lifestyle',
@@ -6,15 +7,6 @@ const CATEGORY_TO_PLAN_KEY = {
   KETO: 'keto',
   'PLANT-BASED': 'plant',
 };
-
-// Serializes properties[_key] pairs the way Shopify's cart/add expects:
-// brackets in keys stay literal, only values get percent-encoded. Building
-// nested return_to URLs from the inside out and always encoding exactly
-// once per nesting level (via this) reproduces the real capture's double-
-// and triple-encoding without any special-casing.
-function qs(pairs) {
-  return pairs.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
-}
 
 // Groups entrée cart selections by the plan each meal's category maps to.
 // Matches the confirmed-live _metadata shape: one userSelections entry per
@@ -242,23 +234,6 @@ function buildSnackTierMetadata({ setWeek, variant, sellingPlanId, items }) {
 // a checkout session) -- callers should treat the result as a merchandise-
 // level discount to apply against their own subtotal before tax, not a
 // final total.
-async function shopifyGraphQL(query, variables) {
-  const res = await fetch(
-    `https://${shopifyConfig.storefrontApiHost}/api/${shopifyConfig.storefrontApiVersion}/graphql.json`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Storefront-Access-Token': shopifyConfig.storefrontToken,
-      },
-      body: JSON.stringify({ query, variables }),
-    }
-  );
-  const json = await res.json();
-  if (json.errors) throw new Error(json.errors.map(e => e.message).join('; '));
-  return json.data;
-}
-
 const CART_CREATE_MUTATION = `mutation CartCreate($lines: [CartLineInput!]!) {
   cartCreate(input: { lines: $lines }) {
     cart { id cost { totalAmount { amount } } }
@@ -359,14 +334,11 @@ export async function previewDiscountCode({ mealCount, doubleProteinQty = 0, bre
   return { applicable, savings };
 }
 
-function buildLineParams(variantId, sellingPlanId, quantity, properties) {
-  const params = [['id', variantId], ['quantity', String(quantity)]];
-  if (sellingPlanId) params.push(['selling_plan', sellingPlanId]);
-  properties.forEach(([k, v]) => params.push([`properties[${k}]`, v]));
-  return params;
+function attrs(pairs) {
+  return pairs.map(([key, value]) => ({ key, value }));
 }
 
-function commonProps({ setWeek, allergiesValue, allergyNotesValue, isNew }) {
+function sharedAttributes({ setWeek, allergiesValue, allergyNotesValue, isNew }) {
   return [
     ['_setWeek', setWeek],
     ['_Allergies', allergiesValue],
@@ -375,58 +347,89 @@ function commonProps({ setWeek, allergiesValue, allergyNotesValue, isNew }) {
   ];
 }
 
-// Builds the real checkout URL as a chain of /cart/add hops, each one's
-// return_to pointing at the next, terminating in /discount/[code] (or
-// straight to /checkout if no code) -- confirmed via two live captures:
-//   - The offer page (2026-07-07): GET-navigation /cart/add chain,
-//     entrées -> double-protein -> discount -> checkout.
-//   - The real mealplan.com checkout (2026-07-14): a same-origin POST to
-//     /cart.data adding all lines at once (entrées, breakfast, snacks).
-//     Our mockup is a different origin and can't POST there (same CORS
-//     wall the doc describes for /cart/add.js), so we replicate the same
-//     line data through the GET-navigation-chain mechanism instead.
-// The mealplan.com capture does NOT send `_defaultData` (unlike the offer
-// page) -- following that as the more current/authoritative source.
-export function buildCheckoutUrl({
-  entree,        // { variantId, mealCount, metadataJson }
-  doubleProtein, // { quantity } | null
-  breakfast,     // { variantId, metadataJson } | null
-  snackLines,    // [{ meal, quantity }] -- meal.basePrice/isDoughnuts pick the variant
+const CART_CREATE_FOR_CHECKOUT_MUTATION = `mutation CartCreate($lines: [CartLineInput!]!) {
+  cartCreate(input: { lines: $lines }) {
+    cart { id checkoutUrl }
+    userErrors { field message }
+  }
+}`;
+
+const CART_BUYER_IDENTITY_MUTATION = `mutation CartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
+  cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
+    cart { id }
+    userErrors { field message }
+  }
+}`;
+
+// Builds the real checkout URL via the Storefront Cart API -- creates a
+// fresh cart with every order line in one call (attributes carry the same
+// _setWeek/_Allergies/_metadata etc. keys the old properties[] scheme did;
+// confirmed 2026-08-18 that CartLineInput.attributes round-trips
+// identically), then layers on the buyer's email and delivery preference
+// (ship, or pick up at a specific real partner location) via
+// cartBuyerIdentityUpdate before handing back cart.checkoutUrl.
+//
+// Replaces the old GET-navigation /cart/add?...&return_to=... hop chain,
+// which existed only to work around the classic same-origin-only Ajax Cart
+// API -- the GraphQL Storefront API has no such restriction (previewDiscountCode
+// above already proves cross-origin calls work from this app). A fresh cart
+// per checkout also removes the old approach's two failure modes for free:
+// no stale-cart-clearing hop needed (every call is a brand-new cart), and no
+// ~10,200-char URL ceiling to blow past on a large order.
+export async function buildCartCheckoutUrl({
+  entree,           // { variantId, mealCount, metadataJson }
+  doubleProtein,    // { quantity } | null
+  breakfast,        // { variantId, metadataJson } | null
+  snackLines,       // [{ meal, quantity }] -- meal.basePrice/isDoughnuts pick the variant
   setWeek, allergiesValue, allergyNotesValue,
   discountCode,
+  email,
+  deliveryMode,     // 'ship' | 'pickup'
+  pickupLocationId, // Shopify Location gid, required when deliveryMode === 'pickup'
   isNew = true,
 }) {
-  const shared = commonProps({ setWeek, allergiesValue, allergyNotesValue, isNew });
-  const discountChain = discountCode
-    ? `/discount/${encodeURIComponent(discountCode)}?redirect=/checkout`
-    : '/checkout';
-
+  const shared = sharedAttributes({ setWeek, allergiesValue, allergyNotesValue, isNew });
   const lines = [];
 
-  lines.push(buildLineParams(entree.variantId, shopifyConfig.entreesSellingPlanId, 1, [
-    ['_subscriptionType', 'entrees'],
-    ['_metadata', entree.metadataJson],
-    ...shared,
-  ]));
+  lines.push({
+    merchandiseId: `gid://shopify/ProductVariant/${entree.variantId}`,
+    quantity: 1,
+    sellingPlanId: `gid://shopify/SellingPlan/${shopifyConfig.entreesSellingPlanId}`,
+    attributes: attrs([
+      ['_subscriptionType', 'entrees'],
+      ['_metadata', entree.metadataJson],
+      ...shared,
+    ]),
+  });
 
   if (doubleProtein && doubleProtein.quantity > 0) {
-    lines.push(buildLineParams(shopifyConfig.doubleProteinVariantId, shopifyConfig.doubleProteinSellingPlanId, doubleProtein.quantity, [
-      ['_subscriptionType', 'double_protein'],
-      ...shared,
-    ]));
+    lines.push({
+      merchandiseId: `gid://shopify/ProductVariant/${shopifyConfig.doubleProteinVariantId}`,
+      quantity: doubleProtein.quantity,
+      sellingPlanId: `gid://shopify/SellingPlan/${shopifyConfig.doubleProteinSellingPlanId}`,
+      attributes: attrs([
+        ['_subscriptionType', 'double_protein'],
+        ...shared,
+      ]),
+    });
   }
 
   if (breakfast) {
-    lines.push(buildLineParams(breakfast.variantId, shopifyConfig.breakfastSellingPlanId, 1, [
-      ['_subscriptionType', 'breakfast'],
-      ['_metadata', breakfast.metadataJson],
-      ...shared,
-    ]));
+    lines.push({
+      merchandiseId: `gid://shopify/ProductVariant/${breakfast.variantId}`,
+      quantity: 1,
+      sellingPlanId: `gid://shopify/SellingPlan/${shopifyConfig.breakfastSellingPlanId}`,
+      attributes: attrs([
+        ['_subscriptionType', 'breakfast'],
+        ['_metadata', breakfast.metadataJson],
+        ...shared,
+      ]),
+    });
   }
 
-  // Group snacks by their resolved tier variant so hop count stays capped
-  // at 4 (2 tiers x 2 products) no matter how many distinct snacks a
-  // customer picks -- see buildSnackTierMetadata for why this matters.
+  // Group snacks by their resolved tier variant, same grouping the old
+  // builder used to keep line count down -- no longer load-bearing for URL
+  // length here, but still the right shape (one cart line per priced tier).
   const snackGroups = new Map();
   (snackLines || []).forEach(({ meal, quantity }) => {
     const { product, variant } = pickSnackVariant(meal);
@@ -444,41 +447,46 @@ export function buildCheckoutUrl({
     const titleSummary = group.items.length === 1
       ? group.items[0].meal.name
       : `${group.items.length} ${isDoughnuts ? 'doughnuts' : 'snacks'} items`;
-    lines.push(buildLineParams(group.variant.id, group.product.sellingPlanId, group.quantity, [
-      ['_subscriptionType', isDoughnuts ? 'doughnuts' : 'snacks'],
-      ['_productTitle', titleSummary],
-      ['_metadata', metadataJson],
-      ...shared,
-    ]));
+    lines.push({
+      merchandiseId: `gid://shopify/ProductVariant/${group.variant.id}`,
+      quantity: group.quantity,
+      sellingPlanId: `gid://shopify/SellingPlan/${group.product.sellingPlanId}`,
+      attributes: attrs([
+        ['_subscriptionType', isDoughnuts ? 'doughnuts' : 'snacks'],
+        ['_productTitle', titleSummary],
+        ['_metadata', metadataJson],
+        ...shared,
+      ]),
+    });
   });
 
-  let chain = discountChain;
-  for (let i = lines.length - 1; i >= 0; i--) {
-    chain = `/cart/add?${qs([...lines[i], ['return_to', chain]])}`;
+  const createData = await shopifyGraphQL(CART_CREATE_FOR_CHECKOUT_MUTATION, { lines });
+  const createResult = createData.cartCreate;
+  if (!createResult.cart || createResult.userErrors.length > 0) {
+    throw new Error(createResult.userErrors.map(e => e.message).join('; ') || 'Could not build checkout');
+  }
+  const cartId = createResult.cart.id;
+
+  const buyerIdentity = {};
+  if (email) buyerIdentity.email = email;
+  if (deliveryMode === 'pickup' && pickupLocationId) {
+    buyerIdentity.preferences = {
+      delivery: { deliveryMethod: ['PICK_UP'], pickupHandle: [pickupLocationId] },
+    };
+  }
+  if (Object.keys(buyerIdentity).length > 0) {
+    const identityData = await shopifyGraphQL(CART_BUYER_IDENTITY_MUTATION, { cartId, buyerIdentity });
+    if (identityData.cartBuyerIdentityUpdate.userErrors.length > 0) {
+      throw new Error(identityData.cartBuyerIdentityUpdate.userErrors.map(e => e.message).join('; '));
+    }
   }
 
-  // Clear any stale cart left over from a previous checkout attempt (e.g.
-  // the customer reached Shopify, hit browser back, and re-ran checkout)
-  // before adding this order's lines -- Shopify's cart is additive, not
-  // replace-on-add, so a repeat attempt without this doubles every line
-  // item (confirmed against the real store 2026-07-09: two /cart/add
-  // navigations for the same variant left item quantity at 2, not 1).
-  // /cart/clear supports the same return_to redirect-chain convention as
-  // /cart/add (confirmed working end-to-end against the real store the
-  // same day), so this just becomes one more outer hop.
-  chain = `/cart/clear?${qs([['return_to', chain]])}`;
-
-  const url = `https://${shopifyConfig.storefrontApiHost}${chain}`;
-
-  // Shopify's edge returns a hard HTTP 414 somewhere between 10,100 and
-  // 10,200 total characters (binary-searched empirically against the real
-  // store 2026-07-15, well below any browser's own URL limit). Warn well
-  // before that cliff so a large real order doesn't fail silently the way
-  // this did in production testing -- there's no way to recover from a 414
-  // client-side once it's already been navigated to.
-  if (url.length > 8000) {
-    console.warn(`buildCheckoutUrl: URL is ${url.length} chars, approaching Shopify's ~10,200 char hard limit (confirmed via real testing). Large orders (many entrées + breakfast + several distinct snacks) risk a silent HTTP 414 at checkout.`);
+  if (discountCode) {
+    const discountData = await shopifyGraphQL(CART_DISCOUNT_MUTATION, { cartId, codes: [discountCode] });
+    if (discountData.cartDiscountCodesUpdate.userErrors.length > 0) {
+      throw new Error(discountData.cartDiscountCodesUpdate.userErrors.map(e => e.message).join('; '));
+    }
   }
 
-  return url;
+  return createResult.cart.checkoutUrl;
 }

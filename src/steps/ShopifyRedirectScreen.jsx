@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // Purely cosmetic pause (lets the spinner render a beat before the tab
 // navigates away) -- not a real loading wait, so keep it short.
@@ -35,7 +35,22 @@ function embedderOrigin() {
   }
 }
 
-export default function ShopifyRedirectScreen({ checkoutUrl, onBack }) {
+export default function ShopifyRedirectScreen({ onBuildCheckoutUrl, onBack }) {
+  const [checkoutUrl, setCheckoutUrl] = useState(null);
+  const [buildFailed, setBuildFailed] = useState(false);
+
+  // Building now creates a real Shopify Storefront Cart (see
+  // buildCartCheckoutUrl), so it's an async network call instead of pure
+  // string assembly -- run it once on mount rather than inline in render.
+  useEffect(() => {
+    let cancelled = false;
+    Promise.resolve(onBuildCheckoutUrl())
+      .then(url => { if (!cancelled) { if (url) setCheckoutUrl(url); else setBuildFailed(true); } })
+      .catch(() => { if (!cancelled) setBuildFailed(true); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (!checkoutUrl) return;
 
@@ -94,14 +109,14 @@ export default function ShopifyRedirectScreen({ checkoutUrl, onBack }) {
     return () => window.removeEventListener('pageshow', handlePageShow);
   }, [onBack]);
 
-  if (!checkoutUrl) {
+  if (buildFailed) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
         <div className="max-w-md w-full text-center">
           <div className="text-4xl mb-4">⚠️</div>
           <h1 className="font-display text-2xl text-gray-900 mb-2">Couldn't build your order</h1>
           <p className="text-gray-500 text-sm mb-8">
-            Something's missing from your selections (meal count or meals). Go back and double-check your order.
+            Something's missing from your selections, or we couldn't reach Shopify just now. Go back and double-check your order, then try again.
           </p>
           <button
             onClick={onBack}

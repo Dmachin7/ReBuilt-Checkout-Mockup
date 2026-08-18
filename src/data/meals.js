@@ -553,38 +553,3 @@ export const ALLERGY_OPTIONS = [
   { id: "no_eggs",       label: "No Eggs",        icon: "🥚", description: "No eggs or egg-derived ingredients" },
   { id: "no_soy",        label: "No Soy",         icon: "🫘", description: "No soy sauce, tofu, or soy derivatives" },
 ];
-
-export const PICKUP_LOCATIONS = [
-  {
-    id: "loc1",
-    name: "ReBuilt Hub — Midtown",
-    address: "1240 Peachtree St NE, Atlanta, GA 30309",
-    distance: 0.8,
-    pickupDay: "Sunday",
-    pickupWindow: "10 AM – 2 PM",
-  },
-  {
-    id: "loc2",
-    name: "ReBuilt Hub — Buckhead",
-    address: "3500 Peachtree Rd NE, Atlanta, GA 30326",
-    distance: 2.4,
-    pickupDay: "Sunday",
-    pickupWindow: "11 AM – 3 PM",
-  },
-  {
-    id: "loc3",
-    name: "ReBuilt Hub — Decatur",
-    address: "115 E Court Square, Decatur, GA 30030",
-    distance: 4.1,
-    pickupDay: "Saturday",
-    pickupWindow: "9 AM – 1 PM",
-  },
-  {
-    id: "loc4",
-    name: "ReBuilt Hub — Sandy Springs",
-    address: "6300 Roswell Rd NE, Sandy Springs, GA 30328",
-    distance: 6.7,
-    pickupDay: "Sunday",
-    pickupWindow: "10 AM – 2 PM",
-  },
-];

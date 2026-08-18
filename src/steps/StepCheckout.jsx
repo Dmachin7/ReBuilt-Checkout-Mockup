@@ -3,11 +3,14 @@ import { shopifyConfig } from '../config/shopify';
 import { pickSnackVariant, previewDiscountCode } from '../lib/shopifyCheckout';
 import { ALLERGY_OPTIONS } from '../data/meals';
 
+const SHIP_COST = 20;
+
 export default function StepCheckout({
   singles, doubles, mealCount, breakfastCount, weeks,
   breakfastItems: breakfastCatalog, snackItems: snackCatalog,
   discountCode, setDiscountCode,
   allergySelected, allergyNotes,
+  deliveryMode,
   onBack, onConfirm,
 }) {
   const [openSections, setOpenSections] = useState({ entrees: false, breakfast: false, snacks: false });
@@ -111,7 +114,8 @@ export default function StepCheckout({
   const discountSavings = discountPreview && discountPreview.applicable ? discountPreview.savings : 0;
   const discountedSubtotal = Math.max(0, subtotal - discountSavings);
   const tax = discountedSubtotal * 0.075;
-  const total = discountedSubtotal + tax;
+  const deliveryCost = deliveryMode === 'pickup' ? 0 : SHIP_COST;
+  const total = discountedSubtotal + tax + deliveryCost;
 
   const allergyLabels = [...(allergySelected || [])]
     .filter(id => id !== 'none')
@@ -191,8 +195,8 @@ export default function StepCheckout({
           <div>
             <p className="font-semibold text-amber-900 text-sm mb-1">Weekly subscription — pause or cancel anytime</p>
             <p className="text-amber-800 text-xs leading-relaxed">
-              You'll be charged <strong>${total.toFixed(2)}</strong> for this week's order. After that, the same amount each week until you skip or cancel.{' '}
-              <strong>Skip deadline: Tuesday 11:59 PM.</strong>
+              You'll be charged <strong>${total.toFixed(2)}</strong> for this week's order. After that, you will be charged each week unless you skip or cancel.{' '}
+              <strong>Deadline for the upcoming week is each Tuesday at 11:59pm.</strong>
             </p>
           </div>
         </div>
@@ -228,8 +232,12 @@ export default function StepCheckout({
             </div>
           )}
           <div className="flex justify-between text-sm text-gray-600">
-            <span>Delivery</span>
-            <span className="text-green-600 font-medium">Calculated at checkout</span>
+            <span>Delivery ({deliveryMode === 'pickup' ? 'Pickup' : 'Ship'})</span>
+            {deliveryMode === 'pickup' ? (
+              <span className="text-green-600 font-medium">Free</span>
+            ) : (
+              <span>${deliveryCost.toFixed(2)}</span>
+            )}
           </div>
           <div className="flex justify-between text-sm text-gray-600">
             <span>Est. Tax (7.5%)</span><span>${tax.toFixed(2)}</span>
