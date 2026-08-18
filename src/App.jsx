@@ -21,6 +21,19 @@ import { PLAN_IMAGES } from './data/planImages';
 
 const persisted = loadPersistedState();
 
+// A discount code can arrive on the URL, from a marketing link like
+// /mealplan/meal/entrees?discount=CODE on the storefront -- that page forwards
+// the code onto this app's own URL when it embeds it. Takes precedence over a
+// code left in localStorage from an earlier visit: the link the customer just
+// followed is the more current intent.
+function discountCodeFromUrl() {
+  try {
+    return new URL(window.location.href).searchParams.get('discount')?.trim() || '';
+  } catch {
+    return '';
+  }
+}
+
 const PLAN_TO_KEY = { lifestyle: 'lifestyle', performance: 'performance', keto: 'keto', plant_based: 'plant' };
 const CATEGORY_TO_PLAN_KEY = { LIFESTYLE: 'lifestyle', PERFORMANCE: 'performance', KETO: 'keto', 'PLANT-BASED': 'plant' };
 
@@ -113,7 +126,7 @@ export default function App() {
   const [breakfastSkipped, setBreakfastSkipped] = useState(persisted?.breakfastSkipped ?? false);
   const [allergySelected, setAllergySelected] = useState(persisted?.allergySelected || new Set());
   const [allergyNotes, setAllergyNotes] = useState(persisted?.allergyNotes || '');
-  const [discountCode, setDiscountCode] = useState(persisted?.discountCode || '');
+  const [discountCode, setDiscountCode] = useState(discountCodeFromUrl() || persisted?.discountCode || '');
 
   const progressBarRef = useRef(null);
   useEffect(() => {
