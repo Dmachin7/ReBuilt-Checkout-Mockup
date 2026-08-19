@@ -6,7 +6,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
   const [expandedPlan, setExpandedPlan] = useState(null);
 
   return (
-    <div className="flex-1 px-4 sm:px-6 py-3 sm:py-5 max-w-3xl lg:max-w-5xl mx-auto w-full">
+    <div className="flex-1 px-4 sm:px-6 py-3 sm:py-5 max-w-3xl lg:max-w-5xl mx-auto w-full pb-64 sm:pb-6">
       <div className="mb-3 sm:mb-4 text-center">
         <h1 className="font-display text-xl sm:text-3xl text-gray-900 mb-1">
           Choose your meal preference
