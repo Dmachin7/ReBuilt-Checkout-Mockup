@@ -45,16 +45,22 @@ export default function ProgressBar({ currentRoute, unlockedUntil = 'mealCount',
               const hasGap    = segEnd - segStart > 1;
 
               if (hasGap) {
-                // Fill bar — grows as user advances through the sub-steps
+                // One tick per hidden sub-step in this stretch, filling in
+                // as the user passes each one -- makes the sub-steps that
+                // don't get their own bubble (Plan/Meal Mode, Delivery)
+                // visible as progress without adding more bubbles.
                 const total    = segEnd - segStart;
                 const progress = Math.min(Math.max(currentIdx - segStart, 0), total);
-                const fillPct  = Math.round((progress / total) * 100);
                 connector = (
-                  <div className="relative mx-1 sm:mx-2 flex-shrink-0 h-1.5 w-12 sm:w-20 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-brand-green rounded-full transition-all duration-500"
-                      style={{ width: `${fillPct}%` }}
-                    />
+                  <div className="flex items-center gap-0.5 sm:gap-1 mx-1 sm:mx-2 flex-shrink-0">
+                    {Array.from({ length: total }).map((_, k) => (
+                      <div
+                        key={k}
+                        className={`h-1.5 w-3 sm:w-5 rounded-full transition-colors duration-500 ${
+                          k < progress ? 'bg-brand-green' : 'bg-gray-200'
+                        }`}
+                      />
+                    ))}
                   </div>
                 );
               } else {
