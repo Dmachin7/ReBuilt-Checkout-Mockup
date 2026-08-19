@@ -195,8 +195,7 @@ export default function StepCheckout({
           <div>
             <p className="font-semibold text-amber-900 text-sm mb-1">Weekly subscription — pause or cancel anytime</p>
             <p className="text-amber-800 text-xs leading-relaxed">
-              You'll be charged <strong>${total.toFixed(2)}</strong> for this week's order. After that, you will be charged each week unless you skip or cancel.{' '}
-              <strong>Deadline for the upcoming week is each Tuesday at 11:59pm.</strong>
+              <strong>Deadline for making changes to an upcoming week is each Tuesday 11:59pm.</strong>
             </p>
           </div>
         </div>
