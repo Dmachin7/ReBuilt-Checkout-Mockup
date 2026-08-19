@@ -51,12 +51,12 @@ export default function StepBreakfast({
   }
 
   return (
-    <div className="flex gap-6 px-3 sm:px-6 lg:px-10 py-6 max-w-[1800px] mx-auto w-full">
-      <div className="flex-1 min-w-0 pb-32 space-y-6">
+    <div className="flex gap-6 px-3 sm:px-6 lg:px-10 py-4 sm:py-6 max-w-[1800px] mx-auto w-full">
+      <div className="flex-1 min-w-0 pb-32 space-y-3 sm:space-y-6">
 
         {/* Header */}
         <div className="text-center">
-          <h2 className="font-display text-2xl sm:text-3xl text-gray-900 mb-1">Choose your breakfast</h2>
+          <h2 className="font-display text-xl sm:text-3xl text-gray-900 mb-0.5 sm:mb-1">Choose your breakfast</h2>
           {breakfastCount && !breakfastComplete ? (
             <p className="text-sm text-amber-600 font-medium">
               {breakfastRemaining} more breakfast item{breakfastRemaining !== 1 ? 's' : ''} needed
@@ -69,20 +69,23 @@ export default function StepBreakfast({
         </div>
 
         {/* Count picker */}
-        <section className="bg-white rounded-2xl p-5 shadow-sm">
-          <div className="flex flex-wrap gap-2 mb-3">
-            {BREAKFAST_COUNTS.map((n, idx) => {
+        <section className="bg-white rounded-2xl p-3 sm:p-5 shadow-sm">
+          {/* Single scrollable row on mobile instead of wrapping to 2+ rows
+              (which used to also cap counts at the first 5, hiding the
+              rest entirely on mobile) -- wraps normally again on sm+. */}
+          <div className="flex sm:flex-wrap gap-2 mb-2 sm:mb-3 overflow-x-auto sm:overflow-visible -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+            {BREAKFAST_COUNTS.map(n => {
               const perMeal = shopifyConfig.breakfastVariants[n].price / n;
               const isSelected = breakfastCount === n;
               return (
                 <button
                   key={n}
                   onClick={() => onSetBreakfastCount(breakfastCount === n ? null : n)}
-                  className={`px-4 py-3 rounded-xl text-left border-2 transition-all min-w-[90px] ${
+                  className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-left border-2 transition-all min-w-[74px] sm:min-w-[90px] flex-shrink-0 ${
                     isSelected
                       ? 'bg-brand-charcoal text-white border-brand-charcoal shadow-md'
                       : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:shadow-sm'
-                  } ${idx >= 5 ? 'hidden sm:inline-block' : ''}`}
+                  }`}
                 >
                   <p className="font-bold text-sm">{n}</p>
                   <p className={`text-[10px] mt-0.5 ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
@@ -103,13 +106,13 @@ export default function StepBreakfast({
           {/* No breakfast — outlined, not dark */}
           <button
             onClick={handleSkipClick}
-            className="mt-3 w-full flex items-center justify-between gap-4 bg-white border-2 border-gray-200 hover:border-gray-400 text-gray-700 rounded-2xl px-5 py-4 transition-colors group"
+            className="mt-2 sm:mt-3 w-full flex items-center justify-between gap-4 bg-white border-2 border-gray-200 hover:border-gray-400 text-gray-700 rounded-2xl px-4 py-2.5 sm:px-5 sm:py-4 transition-colors group"
           >
             <div className="text-left">
-              <p className="font-bold text-base leading-tight">No breakfast for me</p>
-              <p className="text-gray-400 text-xs mt-0.5">Skip ahead → your entrées are already saved</p>
+              <p className="font-bold text-sm sm:text-base leading-tight">No breakfast for me</p>
+              <p className="text-gray-400 text-[11px] sm:text-xs mt-0.5">Skip ahead → your entrées are already saved</p>
             </div>
-            <div className="w-9 h-9 rounded-full border-2 border-gray-300 group-hover:border-brand-green group-hover:bg-brand-green group-hover:text-white flex items-center justify-center text-gray-400 text-lg transition-all flex-shrink-0">
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full border-2 border-gray-300 group-hover:border-brand-green group-hover:bg-brand-green group-hover:text-white flex items-center justify-center text-gray-400 text-base sm:text-lg transition-all flex-shrink-0">
               →
             </div>
           </button>
