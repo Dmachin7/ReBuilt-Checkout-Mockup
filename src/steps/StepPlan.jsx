@@ -6,7 +6,7 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
   const [expandedPlan, setExpandedPlan] = useState(null);
 
   return (
-    <div className="flex-1 px-4 sm:px-6 py-3 sm:py-5 max-w-3xl lg:max-w-5xl mx-auto w-full pb-64 sm:pb-6">
+    <div className="flex-1 px-4 sm:px-6 py-3 sm:py-5 max-w-3xl lg:max-w-5xl mx-auto w-full pb-28 sm:pb-6">
       <div className="mb-3 sm:mb-4 text-center">
         <h1 className="font-display text-xl sm:text-3xl text-gray-900 mb-1">
           Choose your meal preference
@@ -84,28 +84,23 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
           blends into the grid scrolling behind it, same pattern as
           StepMealCount), inline on sm+ */}
       <div className="fixed sm:static bottom-0 inset-x-0 sm:inset-auto z-20 p-4 sm:p-0 bg-white sm:bg-transparent border-t sm:border-0 border-gray-100 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] sm:shadow-none">
-        <div className="max-w-3xl lg:max-w-5xl mx-auto space-y-2">
+        <div className="max-w-3xl lg:max-w-5xl mx-auto flex gap-3">
+          <button
+            onClick={onBack}
+            className="flex-1 py-3.5 rounded-2xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+          >
+            ← Back
+          </button>
           <button
             onClick={onNext}
             disabled={!selectedPlan}
-            className={`w-full py-3.5 rounded-2xl font-bold text-base transition-all shadow-md ${
+            className={`flex-[2] py-3.5 rounded-2xl font-bold text-base transition-all shadow-md ${
               selectedPlan
                 ? 'bg-brand-green hover:bg-brand-green-dark text-white'
                 : 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none'
             }`}
           >
-            {selectedPlan ? 'Continue →' : 'Pick a preference to continue'}
-          </button>
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400">or</span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
-          <button
-            onClick={onBack}
-            className="w-full bg-red-50 text-red-600 hover:bg-red-100 font-semibold text-sm py-3 rounded-xl border border-red-200 transition-colors text-center"
-          >
-            ← Back
+            Continue →
           </button>
         </div>
       </div>
