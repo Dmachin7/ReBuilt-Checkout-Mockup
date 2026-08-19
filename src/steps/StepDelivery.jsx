@@ -5,14 +5,9 @@ import { geocodeZip, haversineMiles } from '../lib/geocode';
 const SHIP_COST = 20;
 const ZIP_RE = /^\d{5}$/;
 
-function isValidEmail(value) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-}
-
 export default function StepDelivery({
   deliveryMode, setDeliveryMode,
   pickupLocationId, setPickupLocationId,
-  customerEmail, setCustomerEmail,
   onNext, onBack,
 }) {
   const { loading, error, locations } = useShopifyLocations();
@@ -71,8 +66,7 @@ export default function StepDelivery({
     if (mode === 'ship') setPickupLocationId(null);
   }
 
-  const canContinue = isValidEmail(customerEmail) &&
-    (deliveryMode === 'ship' || (deliveryMode === 'pickup' && pickupLocationId));
+  const canContinue = deliveryMode === 'ship' || (deliveryMode === 'pickup' && pickupLocationId);
 
   return (
     <div className="px-4 sm:px-6 py-8 max-w-2xl mx-auto w-full pb-32 sm:pb-10">
@@ -175,20 +169,14 @@ export default function StepDelivery({
               })}
             </div>
           )}
+
+          {/* The scrollbar itself only appears on hover/scroll, so without
+              this the list at rest looks like it's just 4 options. */}
+          {!loading && !error && displayLocations.length > 4 && (
+            <p className="text-gray-400 text-[11px] text-center mt-2">↓ Scroll for more options</p>
+          )}
         </div>
       )}
-
-      {/* Email */}
-      <div className="bg-white rounded-2xl shadow-sm p-4 mb-6">
-        <p className="text-sm font-semibold text-gray-900 mb-2">Your email</p>
-        <input
-          type="email"
-          value={customerEmail}
-          onChange={e => setCustomerEmail(e.target.value)}
-          placeholder="you@example.com"
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green"
-        />
-      </div>
 
       {/* Desktop: Back + Continue */}
       <div className="hidden sm:flex gap-3">

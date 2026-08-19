@@ -12,12 +12,14 @@ const MOST_POPULAR_COUNT = 10;
 // counts that actually represent a meaningful step up in value.
 const SAVINGS_BADGE_COUNTS = new Set([15, 20, 25]);
 
-// Initial 4 tiles shown before "More" -- always includes the "Most
-// Popular" badge count so it's visible without an extra click, even
-// though the real variant map's counts run consecutively (5,6,7,8...)
-// rather than the old mock's curated spread (5,7,9,10...) that happened
-// to include 10 in a plain first-4 slice.
+// Initial 4 tiles shown before "More" -- a curated spread (5/10/15/20)
+// rather than the lowest 4 consecutive counts, so the first screen shows
+// a real range of box sizes instead of bunching at the cheap end. Falls
+// back to the old lowest-4-plus-Most-Popular derivation if the live
+// variant map ever stops offering all four of those counts.
 function initialVisibleCounts() {
+  const curated = [5, 10, 15, 20].filter(n => MEAL_COUNTS.includes(n));
+  if (curated.length === 4) return curated;
   if (!MEAL_COUNTS.includes(MOST_POPULAR_COUNT)) return MEAL_COUNTS.slice(0, 4);
   const rest = MEAL_COUNTS.filter(n => n !== MOST_POPULAR_COUNT).slice(0, 3);
   return [...rest, MOST_POPULAR_COUNT].sort((a, b) => a - b);

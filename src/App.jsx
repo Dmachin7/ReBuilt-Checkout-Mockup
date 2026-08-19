@@ -107,17 +107,12 @@ function computeEntreeCount(singles, doubles, allEntreeIds) {
   return count;
 }
 
-function isValidEmail(value) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((value || '').trim());
-}
-
-function computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, breakfastCount, breakfastSkipped, deliveryMode, pickupLocationId, customerEmail) {
+function computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, breakfastCount, breakfastSkipped, deliveryMode, pickupLocationId) {
   if (!mealCount) return 'mealCount';
   if (!selectedPlan) return 'plan';
   if (!mealMode) return 'mealMode';
   if (entreeCount < mealCount) return 'entrees';
   if (!breakfastCount && !breakfastSkipped) return 'breakfast';
-  if (!isValidEmail(customerEmail)) return 'delivery';
   if (!deliveryMode || (deliveryMode === 'pickup' && !pickupLocationId)) return 'delivery';
   return 'checkout';
 }
@@ -136,7 +131,6 @@ export default function App() {
   const [discountCode, setDiscountCode] = useState(discountCodeFromUrl() || persisted?.discountCode || '');
   const [deliveryMode, setDeliveryMode] = useState(persisted?.deliveryMode || null);
   const [pickupLocationId, setPickupLocationId] = useState(persisted?.pickupLocationId || null);
-  const [customerEmail, setCustomerEmail] = useState(persisted?.customerEmail || '');
 
   const progressBarRef = useRef(null);
   useEffect(() => {
@@ -155,9 +149,9 @@ export default function App() {
     savePersistedState({
       step, cart, mealCount, selectedPlan, mealMode,
       breakfastCount, breakfastSkipped, allergySelected, allergyNotes, discountCode,
-      deliveryMode, pickupLocationId, customerEmail,
+      deliveryMode, pickupLocationId,
     });
-  }, [step, cart, mealCount, selectedPlan, mealMode, breakfastCount, breakfastSkipped, allergySelected, allergyNotes, discountCode, deliveryMode, pickupLocationId, customerEmail]);
+  }, [step, cart, mealCount, selectedPlan, mealMode, breakfastCount, breakfastSkipped, allergySelected, allergyNotes, discountCode, deliveryMode, pickupLocationId]);
 
   const menu = useShopifyMenu(2);
   const usingFallback = !!menu.error;
@@ -219,7 +213,7 @@ export default function App() {
   }
 
   const entreeCount   = computeEntreeCount(cart.singles, cart.doubles, allEntreeIds);
-  const unlockedUntil = computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, breakfastCount, breakfastSkipped, deliveryMode, pickupLocationId, customerEmail);
+  const unlockedUntil = computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, breakfastCount, breakfastSkipped, deliveryMode, pickupLocationId);
 
   function handleAddSingle(id)    { dispatch({ type: 'ADD_SINGLE', id }); }
   function handleRemoveSingle(id) { dispatch({ type: 'REMOVE_SINGLE', id }); }
@@ -404,7 +398,6 @@ export default function App() {
       allergiesValue,
       allergyNotesValue,
       discountCode: discountCode.trim(),
-      email: customerEmail.trim(),
       deliveryMode,
       pickupLocationId,
     });
@@ -423,7 +416,6 @@ export default function App() {
     setAllergyNotes('');
     setDeliveryMode(null);
     setPickupLocationId(null);
-    setCustomerEmail('');
     clearPersistedState();
     go('mealCount');
   }
@@ -550,8 +542,6 @@ export default function App() {
           setDeliveryMode={setDeliveryMode}
           pickupLocationId={pickupLocationId}
           setPickupLocationId={setPickupLocationId}
-          customerEmail={customerEmail}
-          setCustomerEmail={setCustomerEmail}
           onNext={() => go('checkout')}
           onBack={() => go('allergies')}
         />
