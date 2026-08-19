@@ -102,7 +102,7 @@ export default function StepMealCount({ mealCount, setMealCount, onNext }) {
             onClick={() => setShowMore(true)}
             className="px-4 py-5 rounded-2xl text-sm font-semibold text-gray-400 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:text-gray-500 transition-colors w-full flex flex-col items-center justify-center gap-0.5"
           >
-            <span>Better Value ↓</span>
+            <span>More Options ↓</span>
             {bestHiddenSavings > 0 && (
               <span className="text-xs text-green-600 font-bold">Save up to {bestHiddenSavings}%</span>
             )}
