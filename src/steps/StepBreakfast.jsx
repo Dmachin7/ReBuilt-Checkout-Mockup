@@ -72,28 +72,35 @@ export default function StepBreakfast({
         <section className="bg-white rounded-2xl p-3 sm:p-5 shadow-sm">
           {/* Single scrollable row on mobile instead of wrapping to 2+ rows
               (which used to also cap counts at the first 5, hiding the
-              rest entirely on mobile) -- wraps normally again on sm+. */}
-          <div className="flex sm:flex-wrap gap-2 mb-2 sm:mb-3 overflow-x-auto sm:overflow-visible -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
-            {BREAKFAST_COUNTS.map(n => {
-              const perMeal = shopifyConfig.breakfastVariants[n].price / n;
-              const isSelected = breakfastCount === n;
-              return (
-                <button
-                  key={n}
-                  onClick={() => onSetBreakfastCount(breakfastCount === n ? null : n)}
-                  className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-left border-2 transition-all min-w-[74px] sm:min-w-[90px] flex-shrink-0 ${
-                    isSelected
-                      ? 'bg-brand-charcoal text-white border-brand-charcoal shadow-md'
-                      : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:shadow-sm'
-                  }`}
-                >
-                  <p className="font-bold text-sm">{n}</p>
-                  <p className={`text-[10px] mt-0.5 ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
-                    ${perMeal.toFixed(2)}/ea
-                  </p>
-                </button>
-              );
-            })}
+              rest entirely on mobile) -- wraps normally again on sm+. The
+              fade + arrow (mobile only) hint there's more to scroll to,
+              since the scrollbar itself is invisible until touched. */}
+          <div className="relative mb-2 sm:mb-3">
+            <div className="flex sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+              {BREAKFAST_COUNTS.map(n => {
+                const perMeal = shopifyConfig.breakfastVariants[n].price / n;
+                const isSelected = breakfastCount === n;
+                return (
+                  <button
+                    key={n}
+                    onClick={() => onSetBreakfastCount(breakfastCount === n ? null : n)}
+                    className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-left border-2 transition-all min-w-[74px] sm:min-w-[90px] flex-shrink-0 ${
+                      isSelected
+                        ? 'bg-brand-charcoal text-white border-brand-charcoal shadow-md'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:shadow-sm'
+                    }`}
+                  >
+                    <p className="font-bold text-sm">{n}</p>
+                    <p className={`text-[10px] mt-0.5 ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
+                      ${perMeal.toFixed(2)}/ea
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="sm:hidden pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white via-white/90 to-transparent flex items-center justify-end">
+              <span className="text-gray-400 text-lg leading-none">›</span>
+            </div>
           </div>
 
           {breakfastCount && (
