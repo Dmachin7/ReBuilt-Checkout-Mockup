@@ -80,30 +80,34 @@ export default function StepPlan({ selectedPlan, setSelectedPlan, onNext, onBack
         })}
       </div>
 
-      {/* Floating on mobile, inline on sm+ */}
-      <div className="fixed sm:static bottom-4 inset-x-4 sm:inset-auto z-20 space-y-2">
-        <button
-          onClick={onNext}
-          disabled={!selectedPlan}
-          className={`w-full py-3.5 rounded-2xl font-bold text-base transition-all shadow-md ${
-            selectedPlan
-              ? 'bg-brand-green hover:bg-brand-green-dark text-white'
-              : 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none'
-          }`}
-        >
-          {selectedPlan ? 'Continue →' : 'Pick a preference to continue'}
-        </button>
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-xs text-gray-400">or</span>
-          <div className="flex-1 h-px bg-gray-200" />
+      {/* Docked full-width bar on mobile (solid background so it never
+          blends into the grid scrolling behind it, same pattern as
+          StepMealCount), inline on sm+ */}
+      <div className="fixed sm:static bottom-0 inset-x-0 sm:inset-auto z-20 p-4 sm:p-0 bg-white sm:bg-transparent border-t sm:border-0 border-gray-100 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] sm:shadow-none">
+        <div className="max-w-3xl lg:max-w-5xl mx-auto space-y-2">
+          <button
+            onClick={onNext}
+            disabled={!selectedPlan}
+            className={`w-full py-3.5 rounded-2xl font-bold text-base transition-all shadow-md ${
+              selectedPlan
+                ? 'bg-brand-green hover:bg-brand-green-dark text-white'
+                : 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none'
+            }`}
+          >
+            {selectedPlan ? 'Continue →' : 'Pick a preference to continue'}
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+          <button
+            onClick={onBack}
+            className="w-full bg-red-50 text-red-600 hover:bg-red-100 font-semibold text-sm py-3 rounded-xl border border-red-200 transition-colors text-center"
+          >
+            ← Back
+          </button>
         </div>
-        <button
-          onClick={onBack}
-          className="w-full bg-red-50 text-red-600 hover:bg-red-100 font-semibold text-sm py-3 rounded-xl border border-red-200 transition-colors text-center"
-        >
-          ← Back
-        </button>
       </div>
     </div>
   );
