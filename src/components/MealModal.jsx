@@ -209,7 +209,7 @@ export default function MealModal({
             onAdd={() => onAddSingle(meal.id)}
             onRemove={() => onRemoveSingle(meal.id)}
             atLimit={atLimit}
-            unavailable={isSoldOut}
+            unavailable={isSoldOut || meal.singleAvailable === false}
           />
           {meal.doubleProtein && (
             <QtyRow
@@ -219,7 +219,7 @@ export default function MealModal({
               onAdd={() => onAddDouble(meal.id)}
               onRemove={() => onRemoveDouble(meal.id)}
               atLimit={atLimit}
-              unavailable={isSoldOut}
+              unavailable={isSoldOut || meal.doubleAvailable === false}
             />
           )}
         </div>

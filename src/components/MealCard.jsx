@@ -22,29 +22,38 @@ const DIETARY = {
   'Vegan':       { icon: '🌿', label: 'Vegan', cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
 };
 
-function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble }) {
+function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble, soldOut }) {
   const stop = e => e.stopPropagation();
   const dotCls = isDouble ? 'bg-brand-green text-white' : 'bg-brand-charcoal text-white';
+  const disabled = atLimit || soldOut;
 
   return (
     <div className="w-full flex items-center justify-between gap-2 py-1">
       <div className="min-w-0">
         <p className="text-[11px] font-semibold text-gray-700 leading-tight truncate">{label}</p>
-        {extraPrice != null && (
+        {soldOut ? (
+          <p className="text-[9px] text-gray-400 leading-tight italic">Currently unavailable</p>
+        ) : extraPrice != null && (
           <p className="text-[9px] text-gray-400 leading-tight">+${extraPrice.toFixed(2)}</p>
         )}
       </div>
 
       {qty === 0 ? (
-        <button
-          onClick={e => { stop(e); if (!atLimit) onAdd(); }}
-          disabled={atLimit}
-          className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-bold text-base leading-none transition-colors ${
-            atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${dotCls} hover:opacity-80`
-          }`}
-        >
-          +
-        </button>
+        soldOut ? (
+          <span className="flex-shrink-0 text-[9px] font-bold text-gray-400 uppercase tracking-wide bg-gray-100 rounded-full px-2.5 py-1.5">
+            Sold Out
+          </span>
+        ) : (
+          <button
+            onClick={e => { stop(e); if (!disabled) onAdd(); }}
+            disabled={disabled}
+            className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-bold text-base leading-none transition-colors ${
+              disabled ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${dotCls} hover:opacity-80`
+            }`}
+          >
+            +
+          </button>
+        )
       ) : (
         <div className="flex-shrink-0 flex items-center gap-2" onClick={stop}>
           <button
@@ -57,10 +66,10 @@ function PortionBtn({ label, extraPrice, qty, onAdd, onRemove, atLimit, isDouble
             {qty}
           </span>
           <button
-            onClick={e => { stop(e); if (!atLimit) onAdd(); }}
-            disabled={atLimit}
+            onClick={e => { stop(e); if (!disabled) onAdd(); }}
+            disabled={disabled}
             className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-base leading-none transition-colors ${
-              atLimit ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${dotCls} hover:opacity-80`
+              disabled ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : `${dotCls} hover:opacity-80`
             }`}
           >
             +
@@ -174,7 +183,8 @@ export default function MealCard({
             qty={singleQty}
             onAdd={() => onAddSingle(meal.id)}
             onRemove={() => onRemoveSingle(meal.id)}
-            atLimit={atLimit || isSoldOut}
+            atLimit={atLimit}
+            soldOut={isSoldOut || meal.singleAvailable === false}
           />
           {meal.doubleProtein && (
             <PortionBtn
@@ -183,7 +193,8 @@ export default function MealCard({
               qty={doubleQty}
               onAdd={() => onAddDouble(meal.id)}
               onRemove={() => onRemoveDouble(meal.id)}
-              atLimit={atLimit || isSoldOut}
+              atLimit={atLimit}
+              soldOut={isSoldOut || meal.doubleAvailable === false}
               isDouble
             />
           )}

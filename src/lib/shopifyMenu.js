@@ -12,7 +12,7 @@ import { shopifyConfig } from '../config/shopify';
 // for what's live, layered on top of (not replacing) the date-computed
 // lookahead in shopifyWeeks.js -- see fetchWeekCollection below.
 function buildWeekQuery(handle) {
-  return `{ collection(handle: "${handle}") { title isWeekly: metafield(namespace: "week", key: "is_weekly"){value} deliveryWeek: metafield(namespace: "week", key: "delivery_week"){value} weekTitle: metafield(namespace: "week", key: "week_title"){value} products(first: 100) { edges { node { id handle title description tags availableForSale featuredImage { url(transform: {maxWidth: 900, preferredContentType: WEBP}) } variants(first: 5) { edges { node { id title price { amount } } } } calories: metafield(namespace: "product", key: "calories"){value} protein: metafield(namespace: "product", key: "protein"){value} fat: metafield(namespace: "product", key: "fat"){value} satFat: metafield(namespace: "product", key: "saturated_fat"){value} carbohydrate: metafield(namespace: "product", key: "carbohydrate"){value} sugar: metafield(namespace: "product", key: "sugar"){value} dietaryFiber: metafield(namespace: "product", key: "dietary_fiber"){value} cholesterol: metafield(namespace: "product", key: "cholesterol"){value} sodium: metafield(namespace: "product", key: "sodium"){value} ingredientsList: metafield(namespace: "product", key: "gradient_list"){value} allergensList: metafield(namespace: "product", key: "allergens"){value} fullNutrition: metafield(namespace: "custom", key: "full_nutritional_information"){value} mealRank: metafield(namespace: "product", key: "meal_rank"){value} } } } } }`;
+  return `{ collection(handle: "${handle}") { title isWeekly: metafield(namespace: "week", key: "is_weekly"){value} deliveryWeek: metafield(namespace: "week", key: "delivery_week"){value} weekTitle: metafield(namespace: "week", key: "week_title"){value} products(first: 100) { edges { node { id handle title description tags availableForSale featuredImage { url(transform: {maxWidth: 900, preferredContentType: WEBP}) } variants(first: 5) { edges { node { id title price { amount } availableForSale } } } calories: metafield(namespace: "product", key: "calories"){value} protein: metafield(namespace: "product", key: "protein"){value} fat: metafield(namespace: "product", key: "fat"){value} satFat: metafield(namespace: "product", key: "saturated_fat"){value} carbohydrate: metafield(namespace: "product", key: "carbohydrate"){value} sugar: metafield(namespace: "product", key: "sugar"){value} dietaryFiber: metafield(namespace: "product", key: "dietary_fiber"){value} cholesterol: metafield(namespace: "product", key: "cholesterol"){value} sodium: metafield(namespace: "product", key: "sodium"){value} ingredientsList: metafield(namespace: "product", key: "gradient_list"){value} allergensList: metafield(namespace: "product", key: "allergens"){value} fullNutrition: metafield(namespace: "custom", key: "full_nutritional_information"){value} mealRank: metafield(namespace: "product", key: "meal_rank"){value} } } } } }`;
 }
 
 // Returns the collection's products plus its staff-authored week metadata.
@@ -153,8 +153,22 @@ export function transformProduct(node) {
     category = 'LIFESTYLE';
   }
 
-  const variantTitles = (node.variants ? node.variants.edges : []).map(e => e.node.title.toLowerCase());
+  const variantsList = node.variants ? node.variants.edges.map(e => e.node) : [];
+  const variantTitles = variantsList.map(v => v.title.toLowerCase());
   const doubleProtein = variantTitles.includes('double protein');
+
+  // Product-level availableForSale (below, on `meal.available`) is true if
+  // ANY variant is available -- so a product with "Single Protein" sold out
+  // but "Double Protein" still in stock (or vice versa) reads as fully
+  // available at that level, silently hiding the sold-out half. Track each
+  // variant's own availableForSale so just that option's Add control can
+  // show "Sold out" instead. Falls back to the product-level value for
+  // products with no separately-titled "Single Protein" variant (e.g.
+  // Plant-Based/breakfast/snacks, which only ever have one variant).
+  const singleVariant = variantsList.find(v => v.title.toLowerCase() === 'single protein') || variantsList[0] || null;
+  const doubleVariant = variantsList.find(v => v.title.toLowerCase() === 'double protein') || null;
+  const singleAvailable = singleVariant ? singleVariant.availableForSale : node.availableForSale;
+  const doubleAvailable = doubleVariant ? doubleVariant.availableForSale : null;
 
   // Snacks tagged "Doughnuts" are added to cart via a separate Shopify
   // product (shopifyConfig.doughnutsProduct) from regular snacks
@@ -199,6 +213,8 @@ export function transformProduct(node) {
     // this is how a meal staff marked sold out (tracking on + qty 0) shows
     // up here without us reading raw inventory numbers.
     available: node.availableForSale,
+    singleAvailable,
+    doubleAvailable,
     protein: numFromMetafield(node.protein),
     calories: numFromMetafield(node.calories),
     carbs: numFromMetafield(node.carbohydrate),
