@@ -76,7 +76,7 @@ export default function StepBreakfast({
               fade + arrow (mobile only) hint there's more to scroll to,
               since the scrollbar itself is invisible until touched. */}
           <div className="relative mb-2 sm:mb-3">
-            <div className="flex sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+            <div className="flex sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible" style={{ scrollbarWidth: 'none' }}>
               {BREAKFAST_COUNTS.map(n => {
                 const perMeal = shopifyConfig.breakfastVariants[n].price / n;
                 const isSelected = breakfastCount === n;
