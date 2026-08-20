@@ -126,7 +126,7 @@ export default function StepDelivery({
             value={locationFilter}
             onChange={e => setLocationFilter(e.target.value)}
             placeholder="Enter your ZIP to find the closest, or search by name"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green"
           />
           {geoStatus === 'searching' && <p className="text-gray-400 text-xs mt-1.5">Finding locations near {locationFilter.trim()}…</p>}
           {geoStatus === 'notfound' && <p className="text-gray-400 text-xs mt-1.5">Couldn't find that ZIP — showing all locations instead.</p>}

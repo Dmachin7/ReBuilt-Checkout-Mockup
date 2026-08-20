@@ -266,7 +266,7 @@ export default function StepCheckout({
           value={discountCode}
           onChange={e => setDiscountCode(e.target.value)}
           placeholder="Enter a discount code (optional)"
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green"
         />
         {discountStatus === 'checking' && (
           <p className="text-gray-400 text-xs mt-1.5">Checking code…</p>

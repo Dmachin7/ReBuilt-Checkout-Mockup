@@ -121,7 +121,7 @@ export default function StepAllergies({ onViewSummary, onCheckout, onBack, selec
             onChange={e => setCustomText(e.target.value)}
             placeholder="e.g. severe cilantro sensitivity, low-sodium preference..."
             rows={2}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green resize-none"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base sm:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-green resize-none"
           />
         </div>
       )}
