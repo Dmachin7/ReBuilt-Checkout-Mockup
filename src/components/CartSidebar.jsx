@@ -141,8 +141,8 @@ export default function CartSidebar({
       <div
         className="sticky bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col"
         style={{
-          top: 'calc(var(--progress-bar-height, 8rem) + 1rem)',
-          maxHeight: 'calc(100vh - var(--progress-bar-height, 8rem) - 2rem)',
+          top: 'calc(var(--discount-banner-height, 0px) + var(--progress-bar-height, 8rem) + 1rem)',
+          maxHeight: 'calc(100vh - var(--discount-banner-height, 0px) - var(--progress-bar-height, 8rem) - 2rem)',
         }}
       >
         {/* Header */}

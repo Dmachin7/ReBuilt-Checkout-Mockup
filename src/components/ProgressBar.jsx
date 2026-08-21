@@ -21,7 +21,7 @@ export default function ProgressBar({ currentRoute, unlockedUntil = 'mealCount',
   function isActive(route)   { return route === currentRoute; }
 
   return (
-    <div ref={barRef} className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+    <div ref={barRef} className="sticky top-[var(--discount-banner-height,0px)] z-30 bg-white border-b border-gray-200 shadow-sm">
 
       {/* Steps row */}
       <div className="overflow-x-auto py-2 sm:py-3" style={{ scrollbarWidth: 'none' }}>

@@ -164,6 +164,30 @@ export default function App() {
     return () => { cancelled = true; clearTimeout(timer); };
   }, [discountCode, mealCount]);
 
+  // The discount banner sits sticky above the progress bar, which itself
+  // needs to know the banner's height so it can stick right below it
+  // instead of at the very top (and get pushed off-screen underneath it).
+  // Reset to 0 when the banner isn't shown so the progress bar collapses
+  // back to top-0 -- otherwise a stale height would leave a gap once the
+  // banner disappears (e.g. the code gets cleared in Order Summary).
+  const discountBannerRef = useRef(null);
+  const showDiscountBanner = !!discountCode.trim();
+  useEffect(() => {
+    if (!showDiscountBanner) {
+      document.documentElement.style.setProperty('--discount-banner-height', '0px');
+      return undefined;
+    }
+    const el = discountBannerRef.current;
+    if (!el) return undefined;
+    const setHeightVar = () => {
+      document.documentElement.style.setProperty('--discount-banner-height', `${el.offsetHeight}px`);
+    };
+    setHeightVar();
+    const observer = new ResizeObserver(setHeightVar);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [showDiscountBanner]);
+
   const progressBarRef = useRef(null);
   useEffect(() => {
     const el = progressBarRef.current;
@@ -493,36 +517,38 @@ export default function App() {
           actually live on this order, without digging into Order Summary.
           Also shows once a customer types a code in later, so it doubles
           as a general "this code is applied" indicator. Deliberately NOT
-          brand green / flush-with-the-edge -- that read as part of the
-          site chrome rather than a callout worth noticing. A raised,
-          rounded, gold gradient card reads as a distinct promo banner. */}
+          brand green -- that read as part of the site chrome rather than a
+          callout worth noticing. Sticky above the progress bar (see
+          --discount-banner-height above) so it stays put on scroll instead
+          of disappearing the moment the page moves. */}
       {discountCode.trim() && (
-        <div className="px-3 sm:px-6 pt-3">
-          <div className={`max-w-2xl mx-auto rounded-2xl shadow-lg border px-4 py-3 flex items-center gap-3 transition-colors ${
+        <div
+          ref={discountBannerRef}
+          className={`sticky top-0 z-40 w-full px-4 py-2.5 flex items-center justify-center gap-2.5 text-center shadow-md transition-colors ${
             discountStatus === 'valid'
-              ? 'bg-gradient-to-r from-amber-400 to-orange-500 border-amber-300 text-white'
+              ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white'
               : discountStatus === 'invalid'
-              ? 'bg-red-50 border-red-200 text-red-700'
-              : 'bg-gray-50 border-gray-200 text-gray-600'
-          }`}>
-            <span className="text-xl sm:text-2xl flex-shrink-0">
-              {discountStatus === 'valid' ? '🎉' : discountStatus === 'invalid' ? '⚠️' : '🏷️'}
-            </span>
-            <p className="text-xs sm:text-sm font-bold leading-snug">
-              {discountStatus === 'valid' && (
-                <>Code <span className="uppercase tracking-wide">{discountCode.trim()}</span> is active — enjoy the savings!</>
-              )}
-              {discountStatus === 'invalid' && (
-                <>Code <span className="uppercase tracking-wide">{discountCode.trim()}</span> isn't valid or has expired</>
-              )}
-              {discountStatus === 'checking' && (
-                <>Checking code <span className="uppercase tracking-wide">{discountCode.trim()}</span>…</>
-              )}
-              {discountStatus === 'idle' && (
-                <>Code <span className="uppercase tracking-wide">{discountCode.trim()}</span> found — we'll confirm it's active once you pick your meal count</>
-              )}
-            </p>
-          </div>
+              ? 'bg-red-50 border-b border-red-200 text-red-700'
+              : 'bg-gray-50 border-b border-gray-200 text-gray-600'
+          }`}
+        >
+          <span className="text-lg sm:text-xl flex-shrink-0">
+            {discountStatus === 'valid' ? '🎉' : discountStatus === 'invalid' ? '⚠️' : '🏷️'}
+          </span>
+          <p className="text-xs sm:text-sm font-bold leading-snug">
+            {discountStatus === 'valid' && (
+              <>Code <span className="uppercase tracking-wide">{discountCode.trim()}</span> is active — enjoy the savings!</>
+            )}
+            {discountStatus === 'invalid' && (
+              <>Code <span className="uppercase tracking-wide">{discountCode.trim()}</span> isn't valid or has expired</>
+            )}
+            {discountStatus === 'checking' && (
+              <>Checking code <span className="uppercase tracking-wide">{discountCode.trim()}</span>…</>
+            )}
+            {discountStatus === 'idle' && (
+              <>Code <span className="uppercase tracking-wide">{discountCode.trim()}</span> found — we'll confirm it's active once you pick your meal count</>
+            )}
+          </p>
         </div>
       )}
       <ProgressBar barRef={progressBarRef} currentRoute={step} unlockedUntil={unlockedUntil} onNavigate={go} />
