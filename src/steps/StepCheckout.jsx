@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { shopifyConfig } from '../config/shopify';
 import { pickSnackVariant, previewDiscountCode } from '../lib/shopifyCheckout';
 import { ALLERGY_OPTIONS } from '../data/meals';
+import { rbStep } from '../lib/analytics';
 
 const SHIP_COST = 20;
 
@@ -117,6 +118,13 @@ export default function StepCheckout({
   const deliveryCost = deliveryMode === 'pickup' ? 0 : SHIP_COST;
   const total = discountedSubtotal + tax + deliveryCost;
 
+  // Fires once per arrival at Order Summary, with the total as first
+  // computed -- not re-fired as the live discount preview later updates it.
+  useEffect(() => {
+    rbStep('rb_review_reached', { value: total, meal_count: mealCount });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const allergyLabels = [...(allergySelected || [])]
     .filter(id => id !== 'none')
     .map(id => ALLERGY_OPTIONS.find(o => o.id === id)?.label)
@@ -124,6 +132,7 @@ export default function StepCheckout({
   const allergiesDisplay = allergyLabels.length ? allergyLabels.join(', ') : 'No Allergies';
 
   function handleCheckout() {
+    rbStep('rb_checkout_clicked', { value: total, meal_count: mealCount });
     onConfirm({ total });
   }
 

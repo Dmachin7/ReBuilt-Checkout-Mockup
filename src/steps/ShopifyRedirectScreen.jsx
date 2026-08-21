@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { afterAnalyticsFlush } from '../lib/analytics';
 
 // Purely cosmetic pause (lets the spinner render a beat before the tab
 // navigates away) -- not a real loading wait, so keep it short.
@@ -56,7 +57,11 @@ export default function ShopifyRedirectScreen({ onBuildCheckoutUrl, onBack }) {
 
     if (!isEmbedded()) {
       const timer = setTimeout(() => {
-        window.location.href = checkoutUrl;
+        // Deferred until gtag's client_id round-trip resolves, so GA has a
+        // chance to send the queued rb_checkout_clicked hit and apply its
+        // cross-domain linker decoration before the page unloads -- see
+        // lib/analytics.js.
+        afterAnalyticsFlush(() => { window.location.href = checkoutUrl; });
       }, HANDOFF_DELAY_MS);
       return () => clearTimeout(timer);
     }
@@ -70,10 +75,12 @@ export default function ShopifyRedirectScreen({ onBuildCheckoutUrl, onBack }) {
     // discount code the customer typed), so falling back to '*' when the
     // referrer is unavailable is acceptable.
     const handoff = setTimeout(() => {
-      window.parent.postMessage(
-        { type: 'rebuilt:checkout', url: checkoutUrl },
-        embedderOrigin() || '*',
-      );
+      afterAnalyticsFlush(() => {
+        window.parent.postMessage(
+          { type: 'rebuilt:checkout', url: checkoutUrl },
+          embedderOrigin() || '*',
+        );
+      });
     }, HANDOFF_DELAY_MS);
 
     // If the embedder is an older build with no listener for that message,
@@ -82,11 +89,13 @@ export default function ShopifyRedirectScreen({ onBuildCheckoutUrl, onBack }) {
     // cross-origin top-level navigation without throwing, in which case the
     // frame-level navigation below is the final (visibly failing) attempt.
     const fallback = setTimeout(() => {
-      try {
-        window.top.location.href = checkoutUrl;
-      } catch {
-        window.location.href = checkoutUrl;
-      }
+      afterAnalyticsFlush(() => {
+        try {
+          window.top.location.href = checkoutUrl;
+        } catch {
+          window.location.href = checkoutUrl;
+        }
+      });
     }, EMBED_FALLBACK_MS);
 
     return () => {

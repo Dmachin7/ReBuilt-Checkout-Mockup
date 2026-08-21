@@ -17,6 +17,7 @@ import { buildEntreeSelections, buildMetadataPayload, buildBreakfastMetadata, bu
 import { defaultEntreeSelection, chefsChoiceEntreeSelection, defaultBreakfastSelection } from './lib/defaultSelections';
 import { shopifyConfig } from './config/shopify';
 import { loadPersistedState, savePersistedState, clearPersistedState } from './lib/persistence';
+import { rbStep } from './lib/analytics';
 import { MEALS_WEEK1, MEALS_WEEK2, BREAKFAST_ITEMS, SNACK_ITEMS, ALLERGY_OPTIONS } from './data/meals';
 import { PLAN_IMAGES } from './data/planImages';
 
@@ -100,10 +101,13 @@ function cartReducer(state, action) {
   }
 }
 
-function computeEntreeCount(singles, doubles, allEntreeIds) {
+// Generic: sums cart quantities (singles + doubles) restricted to a given
+// set of meal ids -- used for both the entrée-count gate and the
+// treats_count analytics param (see rbStep('rb_treats_completed', ...)).
+function computeCartCount(singles, doubles, ids) {
   let count = 0;
-  Object.entries(singles).forEach(([id, qty]) => { if (allEntreeIds.has(Number(id))) count += qty; });
-  Object.entries(doubles).forEach(([id, qty]) => { if (allEntreeIds.has(Number(id))) count += qty; });
+  Object.entries(singles).forEach(([id, qty]) => { if (ids.has(Number(id))) count += qty; });
+  Object.entries(doubles).forEach(([id, qty]) => { if (ids.has(Number(id))) count += qty; });
   return count;
 }
 
@@ -183,6 +187,7 @@ export default function App() {
     () => new Set(entreeMealsFlat.map(m => m.id)),
     [entreeMealsFlat]
   );
+  const snackIdSet = new Set(snackItems.map(m => m.id));
 
   // Breakfast/snacks for every week, not just the active one -- used only
   // to warm the image cache below, so switching weeks later doesn't hit
@@ -212,7 +217,20 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  const entreeCount   = computeEntreeCount(cart.singles, cart.doubles, allEntreeIds);
+  // GA4 funnel tracking (see lib/analytics.js). rb_builder_loaded fires once
+  // per app load, regardless of which step persistence resumes into.
+  // rb_meal_selection_started fires every time the Entrées step opens
+  // (including revisits) -- the "Continue clicked" events for each step
+  // fire at their own onNext/onViewSummary call sites below instead, and
+  // the checkout-review events fire from within StepCheckout.jsx, where the
+  // live order total actually lives.
+  useEffect(() => { rbStep('rb_builder_loaded'); }, []);
+  useEffect(() => {
+    if (step === 'entrees') rbStep('rb_meal_selection_started', { meal_count: mealCount });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  const entreeCount   = computeCartCount(cart.singles, cart.doubles, allEntreeIds);
   const unlockedUntil = computeUnlockedUntil(mealCount, selectedPlan, mealMode, entreeCount, breakfastCount, breakfastSkipped, deliveryMode, pickupLocationId);
 
   function handleAddSingle(id)    { dispatch({ type: 'ADD_SINGLE', id }); }
@@ -448,7 +466,7 @@ export default function App() {
         <StepMealCount
           mealCount={mealCount}
           setMealCount={setMealCount}
-          onNext={() => go('plan')}
+          onNext={() => { rbStep('rb_count_selected', { meal_count: mealCount }); go('plan'); }}
         />
       )}
 
@@ -485,7 +503,7 @@ export default function App() {
           mealDetails={menu.mealDetails}
           entreeCount={entreeCount}
           mealMode={mealMode}
-          onNext={() => go('breakfast')}
+          onNext={() => { rbStep('rb_entrees_completed', { meal_count: mealCount }); go('breakfast'); }}
           onBack={() => go('mealMode')}
           onClearEntrees={handleClearEntrees}
           onRechefWeek={handleRechefWeek}
@@ -504,7 +522,7 @@ export default function App() {
           breakfastCount={breakfastCount}
           onSetBreakfastCount={handleSetBreakfastCount}
           onSkipBreakfast={handleSkipBreakfast}
-          onNext={() => go('snacks')}
+          onNext={() => { rbStep('rb_breakfast_completed', { breakfast_count: breakfastCount }); go('snacks'); }}
           onBack={() => go('entrees')}
         />
       )}
@@ -517,7 +535,10 @@ export default function App() {
           breakfastItems={breakfastItems}
           snackItems={snackItems}
           mealDetails={menu.mealDetails}
-          onNext={() => go('allergies')}
+          onNext={() => {
+            rbStep('rb_treats_completed', { treats_count: computeCartCount(cart.singles, cart.doubles, snackIdSet) });
+            go('allergies');
+          }}
           onSkipSnacks={handleSkipSnacks}
           onBack={() => go('breakfast')}
           breakfastCount={breakfastCount}
@@ -530,7 +551,7 @@ export default function App() {
           setSelected={setAllergySelected}
           customText={allergyNotes}
           setCustomText={setAllergyNotes}
-          onViewSummary={() => go('delivery')}
+          onViewSummary={() => { rbStep('rb_allergies_completed'); go('delivery'); }}
           onCheckout={() => go('shopifyRedirect')}
           onBack={() => go('snacks')}
         />
