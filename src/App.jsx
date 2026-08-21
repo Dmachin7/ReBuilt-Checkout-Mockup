@@ -460,6 +460,16 @@ export default function App() {
 
   return (
     <div className="min-h-svh bg-brand-mint flex flex-col">
+      {/* Confirms a discount picked up from the URL (QR codes/marketing
+          links use ?discount=CODE -- see discountCodeFromUrl above) is
+          actually live on this order, without digging into Order Summary.
+          Also shows once a customer types a code in later, so it doubles
+          as a general "this code is applied" indicator. */}
+      {discountCode.trim() && (
+        <div className="bg-brand-green text-white text-center text-xs sm:text-sm font-semibold py-2 px-4">
+          🎉 Discount code <span className="font-bold uppercase tracking-wide">{discountCode.trim()}</span> is active on this order
+        </div>
+      )}
       <ProgressBar barRef={progressBarRef} currentRoute={step} unlockedUntil={unlockedUntil} onNavigate={go} />
 
       {step === 'mealCount' && (
