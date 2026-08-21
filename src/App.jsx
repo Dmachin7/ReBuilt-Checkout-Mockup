@@ -13,7 +13,7 @@ import ConfirmationScreen from './steps/ConfirmationScreen';
 import ShopifyRedirectScreen from './steps/ShopifyRedirectScreen';
 import { useShopifyMenu } from './hooks/useShopifyMenu';
 import { setWeekForSelection, earliestDeliverableMonday } from './lib/shopifyWeeks';
-import { buildEntreeSelections, buildMetadataPayload, buildBreakfastMetadata, buildCartCheckoutUrl } from './lib/shopifyCheckout';
+import { buildEntreeSelections, buildMetadataPayload, buildBreakfastMetadata, buildCartCheckoutUrl, previewDiscountCode } from './lib/shopifyCheckout';
 import { defaultEntreeSelection, chefsChoiceEntreeSelection, defaultBreakfastSelection } from './lib/defaultSelections';
 import { shopifyConfig } from './config/shopify';
 import { loadPersistedState, savePersistedState, clearPersistedState } from './lib/persistence';
@@ -135,6 +135,34 @@ export default function App() {
   const [discountCode, setDiscountCode] = useState(discountCodeFromUrl() || persisted?.discountCode || '');
   const [deliveryMode, setDeliveryMode] = useState(persisted?.deliveryMode || null);
   const [pickupLocationId, setPickupLocationId] = useState(persisted?.pickupLocationId || null);
+
+  // Live-checks a discount code against a real Shopify cart the moment
+  // there's enough to check with (an entrée line needs a mealCount) --
+  // same previewDiscountCode mechanism Order Summary's own live preview
+  // already uses, just run earlier so the banner below can say for sure
+  // whether the code actually works, not just that one was found on the
+  // URL. Deliberately entree-only (breakfast/snacks aren't picked yet this
+  // early in the flow) -- Order Summary's own preview is still the
+  // authoritative final check once the full cart is built.
+  const [discountStatus, setDiscountStatus] = useState('idle'); // idle | checking | valid | invalid
+  useEffect(() => {
+    const trimmed = discountCode.trim();
+    if (!trimmed || !mealCount) {
+      setDiscountStatus('idle');
+      return undefined;
+    }
+    setDiscountStatus('checking');
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const result = await previewDiscountCode({ mealCount, breakfastCount: null, snackLines: [], discountCode: trimmed });
+        if (!cancelled) setDiscountStatus(result && result.applicable ? 'valid' : 'invalid');
+      } catch {
+        if (!cancelled) setDiscountStatus('idle');
+      }
+    }, 500);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [discountCode, mealCount]);
 
   const progressBarRef = useRef(null);
   useEffect(() => {
@@ -464,10 +492,37 @@ export default function App() {
           links use ?discount=CODE -- see discountCodeFromUrl above) is
           actually live on this order, without digging into Order Summary.
           Also shows once a customer types a code in later, so it doubles
-          as a general "this code is applied" indicator. */}
+          as a general "this code is applied" indicator. Deliberately NOT
+          brand green / flush-with-the-edge -- that read as part of the
+          site chrome rather than a callout worth noticing. A raised,
+          rounded, gold gradient card reads as a distinct promo banner. */}
       {discountCode.trim() && (
-        <div className="bg-brand-green text-white text-center text-xs sm:text-sm font-semibold py-2 px-4">
-          🎉 Discount code <span className="font-bold uppercase tracking-wide">{discountCode.trim()}</span> is active on this order
+        <div className="px-3 sm:px-6 pt-3">
+          <div className={`max-w-2xl mx-auto rounded-2xl shadow-lg border px-4 py-3 flex items-center gap-3 transition-colors ${
+            discountStatus === 'valid'
+              ? 'bg-gradient-to-r from-amber-400 to-orange-500 border-amber-300 text-white'
+              : discountStatus === 'invalid'
+              ? 'bg-red-50 border-red-200 text-red-700'
+              : 'bg-gray-50 border-gray-200 text-gray-600'
+          }`}>
+            <span className="text-xl sm:text-2xl flex-shrink-0">
+              {discountStatus === 'valid' ? '🎉' : discountStatus === 'invalid' ? '⚠️' : '🏷️'}
+            </span>
+            <p className="text-xs sm:text-sm font-bold leading-snug">
+              {discountStatus === 'valid' && (
+                <>Code <span className="uppercase tracking-wide">{discountCode.trim()}</span> is active — enjoy the savings!</>
+              )}
+              {discountStatus === 'invalid' && (
+                <>Code <span className="uppercase tracking-wide">{discountCode.trim()}</span> isn't valid or has expired</>
+              )}
+              {discountStatus === 'checking' && (
+                <>Checking code <span className="uppercase tracking-wide">{discountCode.trim()}</span>…</>
+              )}
+              {discountStatus === 'idle' && (
+                <>Code <span className="uppercase tracking-wide">{discountCode.trim()}</span> found — we'll confirm it's active once you pick your meal count</>
+              )}
+            </p>
+          </div>
         </div>
       )}
       <ProgressBar barRef={progressBarRef} currentRoute={step} unlockedUntil={unlockedUntil} onNavigate={go} />
