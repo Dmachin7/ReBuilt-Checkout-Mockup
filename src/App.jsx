@@ -179,8 +179,11 @@ export default function App() {
     }
     const el = discountBannerRef.current;
     if (!el) return undefined;
+    // getBoundingClientRect (sub-pixel) rather than offsetHeight (rounds to
+    // a whole pixel) -- the rounding was leaving a hairline gap between the
+    // banner and the progress bar on mobile's fractional pixel densities.
     const setHeightVar = () => {
-      document.documentElement.style.setProperty('--discount-banner-height', `${el.offsetHeight}px`);
+      document.documentElement.style.setProperty('--discount-banner-height', `${el.getBoundingClientRect().height}px`);
     };
     setHeightVar();
     const observer = new ResizeObserver(setHeightVar);
@@ -193,7 +196,7 @@ export default function App() {
     const el = progressBarRef.current;
     if (!el) return;
     const setHeightVar = () => {
-      document.documentElement.style.setProperty('--progress-bar-height', `${el.offsetHeight}px`);
+      document.documentElement.style.setProperty('--progress-bar-height', `${el.getBoundingClientRect().height}px`);
     };
     setHeightVar();
     const observer = new ResizeObserver(setHeightVar);
